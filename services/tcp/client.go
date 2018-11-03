@@ -6,7 +6,6 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"math/rand"
 	"net"
 
 	"github.com/nomango/bellex/services/tcp/types"
@@ -15,30 +14,6 @@ import (
 const (
 	serverIP = "139.199.207.247:" + serverPort
 )
-
-func packSendData(sendBytes []byte) []byte {
-	size := len(sendBytes) + 6
-	result := make([]byte, size)
-	result[0] = 0xFF
-	result[1] = 0xFF
-	result[2] = byte(uint16(len(sendBytes)) >> 8)
-	result[3] = byte(uint16(len(sendBytes)) & 0xFF)
-
-	copy(result[4:], sendBytes)
-
-	result[size-2] = 0xFF
-	result[size-1] = 0xFE
-	return result
-}
-
-func getRandString() string {
-	length := rand.Intn(50)
-	strBytes := make([]byte, length)
-	for i := 0; i < length; i++ {
-		strBytes[i] = byte(rand.Intn(26) + 97)
-	}
-	return string(strBytes)
-}
 
 // Client tcp client
 type Client struct {
@@ -106,4 +81,19 @@ func (c *Client) RequestTime() {
 		fmt.Println("Send request failed,", err)
 		return
 	}
+}
+
+func packSendData(sendBytes []byte) []byte {
+	size := len(sendBytes) + 6
+	result := make([]byte, size)
+	result[0] = 0xFF
+	result[1] = 0xFF
+	result[2] = byte(uint16(len(sendBytes)) >> 8)
+	result[3] = byte(uint16(len(sendBytes)) & 0xFF)
+
+	copy(result[4:], sendBytes)
+
+	result[size-2] = 0xFF
+	result[size-1] = 0xFE
+	return result
 }

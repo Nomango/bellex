@@ -28,10 +28,10 @@ func main() {
 	for {
 		conn, err := tcpServer.Accept()
 		if err != nil {
-			fmt.Println("Accept tcp connection failed,", err)
+			fmt.Println("Accept TCP connection failed,", err)
 			continue
 		}
-		fmt.Println("Accept tcp connection from", conn.RemoteAddr().String())
+		fmt.Println("Accept TCP connection from", conn.RemoteAddr().String())
 
 		// handle conn in goroutine
 		go tcpServer.Handle(conn, handlePacket)
@@ -45,11 +45,12 @@ func handlePacket(packet *types.Packet, conn net.Conn) {
 	// 	return
 	// }
 
+	fmt.Println(time.Now().Format("[2006-01-02 15:04:05]"), "Request from", conn.RemoteAddr().String())
+
 	switch packet.Type {
 	case types.PacketTypeGetTime:
-		fmt.Println("recieve time request from [" + conn.RemoteAddr().String() + "]")
-		stamp := strconv.FormatInt(time.Now().Unix(), 10) + "\n"
-		conn.Write([]byte(stamp))
+		timestamp := strconv.FormatInt(time.Now().Unix(), 10) + "\n"
+		conn.Write([]byte(timestamp))
 		return
 	case types.PacketTypeChangeMode:
 		conn.Write([]byte("PacketTypeChangeMode data has received\n"))

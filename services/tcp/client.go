@@ -86,8 +86,8 @@ func (c *Client) Receive() string {
 	return response
 }
 
-// RequestServerTime send 'GetTime' request
-func (c *Client) RequestServerTime() {
+// RequestTime send 'GetTime' request
+func (c *Client) RequestTime() {
 
 	packet := types.Packet{
 		Type: types.PacketTypeGetTime,

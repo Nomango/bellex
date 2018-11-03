@@ -18,25 +18,30 @@ func main() {
 		os.Exit(1)
 	}
 
-	// send request 5 times per second in goroutine
 	go func() {
+		responseChan := make(chan struct{}, 5)
 		heartBeatTick := time.Tick(time.Second)
 
-		for i := range make([]int, 5) {
+		fmt.Println("Start to request server time")
+
+		// send request per second in goroutine
+		for i := 0; i < cap(responseChan); i++ {
 			select {
 			case <-heartBeatTick:
-				client.RequestServerTime()
-
+				client.RequestTime()
 				// handle response
-				go func(i int) {
-					response := client.Receive()
-					fmt.Print("Server response: ", response)
-					if i == 4 {
-						client.Close()
-					}
-				}(i)
+				go func() {
+					fmt.Print("Server response: ", client.Receive())
+					responseChan <- struct{}{}
+				}()
 			}
 		}
+
+		// wait response
+		for i := 0; i < cap(responseChan); i++ {
+			<-responseChan
+		}
+		client.Close()
 	}()
 
 	// wait until tcp connection is closed

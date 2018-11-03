@@ -28,19 +28,15 @@ func getLocalIP() (string, error) {
 		return "", err
 	}
 
-	localIP := ""
 	for _, address := range addrs {
 		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
 			if ipnet.IP.To4() != nil {
-				localIP = ipnet.IP.String()
+				return ipnet.IP.String(), nil
 			}
 		}
 	}
 
-	if localIP == "" {
-		return "", fmt.Errorf("Local IP not found")
-	}
-	return localIP, nil
+	return "", fmt.Errorf("Local IP not found")
 }
 
 // NewServer returns a new tcp server

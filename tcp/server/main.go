@@ -24,7 +24,7 @@ func main() {
 
 	fmt.Println("TCP server is running on", tcpServer.Addr())
 
-	// start to accept clients
+	// start to accept connections
 	for {
 		conn, err := tcpServer.Accept()
 		if err != nil {

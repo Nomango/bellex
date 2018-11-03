@@ -44,7 +44,7 @@ func getRandString() string {
 type Client struct {
 	conn *net.TCPConn
 	addr *net.TCPAddr
-	Stop chan struct{}
+	stop chan struct{}
 }
 
 // NewClient returns a new tcp cliet
@@ -61,21 +61,29 @@ func NewClient() (*Client, error) {
 	return &Client{
 		conn: conn,
 		addr: addr,
-		Stop: make(chan struct{}),
+		stop: make(chan struct{}),
 	}, nil
 }
 
+// Close stop tcp connection
+func (c *Client) Close() {
+	c.conn.Close()
+	c.stop <- struct{}{}
+}
+
+// WaitForClosed wait until tcp connection closed
+func (c *Client) WaitForClosed() {
+	<-c.stop
+}
+
 // Receive get server response
-func (c *Client) Receive() {
+func (c *Client) Receive() string {
 	reader := bufio.NewReader(c.conn)
-	for {
-		response, err := reader.ReadString('\n')
-		if err != nil {
-			close(c.Stop)
-			break
-		}
-		fmt.Print("Server response: ", response)
+	response, err := reader.ReadString('\n')
+	if err != nil {
+		close(c.stop)
 	}
+	return response
 }
 
 // RequestServerTime send 'GetTime' request

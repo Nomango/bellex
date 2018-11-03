@@ -1,3 +1,5 @@
+// Copyright (C) 2018 Nomango - All Rights Reserved
+
 package main
 
 import (

@@ -3,9 +3,8 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"net"
-	"os"
 	"strconv"
 	"time"
 
@@ -16,22 +15,21 @@ import (
 func main() {
 	tcpServer, err := tcp.NewServer()
 	if err != nil {
-		fmt.Println("Start server failed: ", err)
-		os.Exit(1)
+		log.Fatalln("Start server failed: ", err)
 	}
 
 	defer tcpServer.Close()
 
-	fmt.Println("TCP server is running on", tcpServer.Addr())
+	log.Println("TCP server is running on", tcpServer.Addr())
 
 	// start to accept connections
 	for {
 		conn, err := tcpServer.Accept()
 		if err != nil {
-			fmt.Println("Accept TCP connection failed,", err)
+			log.Println("Accept TCP connection failed,", err)
 			continue
 		}
-		fmt.Println("Accept TCP connection from", conn.RemoteAddr().String())
+		log.Println("Accept TCP connection from", conn.RemoteAddr().String())
 
 		// handle conn in goroutine
 		go tcpServer.Handle(conn, handlePacket)
@@ -41,11 +39,11 @@ func main() {
 func handlePacket(packet *types.Packet, conn net.Conn) {
 	// var verifyPacket types.VerifyPacket
 	// if err := json.Unmarshal(packet.PacketContent, &verifyPacket); err != nil {
-	// 	fmt.Println("Unmarshal json data failed", conn.RemoteAddr().String(), err)
+	// 	log.Println("Unmarshal json data failed", conn.RemoteAddr().String(), err)
 	// 	return
 	// }
 
-	fmt.Println(time.Now().Format("[2006-01-02 15:04:05]"), "Request from", conn.RemoteAddr().String())
+	log.Println("Request from", conn.RemoteAddr().String())
 
 	switch packet.Type {
 	case types.PacketTypeGetTime:

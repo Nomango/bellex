@@ -5,7 +5,8 @@ package tcp
 import (
 	"bufio"
 	"encoding/json"
-	"fmt"
+	"errors"
+	"log"
 	"net"
 
 	"github.com/nomango/bellex/services/tcp/types"
@@ -36,7 +37,7 @@ func getLocalIP() (string, error) {
 		}
 	}
 
-	return "", fmt.Errorf("Local IP not found")
+	return "", errors.New("Local IP not found")
 }
 
 // NewServer returns a new tcp server
@@ -93,7 +94,7 @@ func (ts *Server) Handle(conn net.Conn, handler func(*types.Packet, net.Conn)) {
 	for {
 		recvByte, err := bufferReader.ReadByte()
 		if err != nil {
-			fmt.Println("Connection " + conn.RemoteAddr().String() + " is closed")
+			log.Println("Connection " + conn.RemoteAddr().String() + " is closed")
 			return
 		}
 
@@ -136,7 +137,7 @@ func (ts *Server) Handle(conn net.Conn, handler func(*types.Packet, net.Conn)) {
 			if recvByte == 0xFE {
 				var packet types.Packet
 				if err := json.Unmarshal(recvBuffer, &packet); err != nil {
-					fmt.Println("Unmarshal json data failed", err)
+					log.Fatalln("Unmarshal json data failed", err)
 					return
 				}
 				go handler(&packet, conn)

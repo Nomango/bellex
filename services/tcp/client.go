@@ -5,7 +5,7 @@ package tcp
 import (
 	"bufio"
 	"encoding/json"
-	"fmt"
+	"log"
 	"net"
 
 	"github.com/nomango/bellex/services/tcp/types"
@@ -70,15 +70,15 @@ func (c *Client) RequestTime() {
 	}
 	packetData, err := json.Marshal(packet)
 	if err != nil {
-		fmt.Println("Marshal json data failed,", err)
+		log.Fatalln("Marshal json data failed,", err)
 		return
 	}
 
 	data := packSendData(packetData)
-	fmt.Println("Send data:", data)
+	log.Println("Send data:", data)
 
 	if _, err := c.conn.Write(data); err != nil {
-		fmt.Println("Send request failed,", err)
+		log.Fatalln("Send request failed,", err)
 		return
 	}
 }

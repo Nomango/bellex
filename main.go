@@ -3,9 +3,8 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"net"
-	"os"
 	"strconv"
 	"time"
 
@@ -32,22 +31,21 @@ func main() {
 func startTCPServer() {
 	tcpServer, err := tcp.NewServer()
 	if err != nil {
-		fmt.Println("[Bellex] Start TCP server failed: ", err)
-		os.Exit(1)
+		log.Fatalln("[Bellex] Start TCP server failed: ", err)
 	}
 
 	defer tcpServer.Close()
 
-	fmt.Println("[Bellex] TCP server is running on", tcpServer.Addr())
+	log.Println("[Bellex] TCP server is running on", tcpServer.Addr())
 
 	// start to accept connections
 	for {
 		conn, err := tcpServer.Accept()
 		if err != nil {
-			fmt.Println("[Bellex] Accept TCP connection failed,", err)
+			log.Println("[Bellex] Accept TCP connection failed:", err)
 			continue
 		}
-		fmt.Println("[Bellex] Accept TCP connection from", conn.RemoteAddr().String())
+		log.Println("[Bellex] Accept TCP connection from", conn.RemoteAddr().String())
 
 		// handle conn in goroutine
 		go tcpServer.Handle(conn, handlePacket)
@@ -57,7 +55,7 @@ func startTCPServer() {
 func handlePacket(packet *types.Packet, conn net.Conn) {
 
 	now := time.Now().Format("| 2006-01-02 15:04:05 |")
-	fmt.Println("[Bellex]", now, "Request from", conn.RemoteAddr().String())
+	log.Println("[Bellex]", now, "Request from", conn.RemoteAddr().String())
 
 	switch packet.Type {
 	case types.PacketTypeGetTime:

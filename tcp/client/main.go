@@ -3,8 +3,7 @@
 package main
 
 import (
-	"fmt"
-	"os"
+	"log"
 	"time"
 
 	"github.com/nomango/bellex/services/tcp"
@@ -14,15 +13,14 @@ func main() {
 
 	client, err := tcp.NewClient()
 	if err != nil {
-		fmt.Println("Start client failed: ", err)
-		os.Exit(1)
+		log.Fatalln("Start client failed: ", err)
 	}
 
 	go func() {
 		responseChan := make(chan struct{}, 5)
 		heartBeatTick := time.Tick(time.Second)
 
-		fmt.Println("Start to request server time")
+		log.Println("Start to request server time")
 
 		// send request per second in goroutine
 		for i := 0; i < cap(responseChan); i++ {
@@ -31,7 +29,7 @@ func main() {
 				client.RequestTime()
 				// handle response
 				go func() {
-					fmt.Print("Server response: ", client.Receive())
+					log.Print("Server response: ", client.Receive())
 					responseChan <- struct{}{}
 				}()
 			}

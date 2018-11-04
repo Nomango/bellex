@@ -6,7 +6,8 @@ if {%1}=={help}                     goto help
 if {%1}=={build}                    goto build
 if {%1}=={build_tcp_server}         goto build_tcp_server
 if {%1}=={build_tcp_client}         goto build_tcp_client
-if {%1}=={run_tcp_client}           goto run_tcp_client
+if {%1}=={test_tcp}                 goto test_tcp
+if {%1}=={test_ntp}                 goto test_ntp
 goto help
 
 :all
@@ -34,6 +35,10 @@ goto help
     go build -o tcpclient.exe .\tcp\client\main.go
     exit
 
-:run_tcp_client
+:test_tcp
     go run .\tcp\client\main.go
+    exit
+
+:test_ntp
+    go run .\ntp\main.go
     exit

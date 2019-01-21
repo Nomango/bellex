@@ -55,14 +55,7 @@ func (c *Client) Receive() string {
 // RequestTime send 'GetTime' request
 func (c *Client) RequestTime() {
 
-	packet := types.Packet{
-		Auth: types.AuthPacket{
-			ID:   "BW123",
-			Code: "Xwa8pj7",
-		},
-		Type: types.PacketTypeRequestTime,
-		Data: make([]byte, 0),
-	}
+	packet := types.DefaultPacket()
 	packetData, err := json.Marshal(packet)
 	if err != nil {
 		log.Fatalln("Marshal json data failed,", err)

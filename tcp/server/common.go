@@ -49,8 +49,7 @@ func HandlePacket(packet *types.Packet, conn net.Conn) {
 
 	switch packet.Type {
 	case types.PacketTypeRequestTime:
-		now, err := requestNTP()
-		if err != nil {
+		if now, err := requestNTP(); err != nil {
 			write(err.Error(), conn)
 		} else {
 			write(strconv.FormatInt(now, 10), conn)

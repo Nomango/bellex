@@ -5,6 +5,7 @@ package tcp
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net"
 
@@ -36,28 +37,18 @@ func NewClient() (*Client, error) {
 	return &Client{
 		conn: conn,
 		addr: addr,
-		stop: make(chan struct{}),
 	}, nil
 }
 
 // Close stop tcp connection
 func (c *Client) Close() {
 	c.conn.Close()
-	c.stop <- struct{}{}
-}
-
-// WaitForClosed wait until tcp connection closed
-func (c *Client) WaitForClosed() {
-	<-c.stop
 }
 
 // Receive get server response
 func (c *Client) Receive() string {
 	reader := bufio.NewReader(c.conn)
-	response, err := reader.ReadString('\n')
-	if err != nil {
-		close(c.stop)
-	}
+	response, _ := reader.ReadString(byte(0))
 	return response
 }
 
@@ -65,7 +56,11 @@ func (c *Client) Receive() string {
 func (c *Client) RequestTime() {
 
 	packet := types.Packet{
-		Type: types.PacketTypeGetTime,
+		Auth: types.AuthPacket{
+			ID:   "BW123",
+			Code: "Xwa8pj7",
+		},
+		Type: types.PacketTypeRequestTime,
 		Data: make([]byte, 0),
 	}
 	packetData, err := json.Marshal(packet)
@@ -75,7 +70,8 @@ func (c *Client) RequestTime() {
 	}
 
 	data := packSendData(packetData)
-	log.Println("Send data:", data)
+	fmt.Println("Send packet:", string(packetData))
+	fmt.Println("Byte data:", data)
 
 	if _, err := c.conn.Write(data); err != nil {
 		log.Fatalln("Send request failed,", err)

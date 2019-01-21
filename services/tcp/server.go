@@ -140,7 +140,7 @@ func (ts *Server) Handle(conn net.Conn, handler func(*types.Packet, net.Conn)) {
 					log.Fatalln("Unmarshal json data failed", err)
 					return
 				}
-				go handler(&packet, conn)
+				handler(&packet, conn)
 			}
 			// state machine is ready. read next packet.
 			state = 0

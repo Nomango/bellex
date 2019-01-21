@@ -2,33 +2,29 @@
 
 package types
 
-// Packet send & recive data format
-type Packet struct {
-	Type byte
-	Data []byte
-}
-
 // Packet types
 const (
-	PacketTypeGetTime byte = iota
+	PacketTypeRequestTime byte = iota
 	PacketTypeChangeMode
 )
 
 var (
 	// PacketTypes all types of packet
 	PacketTypes = [...]byte{
-		PacketTypeGetTime,
+		PacketTypeRequestTime,
 		PacketTypeChangeMode,
 	}
 )
 
-// VerifyPacket contains authority verification infomation
-type VerifyPacket struct {
-	BellID     string `json:"bell_id"`
-	UniqueCode string `json:"unique_code"`
+// AuthPacket contains authority verification infofmation
+type AuthPacket struct {
+	ID   string `json:"id"`
+	Code string `json:"code"`
 }
 
-// TimePacket contains time info
-type TimePacket struct {
-	Timestamp int64 `json:"timestamp"`
+// Packet send & recive data format
+type Packet struct {
+	Auth AuthPacket `json:"auth"`
+	Type byte       `json:"type"`
+	Data []byte     `json:"data"`
 }

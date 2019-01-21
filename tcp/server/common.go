@@ -3,11 +3,13 @@
 package server
 
 import (
+	"errors"
 	"log"
 	"net"
 	"strconv"
 	"time"
 
+	"github.com/nomango/bellex/services/ntp"
 	"github.com/nomango/bellex/services/tcp"
 	"github.com/nomango/bellex/services/tcp/types"
 )
@@ -37,30 +39,56 @@ func Start() {
 	}
 }
 
-// Write send string to the client
-func Write(data string, conn net.Conn) error {
-	bytes := append([]byte(data), byte(0))
-	if _, err := conn.Write(bytes); err != nil {
-		return err
-	}
-	return nil
-}
-
 // HandlePacket handle request packets
 func HandlePacket(packet *types.Packet, conn net.Conn) {
 
 	if !Verify(packet) {
-		Write("Permission denied", conn)
+		write("Permission denied", conn)
 		return
 	}
 
 	switch packet.Type {
 	case types.PacketTypeRequestTime:
-		stamp := strconv.FormatInt(time.Now().Unix(), 10)
-		Write(stamp, conn)
-		return
+		now, err := requestNTP()
+		if err != nil {
+			write(err.Error(), conn)
+		} else {
+			write(strconv.FormatInt(now, 10), conn)
+		}
 	case types.PacketTypeChangeMode:
-		Write("PacketTypeChangeMode data has received", conn)
-		return
+		write("PacketTypeChangeMode data has received", conn)
 	}
+}
+
+func requestNTP() (int64, error) {
+	size := len(ntp.Servers)
+	signals := make(chan time.Time, size)
+
+	for _, host := range ntp.Servers {
+		go func(host string) {
+			if now, err := ntp.SendRequest(host); err == nil {
+				signals <- now
+			} else {
+				signals <- time.Time{}
+			}
+		}(host)
+	}
+
+	var sum int64
+	for range make([]int, size) {
+		result := <-signals
+		if result.IsZero() {
+			return 0, errors.New("Request NTP failed")
+		}
+		sum += result.Unix()
+	}
+	return sum / int64(size), nil
+}
+
+func write(data string, conn net.Conn) error {
+	bytes := append([]byte(data), byte(0))
+	if _, err := conn.Write(bytes); err != nil {
+		return err
+	}
+	return nil
 }

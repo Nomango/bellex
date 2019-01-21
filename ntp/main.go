@@ -3,21 +3,34 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/nomango/bellex/services/ntp"
 )
 
 func main() {
-	requests := make(chan struct{}, 3)
+	guns := make(chan struct{}, len(ntp.Servers))
+	results := make(chan struct{}, len(ntp.Servers))
 
 	for _, host := range ntp.Servers {
 		go func(host string) {
-			ntp.SendRequest(host)
-			requests <- struct{}{}
+			// wait
+			<-guns
+
+			if now, err := ntp.SendRequest(host); err == nil {
+				fmt.Println("Response from", host, now)
+			}
+			results <- struct{}{}
 		}(host)
 	}
 
-	// Wait for exit
-	for range make([]int, 3) {
-		<-requests
+	// Start
+	for i := 0; i < len(ntp.Servers); i++ {
+		guns <- struct{}{}
+	}
+
+	// Wait for responses
+	for i := 0; i < len(ntp.Servers); i++ {
+		<-results
 	}
 }

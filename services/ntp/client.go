@@ -64,18 +64,20 @@ func (c *Client) Request() (*Packet, error) {
 }
 
 // SendRequest ...
-func SendRequest(host string) {
+func SendRequest(host string) (time.Time, error) {
 	client, err := NewClient(host)
 	if err != nil {
-		log.Fatalf("Start NTP client failed: %v", err)
+		log.Println("Start NTP client failed:", err)
+		return time.Time{}, err
 	}
 
 	defer client.Close()
 
 	packet, err := client.Request()
 	if err != nil {
-		log.Fatalf("failed to send request: %v", err)
+		log.Println("Failed to send request:", err)
+		return time.Time{}, err
 	}
 
-	log.Println("Response from ", host, ",", packet.Parse())
+	return packet.Parse(), nil
 }

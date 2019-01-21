@@ -1,12 +1,20 @@
 @echo off
 setlocal enabledelayedexpansion
 
-if {%1}=={}                         goto all
-if {%1}=={help}                     goto help
-if {%1}=={build}                    goto build
-if {%1}=={build_tcp_server}         goto build_tcp_server
-if {%1}=={test_tcp}                 goto test_tcp
-if {%1}=={test_ntp}                 goto test_ntp
+if {%1}=={}                 goto all
+if {%1}=={help}             goto help
+if {%1}=={run} (
+    if {%2}=={server}       goto run_server
+)
+if {%1}=={build} (
+    if {%2}=={server}       goto build_server
+    if {%2}=={ntp}          goto build_ntp
+    if {%2}=={tcp}          goto build_tcp_server
+)
+if {%1}=={test} (
+    if {%2}=={ntp}          goto test_ntp
+    if {%2}=={tcp}          goto test_tcp
+)
 goto help
 
 :all
@@ -16,19 +24,33 @@ goto help
     echo Usage: ./make [option]
     echo.
     echo Options:
-    echo build                - Compile server app
-    echo build_tcp_server     - Compile tcp server
-    echo test_tcp             - Send test data to the TCP server
-    echo test_ntp             - Send test data to the NTP server
+    echo run
+    echo     server     - Run server app
+    echo build
+    echo     server     - Compile server app
+    echo     tcp        - Compile TCP server
+    echo     ntp        - Compile NTP client
+    echo test
+    echo     tcp        - Send test data to the TCP server
+    echo     ntp        - Send test data to the NTP server
     echo.
     exit
 
-:build
+
+:run_server
+    go run .\main.go
+    exit
+
+:build_server
     go build -o server.exe .\main.go
     exit
 
 :build_tcp_server
     go build -o tcpserver.exe .\tcp\server\main\main.go
+    exit
+
+:build_ntp
+    go build -o ntpclient.exe .\ntp\main.go
     exit
 
 :test_tcp

@@ -4,16 +4,13 @@ package tcp
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net"
-
-	"github.com/nomango/bellex/services/tcp/types"
 )
 
 const (
-	serverIP = "139.199.207.247:" + serverPort
+	serverIP = "132.232.126.221:" + serverPort
 )
 
 // Client tcp client
@@ -55,16 +52,17 @@ func (c *Client) Receive() string {
 // RequestTime send 'GetTime' request
 func (c *Client) RequestTime() {
 
-	packet := types.DefaultPacket()
+	/*packet := types.DefaultPacket()
 	packetData, err := json.Marshal(packet)
 	if err != nil {
 		log.Fatalln("Marshal json data failed,", err)
 		return
-	}
+	}*/
 
+	packetData := []byte(`id:123;code:123;request_timing`)
 	data := packSendData(packetData)
 	fmt.Println("Send packet:", string(packetData))
-	fmt.Println("Byte data:", data)
+	//fmt.Println("Byte data:", data)
 
 	if _, err := c.conn.Write(data); err != nil {
 		log.Fatalln("Send request failed,", err)
@@ -73,14 +71,13 @@ func (c *Client) RequestTime() {
 }
 
 func packSendData(sendBytes []byte) []byte {
-	size := len(sendBytes) + 6
+	size := len(sendBytes) + 5
 	result := make([]byte, size)
 	result[0] = 0xFF
 	result[1] = 0xFF
-	result[2] = byte(uint16(len(sendBytes)) >> 8)
-	result[3] = byte(uint16(len(sendBytes)) & 0xFF)
+	result[2] = byte(uint16(len(sendBytes)) & 0xFF)
 
-	copy(result[4:], sendBytes)
+	copy(result[3:], sendBytes)
 
 	result[size-2] = 0xFF
 	result[size-1] = 0xFE

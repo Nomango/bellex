@@ -4,9 +4,9 @@ package server
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"net"
-	"strconv"
 	"time"
 
 	"github.com/nomango/bellex/services/ntp"
@@ -52,14 +52,21 @@ func HandlePacket(packet *types.Packet, conn net.Conn) {
 		if now, err := requestNTP(); err != nil {
 			write(err.Error(), conn)
 		} else {
-			write(strconv.FormatInt(now, 10), conn)
+			week := int(now.Weekday())
+			if week == 0 {
+				week = 7
+			}
+			response := fmt.Sprintf("current_time:%s%02d%s", now.Format("0504150201"), week, now.Format("06"))
+			write(response, conn)
 		}
 	case types.PacketTypeChangeMode:
 		write("PacketTypeChangeMode data has received", conn)
+	default:
+		write("Invalid request", conn)
 	}
 }
 
-func requestNTP() (int64, error) {
+func requestNTP() (time.Time, error) {
 	size := len(ntp.Servers)
 	signals := make(chan time.Time, size)
 
@@ -73,15 +80,18 @@ func requestNTP() (int64, error) {
 		}(host)
 	}
 
-	var sum int64
+	var result time.Time
 	for range make([]int, size) {
-		result := <-signals
-		if result.IsZero() {
-			return 0, errors.New("Request NTP failed")
+		result = <-signals
+		if !result.IsZero() {
+			break
 		}
-		sum += result.Unix()
 	}
-	return sum / int64(size), nil
+
+	if result.IsZero() {
+		return time.Time{}, errors.New("Request NTP failed")
+	}
+	return result, nil
 }
 
 func write(data string, conn net.Conn) error {

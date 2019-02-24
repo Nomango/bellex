@@ -12,5 +12,5 @@ import (
 func Verify(packet *types.Packet) bool {
 	// FIX ME!!! @Nomango
 	log.Println(*packet)
-	return true
+	return packet.Auth.ID == "123" && packet.Auth.Code == "123"
 }

@@ -4,10 +4,10 @@ package tcp
 
 import (
 	"bufio"
-	"encoding/json"
 	"errors"
 	"log"
 	"net"
+	"strings"
 
 	"github.com/nomango/bellex/services/tcp/types"
 )
@@ -83,8 +83,8 @@ func (ts *Server) Handle(conn net.Conn, handler func(*types.Packet, net.Conn)) {
 	defer conn.Close()
 
 	var (
-		dataSize     uint16
-		dataCursor   uint16
+		dataSize     uint8
+		dataCursor   uint8
 		recvBuffer   []byte
 		bufferReader = bufio.NewReader(conn)
 	)
@@ -114,32 +114,54 @@ func (ts *Server) Handle(conn net.Conn, handler func(*types.Packet, net.Conn)) {
 				state = 0
 			}
 		case 2:
-			dataSize += uint16(recvByte) * 256
-			state = 3
-		case 3:
-			dataSize += uint16(recvByte)
+			dataSize = uint8(recvByte)
 			recvBuffer = make([]byte, dataSize)
 			dataCursor = 0
-			state = 4
-		case 4:
+			state = 3
+		case 3:
 			recvBuffer[dataCursor] = recvByte
 			dataCursor++
 			if dataCursor == dataSize {
-				state = 5
+				state = 4
 			}
-		case 5:
+		case 4:
 			if recvByte == 0xFF {
-				state = 6
+				state = 5
 			} else {
 				state = 0
 			}
-		case 6:
+		case 5:
 			if recvByte == 0xFE {
-				var packet types.Packet
-				if err := json.Unmarshal(recvBuffer, &packet); err != nil {
-					log.Fatalln("Unmarshal json data failed", err)
-					return
+				info := make(map[string]string)
+				strs := strings.Split(string(recvBuffer), ";")
+				for _, str := range strs {
+					if strings.Contains(str, ":") {
+						kv := strings.Split(str, ":")
+						info[kv[0]] = kv[1]
+					} else {
+						info["req"] = str
+					}
 				}
+
+				var reqType byte
+				if req, ok := info["req"]; ok && req == "request_timing" {
+					reqType = types.PacketTypeRequestTime
+				} else {
+					reqType = byte(5)
+				}
+
+				packet := types.Packet{
+					Auth: types.AuthPacket{
+						ID:   info["id"],
+						Code: info["code"],
+					},
+					Type: reqType,
+				}
+				// var packet types.Packet
+				// if err := json.Unmarshal(recvBuffer, &packet); err != nil {
+				// 	log.Fatalln("Unmarshal json data failed", err)
+				// 	return
+				// }
 				handler(&packet, conn)
 			}
 			// state machine is ready. read next packet.

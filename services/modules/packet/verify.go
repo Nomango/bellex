@@ -1,6 +1,6 @@
 // Copyright (C) 2018 Nomango - All Rights Reserved
 
-package server
+package packet
 
 import (
 	"log"

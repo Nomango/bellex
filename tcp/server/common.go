@@ -9,6 +9,7 @@ import (
 	"net"
 	"time"
 
+	tcpPacket "github.com/nomango/bellex/services/modules/packet"
 	"github.com/nomango/bellex/services/ntp"
 	"github.com/nomango/bellex/services/tcp"
 	"github.com/nomango/bellex/services/tcp/types"
@@ -40,9 +41,15 @@ func Start() {
 }
 
 // HandlePacket handle request packets
-func HandlePacket(packet *types.Packet, conn net.Conn) {
+func HandlePacket(req []byte, conn net.Conn) {
 
-	if !Verify(packet) {
+	packet, err := tcpPacket.LoadPacket(string(req))
+	if err != nil {
+		write("Invalid request", conn)
+		return
+	}
+
+	if !tcpPacket.Verify(packet) {
 		write("Permission denied", conn)
 		return
 	}
@@ -59,8 +66,11 @@ func HandlePacket(packet *types.Packet, conn net.Conn) {
 			response := fmt.Sprintf("current_time:%s%02d%s", now.Format("0504150201"), week, now.Format("06"))
 			write(response, conn)
 		}
-	case types.PacketTypeChangeMode:
-		write("PacketTypeChangeMode data has received", conn)
+	case types.PacketTypeSchedule:
+		write("schedule_A1234567890123456", conn)
+		write("schedule_B1234567890123456", conn)
+		write("schedule_C1234567890123456", conn)
+		write("schedule_D1234567890123456", conn)
 	default:
 		write("Invalid request", conn)
 	}

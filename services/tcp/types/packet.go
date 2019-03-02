@@ -5,14 +5,14 @@ package types
 // Packet types
 const (
 	PacketTypeRequestTime byte = iota
-	PacketTypeChangeMode
+	PacketTypeSchedule
 )
 
 var (
 	// PacketTypes all types of packet
 	PacketTypes = [...]byte{
 		PacketTypeRequestTime,
-		PacketTypeChangeMode,
+		PacketTypeSchedule,
 	}
 )
 
@@ -29,6 +29,7 @@ type Packet struct {
 	Data []byte     `json:"data"`
 }
 
+// DefaultPacket returns a default packet
 func DefaultPacket() *Packet {
 	return &Packet{
 		Auth: AuthPacket{

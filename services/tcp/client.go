@@ -42,28 +42,26 @@ func (c *Client) Close() {
 	c.conn.Close()
 }
 
-// Receive get server response
-func (c *Client) Receive() string {
-	reader := bufio.NewReader(c.conn)
-	response, _ := reader.ReadString(byte(0))
-	return response
+// Receiver returns a Reader to get server response
+func (c *Client) Receiver() *bufio.Reader {
+	return bufio.NewReader(c.conn)
 }
 
 // RequestTime send 'GetTime' request
 func (c *Client) RequestTime() {
 
-	/*packet := types.DefaultPacket()
+	/*packet := packet.DefaultPacket()
 	packetData, err := json.Marshal(packet)
 	if err != nil {
 		log.Fatalln("Marshal json data failed,", err)
 		return
 	}*/
 
-	packetData := []byte(`id:123;code:123;request_timing`)
-	data := packSendData(packetData)
+	packetData := []byte(`id:123;code:123;req:schedule;`)
+	//packetData := []byte(`id:123;code:123;req:request_timing;`)
 	fmt.Println("Send packet:", string(packetData))
-	//fmt.Println("Byte data:", data)
 
+	data := packSendData(packetData)
 	if _, err := c.conn.Write(data); err != nil {
 		log.Fatalln("Send request failed,", err)
 		return

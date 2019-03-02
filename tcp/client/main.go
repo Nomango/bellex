@@ -24,16 +24,24 @@ func main() {
 
 	fmt.Println("Start to request server time")
 
+	go func() {
+		receiver := client.Receiver()
+		for {
+			// handle response
+			if response, err := receiver.ReadString(byte(0)); err != nil {
+				fmt.Println(err)
+			} else {
+				fmt.Println(response)
+			}
+		}
+	}()
+
 	// send request per second in goroutine
 	for i := 0; i < cap(responseChan); i++ {
 		select {
 		case <-heartBeatTick:
 			client.RequestTime()
-			// handle response
-			go func() {
-				fmt.Println("Server response: ", client.Receive())
-				responseChan <- struct{}{}
-			}()
+			responseChan <- struct{}{}
 		}
 	}
 

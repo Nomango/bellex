@@ -7,9 +7,6 @@ import (
 	"errors"
 	"log"
 	"net"
-	"strings"
-
-	"github.com/nomango/bellex/services/tcp/types"
 )
 
 const (
@@ -78,7 +75,7 @@ func (ts *Server) Addr() string {
 
 // Handle recives data from client and send response
 // Data format: 0xFF|0xFF|len(high)|len(low)|Data|0xFF|0xFE. '0xFF' is preamble code
-func (ts *Server) Handle(conn net.Conn, handler func(*types.Packet, net.Conn)) {
+func (ts *Server) Handle(conn net.Conn, handler func([]byte, net.Conn)) {
 	// close connection before exit
 	defer conn.Close()
 
@@ -132,37 +129,7 @@ func (ts *Server) Handle(conn net.Conn, handler func(*types.Packet, net.Conn)) {
 			}
 		case 5:
 			if recvByte == 0xFE {
-				info := make(map[string]string)
-				strs := strings.Split(string(recvBuffer), ";")
-				for _, str := range strs {
-					if strings.Contains(str, ":") {
-						kv := strings.Split(str, ":")
-						info[kv[0]] = kv[1]
-					} else {
-						info["req"] = str
-					}
-				}
-
-				var reqType byte
-				if req, ok := info["req"]; ok && req == "request_timing" {
-					reqType = types.PacketTypeRequestTime
-				} else {
-					reqType = byte(5)
-				}
-
-				packet := types.Packet{
-					Auth: types.AuthPacket{
-						ID:   info["id"],
-						Code: info["code"],
-					},
-					Type: reqType,
-				}
-				// var packet types.Packet
-				// if err := json.Unmarshal(recvBuffer, &packet); err != nil {
-				// 	log.Fatalln("Unmarshal json data failed", err)
-				// 	return
-				// }
-				handler(&packet, conn)
+				handler(recvBuffer, conn)
 			}
 			// state machine is ready. read next packet.
 			state = 0

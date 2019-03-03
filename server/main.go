@@ -1,32 +1,22 @@
-// Copyright (C) 2018 Nomango - All Rights Reserved
-
 package main
 
 import (
 	"log"
 
-	"github.com/gin-gonic/gin"
-	"github.com/nomango/bellex/services/api"
+	_ "github.com/nomango/bellex/server/routers"
 	"github.com/nomango/bellex/services/tcp"
+
+	"github.com/astaxie/beego"
 )
 
 func main() {
-
 	// start a tcp server
 	//go startTCPServer()
 
-	// Windows PowerShell cannot display color correctly, so disable it
-	gin.DisableConsoleColor()
+	beego.SetViewsPath("views")
+	beego.SetStaticPath("/static", "static")
 
-	engine := gin.Default()
-
-	engine.Static("/static", "./static")
-	engine.LoadHTMLGlob("views/**/*")
-
-	api.SetupRouter(engine)
-
-	// Listen and Server in 0.0.0.0:8080
-	engine.Run(":8080")
+	beego.Run()
 }
 
 func startTCPServer() {

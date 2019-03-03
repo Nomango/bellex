@@ -8,21 +8,21 @@ import (
 	"net"
 	"time"
 
-	"github.com/nomango/bellex/services/modules/tcppacket"
 	"github.com/nomango/bellex/services/ntp"
+	tcpPacket "github.com/nomango/bellex/services/tcp/packet"
 	"github.com/nomango/bellex/services/tcp/types"
 )
 
 // PacketHandler handle request packets
 func PacketHandler(req []byte, conn net.Conn) {
 
-	packet, err := tcppacket.LoadPacket(string(req))
+	packet, err := tcpPacket.LoadPacket(string(req))
 	if err != nil {
 		write("Invalid request", conn)
 		return
 	}
 
-	if !tcppacket.Verify(packet) {
+	if !tcpPacket.Verify(packet) {
 		write("Permission denied", conn)
 		return
 	}

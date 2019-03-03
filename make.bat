@@ -36,11 +36,11 @@ goto help
 
 
 :run_server
-    go run .\main.go
+    go run .\services\main.go
     exit
 
 :build_server
-    go build -o server.exe .\main.go
+    go build -o server.exe .\services\main.go
     exit
 
 :test_tcp

@@ -1,55 +1,28 @@
 // Copyright (C) 2018 Nomango - All Rights Reserved
 
-package server
+package tcp
 
 import (
 	"errors"
 	"fmt"
-	"log"
 	"net"
 	"time"
 
-	tcpPacket "github.com/nomango/bellex/services/modules/packet"
+	"github.com/nomango/bellex/services/modules/tcppacket"
 	"github.com/nomango/bellex/services/ntp"
-	"github.com/nomango/bellex/services/tcp"
 	"github.com/nomango/bellex/services/tcp/types"
 )
 
-// Start starts to listen tcp connection
-func Start() {
-	tcpServer, err := tcp.NewServer()
-	if err != nil {
-		log.Fatalln("[Bellex] Start TCP server failed: ", err)
-	}
+// PacketHandler handle request packets
+func PacketHandler(req []byte, conn net.Conn) {
 
-	defer tcpServer.Close()
-
-	log.Println("[Bellex] TCP server is running on", tcpServer.Addr())
-
-	// start to accept connections
-	for {
-		conn, err := tcpServer.Accept()
-		if err != nil {
-			log.Println("[Bellex] Accept TCP connection failed:", err)
-			continue
-		}
-		log.Println("[Bellex] Accept TCP connection from", conn.RemoteAddr().String())
-
-		// handle conn in goroutine
-		go tcpServer.Handle(conn, HandlePacket)
-	}
-}
-
-// HandlePacket handle request packets
-func HandlePacket(req []byte, conn net.Conn) {
-
-	packet, err := tcpPacket.LoadPacket(string(req))
+	packet, err := tcppacket.LoadPacket(string(req))
 	if err != nil {
 		write("Invalid request", conn)
 		return
 	}
 
-	if !tcpPacket.Verify(packet) {
+	if !tcppacket.Verify(packet) {
 		write("Permission denied", conn)
 		return
 	}

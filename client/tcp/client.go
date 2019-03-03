@@ -1,16 +1,12 @@
 // Copyright (C) 2018 Nomango - All Rights Reserved
 
-package tcp
+package main
 
 import (
 	"bufio"
 	"fmt"
 	"log"
 	"net"
-)
-
-const (
-	serverIP = "132.232.126.221:" + serverPort
 )
 
 // Client tcp client
@@ -21,8 +17,8 @@ type Client struct {
 }
 
 // NewClient returns a new tcp cliet
-func NewClient() (*Client, error) {
-	addr, err := net.ResolveTCPAddr("tcp", serverIP)
+func NewClient(ip string) (*Client, error) {
+	addr, err := net.ResolveTCPAddr("tcp", ip)
 	if err != nil {
 		return nil, err
 	}
@@ -49,13 +45,6 @@ func (c *Client) Receiver() *bufio.Reader {
 
 // RequestTime send 'GetTime' request
 func (c *Client) RequestTime() {
-
-	/*packet := packet.DefaultPacket()
-	packetData, err := json.Marshal(packet)
-	if err != nil {
-		log.Fatalln("Marshal json data failed,", err)
-		return
-	}*/
 
 	packetData := []byte(`id:123;code:123;req:schedule;`)
 	//packetData := []byte(`id:123;code:123;req:request_timing;`)

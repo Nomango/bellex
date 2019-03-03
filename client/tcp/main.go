@@ -5,13 +5,11 @@ package main
 import (
 	"fmt"
 	"time"
-
-	"github.com/nomango/bellex/services/tcp"
 )
 
 func main() {
 
-	client, err := tcp.NewClient()
+	client, err := NewClient("132.232.126.221:7777")
 	if err != nil {
 		fmt.Println("Start client failed: ", err)
 		return

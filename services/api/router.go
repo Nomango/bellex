@@ -1,11 +1,20 @@
+// Copyright (C) 2018 Nomango - All Rights Reserved
+
 package api
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
-	"github.com/nomango/bellex/services/api/v1/ping"
 )
 
 // SetupRouter ...
 func SetupRouter(engine *gin.Engine) {
-	ping.SetupRouter(engine)
+	v1 := engine.Group("/v1")
+	{
+		// Ping test
+		v1.GET("/ping", func(c *gin.Context) {
+			c.String(http.StatusOK, "pong")
+		})
+	}
 }

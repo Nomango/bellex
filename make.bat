@@ -28,8 +28,6 @@ goto help
     echo     server     - Run server app
     echo build
     echo     server     - Compile server app
-    echo     tcp        - Compile TCP server
-    echo     ntp        - Compile NTP client
     echo test
     echo     tcp        - Send test data to the TCP server
     echo     ntp        - Send test data to the NTP server
@@ -45,18 +43,10 @@ goto help
     go build -o server.exe .\main.go
     exit
 
-:build_tcp_server
-    go build -o tcpserver.exe .\tcp\server\main\main.go
-    exit
-
-:build_ntp
-    go build -o ntpclient.exe .\ntp\main.go
-    exit
-
 :test_tcp
-    go run .\tcp\client\main.go
+    go run .\client\tcp\
     exit
 
 :test_ntp
-    go run .\ntp\main.go
+    go run .\client\ntp\
     exit

@@ -9,10 +9,6 @@ import (
 	"net"
 )
 
-const (
-	serverPort = "7777"
-)
-
 // Server tcp server
 type Server struct {
 	listener *net.TCPListener
@@ -38,12 +34,12 @@ func getLocalIP() (string, error) {
 }
 
 // NewServer returns a new tcp server
-func NewServer() (*Server, error) {
+func NewServer(port string) (*Server, error) {
 	localIP, err := getLocalIP()
 	if err != nil {
 		return nil, err
 	}
-	addr, err := net.ResolveTCPAddr("tcp", localIP+":"+serverPort)
+	addr, err := net.ResolveTCPAddr("tcp", localIP+":"+port)
 	if err != nil {
 		return nil, err
 	}

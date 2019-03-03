@@ -1,0 +1,40 @@
+{
+  "code": 0
+  ,"msg": "",
+  "data": [
+    {
+    "title": "主页",
+    "icon": "layui-icon-home"
+    ,"list": [
+      {
+        "name":"manage",
+        "title": "教学楼管理",
+        "icon": "layui-icon-component",
+        "jump": "/"
+      },
+      {
+        "name":"rest",
+        "title": "作息时间管理",
+        "icon": "layui-icon-template",
+        "jump": "rest/list"
+      }
+    ]
+  }
+  ,{
+      "name": "set"
+      ,"title": "设置"
+      ,"icon": "layui-icon-set"
+      ,"list": [
+      {
+        "name": "user"
+        ,"title": "我的设置"
+        ,"spread": true
+        ,"list": [
+        {
+          "name": "password"
+          ,"title": "修改密码"
+        }]
+      }]
+    }
+  ]
+}

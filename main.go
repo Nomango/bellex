@@ -13,12 +13,16 @@ import (
 func main() {
 
 	// start a tcp server
-	go startTCPServer()
+	//go startTCPServer()
 
 	// Windows PowerShell cannot display color correctly, so disable it
 	gin.DisableConsoleColor()
 
 	engine := gin.Default()
+
+	engine.Static("/static", "./static")
+	engine.LoadHTMLGlob("views/**/*")
+
 	api.SetupRouter(engine)
 
 	// Listen and Server in 0.0.0.0:8080

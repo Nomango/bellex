@@ -10,6 +10,10 @@ import (
 
 // SetupRouter ...
 func SetupRouter(engine *gin.Engine) {
+	// Home
+	engine.GET("/", home)
+
+	// api v1
 	v1 := engine.Group("/v1")
 	{
 		// Ping test
@@ -17,4 +21,8 @@ func SetupRouter(engine *gin.Engine) {
 			c.String(http.StatusOK, "pong")
 		})
 	}
+}
+
+func home(c *gin.Context) {
+	c.HTML(200, "admin/index", gin.H{})
 }

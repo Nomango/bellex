@@ -16,13 +16,13 @@ pipeline {
                 }
             }
         }
-        stage('Build Bellex Back-end') {
-            steps {
-                dir('C:/Users/Administrator/go/src/github.com/nomango/bellex/server') {
-                    bat 'go build -o bellex main.go'
-                }
-            }
-        }
+        // stage('Build Bellex Back-end') {
+        //     steps {
+        //         dir('C:/Users/Administrator/go/src/github.com/nomango/bellex/server') {
+        //             bat 'go build -o bellex main.go'
+        //         }
+        //     }
+        // }
     }
     post {
         success {

@@ -18,7 +18,7 @@ type Object struct {
 
 func init() {
 	Objects = make(map[string]*Object)
-	Objects["hjkhsbnmn123"] = &Object{"hjkhsbnmn123", 100, "astaxie"}
+	Objects["123456"] = &Object{"123456", 100, "nomango"}
 	Objects["mjjkxsxsaa23"] = &Object{"mjjkxsxsaa23", 101, "someone"}
 }
 
@@ -50,4 +50,3 @@ func Update(ObjectId string, Score int64) (err error) {
 func Delete(ObjectId string) {
 	delete(Objects, ObjectId)
 }
-

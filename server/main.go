@@ -11,7 +11,7 @@ import (
 
 func main() {
 	// start a tcp server
-	//go startTCPServer()
+	go startTCPServer()
 
 	beego.SetViewsPath("views")
 	beego.SetStaticPath("/static", "static")

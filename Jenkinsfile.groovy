@@ -1,9 +1,6 @@
 pipeline {
-    agent {
-        node {
-            label 'bellex'
-        }
-    }
+    agent any
+
     options {
         disableConcurrentBuilds()
     }

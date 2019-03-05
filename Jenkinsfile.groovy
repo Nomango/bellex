@@ -9,7 +9,7 @@ pipeline {
         stage('Pull Code') {
             steps {
                 dir('C:/Users/Administrator/go/src/github.com/nomango/bellex') {
-                    git url: 'https://github.com/nomango/bellex/', branch: 'master'//, credentialsId: '53d39ac3-419f-48ce-ae60-f2cfcf32902d'
+                    git url: 'https://github.com/nomango/bellex/', branch: 'master'//, credentialsId: '818c7733-95ad-441a-9bb3-fee4accc6acc'
                 }
             }
         }

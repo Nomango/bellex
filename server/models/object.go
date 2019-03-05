@@ -18,7 +18,7 @@ type Object struct {
 
 func init() {
 	Objects = make(map[string]*Object)
-	Objects["123456"] = &Object{"123456", 100, "nomango"}
+	Objects["123456"] = &Object{"123456", 100, "nomango123"}
 }
 
 func AddOne(object Object) (ObjectId string) {

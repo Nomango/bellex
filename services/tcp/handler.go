@@ -40,10 +40,7 @@ func PacketHandler(req []byte, conn net.Conn) {
 			write(response, conn)
 		}
 	case types.PacketTypeSchedule:
-		write("schedule_A1234567890123456", conn)
-		write("schedule_B1234567890123456", conn)
-		write("schedule_C1234567890123456", conn)
-		write("schedule_D1234567890123456", conn)
+		write("schedule:1234567890123456", conn)
 	default:
 		write("Invalid request", conn)
 	}

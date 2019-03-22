@@ -5,7 +5,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/nomango/bellex/services/ntp"
+	"github.com/nomango/bellex/server/services/ntp"
 )
 
 func main() {

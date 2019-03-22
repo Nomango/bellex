@@ -5,7 +5,7 @@ package tcppacket
 import (
 	"log"
 
-	"github.com/nomango/bellex/services/tcp/types"
+	"github.com/nomango/bellex/server/services/tcp/types"
 )
 
 // Verify check if the client has permissions

@@ -4,7 +4,7 @@ import (
 	"log"
 
 	_ "github.com/nomango/bellex/server/routers"
-	"github.com/nomango/bellex/services/tcp"
+	"github.com/nomango/bellex/server/services/tcp"
 
 	"github.com/astaxie/beego"
 )

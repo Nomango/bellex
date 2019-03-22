@@ -16,34 +16,53 @@ import (
 // PacketHandler handle request packets
 func PacketHandler(req []byte, conn net.Conn) {
 
-	packet, err := tcpPacket.LoadPacket(string(req))
+	var (
+		packet   *types.Packet
+		response string
+		err      error
+	)
+
+	defer func() {
+		if err != nil {
+			write(err.Error(), conn)
+		} else {
+			write(response, conn)
+		}
+	}()
+
+	packet, err = tcpPacket.LoadPacket(string(req))
 	if err != nil {
-		write("Invalid request", conn)
+		err = errors.New("error:Invalid request;#")
 		return
 	}
 
 	if !tcpPacket.Verify(packet) {
-		write("Permission denied", conn)
+		err = errors.New("error:Permission denied;#")
 		return
 	}
 
 	switch packet.Type {
+	case types.PacketTypeConnect:
+		response = "status:1;#"
 	case types.PacketTypeRequestTime:
-		if now, err := requestNTP(); err != nil {
-			write(err.Error(), conn)
-		} else {
-			week := int(now.Weekday())
-			if week == 0 {
-				week = 7
-			}
-			response := fmt.Sprintf("current_time:%s%02d%s", now.Format("0504150201"), week, now.Format("06"))
-			write(response, conn)
-		}
-	case types.PacketTypeSchedule:
-		write("schedule:1234567890123456", conn)
+		response, err = requestTime()
 	default:
-		write("Invalid request", conn)
+		err = errors.New("error:Invalid request;#")
 	}
+}
+
+func requestTime() (string, error) {
+	now, err := requestNTP()
+	if err != nil {
+		return "", err
+	}
+
+	week := int(now.Weekday())
+	if week == 0 {
+		week = 7
+	}
+	response := fmt.Sprintf("current_time:%s%02d%s;#", now.Format("0504150201"), week, now.Format("06"))
+	return response, nil
 }
 
 func requestNTP() (time.Time, error) {
@@ -69,14 +88,13 @@ func requestNTP() (time.Time, error) {
 	}
 
 	if result.IsZero() {
-		return time.Time{}, errors.New("Request NTP failed")
+		return time.Time{}, errors.New("error:Request NTP failed;#")
 	}
 	return result, nil
 }
 
 func write(data string, conn net.Conn) error {
-	bytes := append([]byte(data), byte(0))
-	if _, err := conn.Write(bytes); err != nil {
+	if _, err := conn.Write([]byte(data)); err != nil {
 		return err
 	}
 	return nil

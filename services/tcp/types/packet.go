@@ -4,16 +4,9 @@ package types
 
 // Packet types
 const (
-	PacketTypeRequestTime byte = iota
-	PacketTypeSchedule
-)
-
-var (
-	// PacketTypes all types of packet
-	PacketTypes = [...]byte{
-		PacketTypeRequestTime,
-		PacketTypeSchedule,
-	}
+	PacketTypeConnect byte = iota
+	PacketTypeRequestTime
+	PacketTypeHeartBeat
 )
 
 // AuthPacket contains authority verification infofmation
@@ -36,7 +29,7 @@ func DefaultPacket() *Packet {
 			ID:   "BW123",
 			Code: "Xwa8pj7",
 		},
-		Type: PacketTypeRequestTime,
+		Type: 0,
 		Data: make([]byte, 0),
 	}
 }

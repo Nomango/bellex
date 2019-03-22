@@ -18,8 +18,9 @@ var (
 	baseRegExp *regexp.Regexp
 
 	packetTypes = map[string]byte{
-		"request_timing": types.PacketTypeRequestTime,
-		"schedule":       types.PacketTypeSchedule,
+		"connect":      types.PacketTypeConnect,
+		"request_time": types.PacketTypeRequestTime,
+		"heart_beat":   types.PacketTypeHeartBeat,
 	}
 )
 

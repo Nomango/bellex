@@ -1,9 +1,8 @@
 // Copyright (C) 2018 Nomango - All Rights Reserved
 
-package tcppacket
+package packet
 
 import (
-	"errors"
 	"log"
 	"regexp"
 
@@ -11,7 +10,7 @@ import (
 )
 
 const (
-	baseRegStr = `id:([\w]+);code:([\w]+);req:([\w]+);(.*)`
+	baseRegStr = `id:([\w]+);code:([\w]*);req:([\w]+);(.*)`
 )
 
 var (
@@ -28,18 +27,18 @@ var (
 func LoadPacket(req string) (*types.Packet, error) {
 	if matched := baseRegExp.MatchString(req); !matched {
 		log.Println("Invalid request", req)
-		return nil, errors.New("Invalid request")
+		return nil, NewError("Invalid request")
 	}
 
 	params := baseRegExp.FindStringSubmatch(req)
 	if len(params) != 5 {
-		return nil, errors.New("Invalid request")
+		return nil, NewError("Invalid request")
 	}
 
 	packetType, ok := packetTypes[params[3]]
 	if !ok {
 		log.Println("Unknown request type", req)
-		return nil, errors.New("Unknown request type")
+		return nil, NewError("Unknown request type")
 	}
 
 	packet := &types.Packet{

@@ -1,0 +1,202 @@
+#include "sys.h"
+#include "usart.h"	
+#include "delay.h"	
+#include "ntp.h"
+#include "string.h"
+////////////////////////////////////////////////////////////////////////////////// 	 
+//如果使用ucos,则包括下面的头文件即可.
+#if SYSTEM_SUPPORT_OS
+#include "includes.h"					//ucos 使用	  
+#endif
+
+//extern u8 control_0;
+//extern u16 A,B;
+
+
+unsigned char sum;	//传送接受数据的位数count
+unsigned char I;    //所需的数据从第I位开始
+unsigned char rec[100],REC[100];
+//u8 rec_buf[];
+
+ 
+
+//////////////////////////////////////////////////////////////////
+//加入以下代码,支持printf函数,而不需要选择use MicroLIB	  
+#if 1
+#pragma import(__use_no_semihosting)             
+//标准库需要的支持函数                 
+struct __FILE 
+{ 
+	int handle; 
+
+}; 
+
+FILE __stdout;       
+//定义_sys_exit()以避免使用半主机模式    
+_sys_exit(int x) 
+{ 
+	x = x; 
+} 
+//重定义fputc函数 
+int fputc(int ch, FILE *f)
+{      
+	while((USART2->SR&0X40)==0);//循环发送,直到发送完毕   
+    USART2->DR = (u8) ch;      
+	return ch;
+}
+#endif 
+
+void uart2_init(u32 bound){
+  //GPIO端口设置
+  GPIO_InitTypeDef GPIO_InitStructure;
+	USART_InitTypeDef USART_InitStructure;
+	NVIC_InitTypeDef NVIC_InitStructure;
+	 
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);			//使能USART1，GPIOA时钟
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2,ENABLE);
+  
+	//USART1_TX   GPIOA.9
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2; 								//PA.2
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;						//复用推挽输出
+  GPIO_Init(GPIOA, &GPIO_InitStructure);										//初始化GPIOA.2
+   
+  //USART1_RX	  GPIOA.10初始化
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;									//PA3
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;			//浮空输入
+  GPIO_Init(GPIOA, &GPIO_InitStructure);										//初始化GPIOA.3  
+
+  //Usart1 NVIC 配置
+  NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=3 ;		//抢占优先级3
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;					//子优先级3
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;							//IRQ通道使能
+	NVIC_Init(&NVIC_InitStructure);															//根据指定的参数初始化VIC寄存器
+  
+  //USART 初始化设置
+	USART_InitStructure.USART_BaudRate = bound;														//串口波特率
+	USART_InitStructure.USART_WordLength = USART_WordLength_8b;						//字长为8位数据格式
+	USART_InitStructure.USART_StopBits = USART_StopBits_1;								//一个停止位
+	USART_InitStructure.USART_Parity = USART_Parity_No;										//无奇偶校验位
+	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;//无硬件数据流控制
+	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;				//收发模式
+
+  USART_Init(USART2, &USART_InitStructure); 				//初始化串口2
+  USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);		//开启串口接受中断(一个字节)
+  USART_Cmd(USART2, ENABLE);                    		//使能串口2
+  USART_ITConfig(USART2, USART_IT_IDLE, ENABLE);		//开启串口接受中断(一帧数据)
+}
+ void usart1_send(u8 data)
+{
+	USART1->DR = data;
+	while((USART1->SR&0x40)==0);	
+}
+#if EN_USART1_RX   //如果使能了接收
+	  
+  
+void uart_init(u32 bound){
+  //GPIO端口设置
+  GPIO_InitTypeDef GPIO_InitStructure;
+	USART_InitTypeDef USART_InitStructure;
+	NVIC_InitTypeDef NVIC_InitStructure;
+	 
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1|RCC_APB2Periph_GPIOA, ENABLE);	//使能USART1，GPIOA时钟
+  
+	//USART1_TX   GPIOA.9
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9; 					//PA.9
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;			//复用推挽输出
+  GPIO_Init(GPIOA, &GPIO_InitStructure);							//初始化GPIOA.9
+   
+  //USART1_RX	  GPIOA.10初始化
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;							//PA10
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;		//浮空输入
+  GPIO_Init(GPIOA, &GPIO_InitStructure);									//初始化GPIOA.10  
+
+  //Usart1 NVIC 配置
+  NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority=3 ;	//抢占优先级3
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;				//子优先级3
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;						//IRQ通道使能
+	NVIC_Init(&NVIC_InitStructure);														//根据指定的参数初始化VIC寄存器
+  
+  //USART 初始化设置
+	USART_InitStructure.USART_BaudRate = bound;													//串口波特率
+	USART_InitStructure.USART_WordLength = USART_WordLength_8b;					//字长为8位数据格式
+	USART_InitStructure.USART_StopBits = USART_StopBits_1;							//一个停止位
+	USART_InitStructure.USART_Parity = USART_Parity_No;									//无奇偶校验位
+	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;//无硬件数据流控制
+	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;			//收发模式
+
+  USART_Init(USART1, &USART_InitStructure); 				//初始化串口1
+  USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);		//开启串口接受中断(一个字节)
+  USART_Cmd(USART1, ENABLE);                    		//使能串口1 
+  USART_ITConfig(USART1, USART_IT_IDLE, ENABLE);    //开启串口接受中断(一帧数据)
+}
+
+
+void USART2_IRQHandler(void)                	//串口1中断服务程序
+{
+	static u16 count=0;                         //接受数据的位数
+	if (USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)		//接受到一个字节
+	{
+	  USART_ClearITPendingBit(USART2, USART_IT_RXNE);					//清空标志位
+		rec[count++]=USART_ReceiveData(USART2);
+	}
+	
+	if (USART_GetITStatus(USART2, USART_IT_IDLE) != RESET){		//接受到一帧数据
+	  USART_ClearITPendingBit(USART2, USART_IT_RXNE);					//清空标志位
+		USART2->DR;
+		USART2->SR;
+		
+		if( rec[0] == 0x1c && rec[1] == 0x02 && rec[2] == 0x03 ){				//根据约定发送数据的标志位
+			sum=count;
+			I=3;
+	  }
+		else if( rec[12] == ':' ){				//时间的标志位，前面为“current_time:”
+			sum=count-2;
+			I=13;
+	  }
+		else if( rec[8] == ':' )					//时间表的标志位，前面为“schedule:”
+		{
+			sum = count;
+			I = 9;
+	  }
+		else
+			I=0;
+
+		count=0;
+	}
+	
+} 
+
+
+void HMISends_0(char *buf1){
+	u8 i=0;
+	while(1){
+		if(buf1[i]!='\0'){
+			USART_SendData(USART2,buf1[i]); 														 	//发送一个字节
+			while(USART_GetFlagStatus(USART2,USART_FLAG_TXE)==RESET){};		//等待发送结束
+			i++;
+		}
+	  else{
+//			USART_SendData(USART2,'\0');
+		  return ;
+		}
+	}
+}
+
+
+void UART2_Send_Array(unsigned char send_array[],unsigned char num){
+	unsigned char i=0;  
+	for(i=0;i<num;i++){
+		USART_SendData(USART2,send_array[i]);        
+		while( USART_GetFlagStatus(USART2,USART_FLAG_TC)!= SET);      
+	}
+}
+
+
+
+
+#endif	
+

@@ -22,9 +22,9 @@ void wifi_connect(void){
 	key=KEY_Scan(0);
 	
 	if(key==KEY2_PRES){
-//		sprintf(AT_buf,"AT+CIPSTART=\"UDP\",\"114.118.7.161\",123\r\n");		//国家授时服务器得到IP地址、端口
+		sprintf(AT_buf,"AT+CIPSTART=\"UDP\",\"114.118.7.161\",123\r\n");		//国家授时服务器得到IP地址、端口
 //		sprintf(AT_buf,"AT+CIPSTART=\"TCP\",\"192.168.1.101\",7777\r\n");		//虚拟服务器得到IP地址、端口
-		sprintf(AT_buf,"AT+CIPSTART=\"TCP\",\"132.232.126.221\",7777\r\n");		//目标服务器得到IP地址、端口
+//		sprintf(AT_buf,"AT+CIPSTART=\"TCP\",\"132.232.126.221\",7777\r\n");		//目标服务器得到IP地址、端口
 		HMISends_0(AT_buf);
 		delay_ms(500);
 	}
@@ -41,12 +41,12 @@ void wifi_connect(void){
 	}
 	
 	if(key==KEY4_PRES){
-		UART2_Send_Array(heart_beat,36);
+//		UART2_Send_Array(heart_beat,36);
 //		UART2_Send_Array(request_code,30);
 		delay_ms(500);
 //		UART2_Send_Array(request_time,39);
 //		UART2_Send_Array(request_schedule,34);
-//		UART2_Send_Array((unsigned char*)&packet,sizeof(struct NtpPacket));
+		UART2_Send_Array((unsigned char*)&packet,sizeof(struct NtpPacket));
 		delay_ms(100);
 	}
 }

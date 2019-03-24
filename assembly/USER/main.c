@@ -52,22 +52,27 @@ int main(void){
 		if(I == 3){
 			for(i=0; i<48; i++)
 				buf[i]=rec[i];
-//			UART2_Send_Array(buf,48);
+			//UART2_Send_Array(buf,48);
 			delay_ms(1000);
 			printf("\r\n");
 			delay_ms(1000);
-			memcpy(&p, buf, sizeof(struct NtpPacket));
+			//memcpy(&p, buf, sizeof(struct NtpPacket));
+
+			p.tx_tm_s = 0;
+			p.tx_tm_s += ((int)buf[40]) << 24;
+			p.tx_tm_s += ((int)buf[41]) << 16;
+			p.tx_tm_s += ((int)buf[42]) << 8;
+			p.tx_tm_s += ((int)buf[43]);
 			
-			unix = (time_t)(p.tx_tm_s - 2208988800);
+			unix = (time_t)(((uint64_t)p.tx_tm_s) - 2208988800);
+			
+			//HMISends_0(ctime((const time_t*)&unix));
 			tmbuf = localtime(&unix);
 
-			delay_ms(800);
-			printf("%c",((tmbuf -> tm_year) & 255));
-			printf("%c",((tmbuf -> tm_year >> 8) & 255));
-			printf("%c",((tmbuf -> tm_year >> 16) & 255));
-			printf("%c",tmbuf -> tm_year >> 24);
-			printf("\r\n");
 			delay_ms(1000);
+			printf("%d %d %d %d %d %d\r\n",
+				1900 + tmbuf->tm_year, 1 + tmbuf->tm_mon, tmbuf->tm_mday, 8+tmbuf->tm_hour, tmbuf->tm_min, tmbuf->tm_sec);
+//			delay_ms(1000);
 			
 //			printf("%X",tmbuf -> tm_hour );
 //			delay_ms(1000);

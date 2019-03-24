@@ -8,6 +8,7 @@ import (
 	"net"
 	"time"
 
+	"github.com/nomango/bellex/server/models"
 	"github.com/nomango/bellex/server/services/ntp"
 	tcpPacket "github.com/nomango/bellex/server/services/tcp/packet"
 	"github.com/nomango/bellex/server/services/tcp/types"
@@ -42,7 +43,7 @@ func PacketHandler(req []byte, conn net.Conn) {
 
 	switch packet.Type {
 	case types.PacketTypeConnect:
-		response, err = requestConnect()
+		response, err = requestConnect(packet, conn)
 	case types.PacketTypeRequestTime:
 		response, err = requestTime()
 	case types.PacketTypeHeartBeat:
@@ -52,10 +53,16 @@ func PacketHandler(req []byte, conn net.Conn) {
 	}
 }
 
-func requestConnect() (string, error) {
+func requestConnect(packet *types.Packet, conn net.Conn) (string, error) {
+	// if _, ok := bells[packet.Auth.ID]; ok {
+	// 	return tcpPacket.NewError("ID exists")
+	// }
 	code := utils.RandString(8)
-	// Check whether code exists
-	// Save code
+	bell := models.Bell{
+		ID:   packet.Auth.ID,
+		Code: packet.Auth.Code,
+	}
+	models.AddBell(bell)
 	return "unique_code:" + code + ";", nil
 }
 

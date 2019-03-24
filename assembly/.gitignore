@@ -2,3 +2,9 @@
 /OBJ
 /SYSTEM/delay
 /SYSTEM/sys
+/USER/*.map
+/USER/*.bak
+/USER/*.dep
+/USER/*.uvopt
+/USER/*.uvproj
+/USER/*.uvgui.*

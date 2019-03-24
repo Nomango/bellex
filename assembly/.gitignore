@@ -1,10 +1,7 @@
-/CORE
-/OBJ
-/SYSTEM/delay
-/SYSTEM/sys
-/USER/*.map
-/USER/*.bak
-/USER/*.dep
-/USER/*.uvopt
-/USER/*.uvproj
-/USER/*.uvgui.*
+CORE/*
+OBJ/*
+SYSTEM/delay/*
+SYSTEM/sys/*
+USER/*
+!USER/main.c
+!USER/main.h

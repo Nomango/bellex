@@ -1,5 +1,5 @@
 Dependencies for Project 'OLED', Target 'Target 1': (DO NOT MODIFY !)
-F (.\main.c)(0x5C9725F7)(-c --cpu Cortex-M3 -g -O0 --apcs=interwork -I..\HARDWARE\LED -I..\SYSTEM\delay -I..\SYSTEM\sys -I..\SYSTEM\usart -I..\USER -I..\STM32F10x_FWLib\inc -I..\CORE -I..\HARDWARE\KEY -I..\HARDWARE\OLED -I..\HARDWARE\KEY_SEND -I..\HARDWARE\DS1302 -I..\HARDWARE\NTP -I..\HARDWARE\TIMER-I D:\MDK5\ARM\RV31\INC-I D:\MDK5\ARM\PACK\ARM\CMSIS\4.1.1\CMSIS\Include-I D:\MDK5\ARM\Inc\ST\STM32F10x-DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o ..\obj\main.o --omf_browse ..\obj\main.crf --depend ..\obj\main.d)
+F (.\main.c)(0x5C972A8F)(-c --cpu Cortex-M3 -g -O0 --apcs=interwork -I..\HARDWARE\LED -I..\SYSTEM\delay -I..\SYSTEM\sys -I..\SYSTEM\usart -I..\USER -I..\STM32F10x_FWLib\inc -I..\CORE -I..\HARDWARE\KEY -I..\HARDWARE\OLED -I..\HARDWARE\KEY_SEND -I..\HARDWARE\DS1302 -I..\HARDWARE\NTP -I..\HARDWARE\TIMER-I D:\MDK5\ARM\RV31\INC-I D:\MDK5\ARM\PACK\ARM\CMSIS\4.1.1\CMSIS\Include-I D:\MDK5\ARM\Inc\ST\STM32F10x-DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER-o ..\obj\main.o --omf_browse ..\obj\main.crf --depend ..\obj\main.d)
 I (main.h)(0x5C9725F7)
 I (..\SYSTEM\delay\delay.h)(0x50513B7A)
 I (..\SYSTEM\sys\sys.h)(0x5055B57C)

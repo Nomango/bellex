@@ -3,6 +3,7 @@
 package packet
 
 import (
+	"errors"
 	"log"
 	"regexp"
 
@@ -27,18 +28,18 @@ var (
 func LoadPacket(req string) (*types.Packet, error) {
 	if matched := baseRegExp.MatchString(req); !matched {
 		log.Println("Invalid request", req)
-		return nil, NewError("Invalid request")
+		return nil, errors.New("Invalid request")
 	}
 
 	params := baseRegExp.FindStringSubmatch(req)
 	if len(params) != 5 {
-		return nil, NewError("Invalid request")
+		return nil, errors.New("Invalid request")
 	}
 
 	packetType, ok := packetTypes[params[3]]
 	if !ok {
 		log.Println("Unknown request type", req)
-		return nil, NewError("Unknown request type")
+		return nil, errors.New("Unknown request type")
 	}
 
 	packet := &types.Packet{

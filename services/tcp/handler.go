@@ -26,7 +26,7 @@ func PacketHandler(req []byte, conn net.Conn) {
 
 	defer func() {
 		if err != nil {
-			write(err.Error(), conn)
+			write("error:"+err.Error()+";", conn)
 		} else {
 			write(response, conn)
 		}
@@ -49,7 +49,7 @@ func PacketHandler(req []byte, conn net.Conn) {
 	case types.PacketTypeHeartBeat:
 		response = "status:1;"
 	default:
-		err = tcpPacket.NewError("Invalid request")
+		err = errors.New("Invalid request")
 	}
 }
 
@@ -58,11 +58,10 @@ func requestConnect(packet *types.Packet, conn net.Conn) (string, error) {
 	// 	return tcpPacket.NewError("ID exists")
 	// }
 	code := utils.RandString(8)
-	bell := models.Bell{
-		ID:   packet.Auth.ID,
-		Code: packet.Auth.Code,
+	bell := models.NewBell(packet.Auth.ID, packet.Auth.Code, conn)
+	if err := models.AddBell(bell); err != nil {
+		return "", err
 	}
-	models.AddBell(bell)
 	return "unique_code:" + code + ";", nil
 }
 

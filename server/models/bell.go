@@ -3,9 +3,7 @@ package models
 import (
 	"errors"
 	"net"
-	"strconv"
 	"sync"
-	"time"
 )
 
 var (
@@ -23,10 +21,17 @@ func init() {
 	Bells = make(map[string]*Bell)
 }
 
-func AddBell(bell Bell) (ID string) {
-	bell.ID = "astaxie" + strconv.FormatInt(time.Now().UnixNano(), 10)
-	Bells[bell.ID] = &bell
-	return bell.ID
+func NewBell(ID string, Code string, conn net.Conn) *Bell {
+	return &Bell{
+		ID:   ID,
+		Code: Code,
+		conn: conn,
+	}
+}
+
+func AddBell(bell *Bell) error {
+	Bells[bell.ID] = bell
+	return nil
 }
 
 func GetBell(ID string) (bell *Bell, err error) {

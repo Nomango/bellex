@@ -5,7 +5,6 @@
 #include "sys.h"
 #include "delay.h"
 #include "usart.h"
-#include "ntp.h"
 
 void wifi_connect(void);
 

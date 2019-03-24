@@ -14,5 +14,6 @@
 # Temporary files
 *.tmp
 
+.vscode/*
 vendor/*
 !vendor/vendor.json

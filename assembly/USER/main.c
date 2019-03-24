@@ -61,7 +61,7 @@ int main(void){
 			unix = (time_t)(p.tx_tm_s - 2208988800);
 			tmbuf = localtime(&unix);
 
-			delay_ms(1000);
+			delay_ms(800);
 			printf("%c",((tmbuf -> tm_year) & 255));
 			printf("%c",((tmbuf -> tm_year >> 8) & 255));
 			printf("%c",((tmbuf -> tm_year >> 16) & 255));

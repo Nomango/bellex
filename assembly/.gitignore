@@ -5,3 +5,4 @@ SYSTEM/sys/*
 USER/*
 !USER/main.c
 !USER/main.h
+STM32F10x_FWLib/*

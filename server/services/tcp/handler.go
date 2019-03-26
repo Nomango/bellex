@@ -25,7 +25,7 @@ func PacketHandler(req []byte, conn net.Conn) {
 
 	defer func() {
 		if err != nil {
-			write(err.Error(), conn)
+			write("error:" + err.Error() + ";", conn)
 		} else {
 			write(response, conn)
 		}
@@ -33,12 +33,11 @@ func PacketHandler(req []byte, conn net.Conn) {
 
 	packet, err = tcpPacket.LoadPacket(string(req))
 	if err != nil {
-		err = errors.New("error:Invalid request;#")
 		return
 	}
 
 	if !tcpPacket.Verify(packet) {
-		err = errors.New("error:Permission denied;#")
+		err = errors.New("Permission denied")
 		return
 	}
 
@@ -48,9 +47,9 @@ func PacketHandler(req []byte, conn net.Conn) {
 	case types.PacketTypeRequestTime:
 		response, err = requestTime()
 	case types.PacketTypeHeartBeat:
-		response = "status:1;#"
+		response = "status:1;"
 	default:
-		err = errors.New("error:Invalid request;#")
+		err = errors.New("Invalid request")
 	}
 }
 
@@ -58,7 +57,7 @@ func requestConnect() (string, error) {
 	code := utils.RandString(8)
 	// Check whether code exists
 	// Save code
-	return "unique_code:" + code + ";#", nil
+	return "unique_code:" + code + ";", nil
 }
 
 func requestTime() (string, error) {
@@ -71,7 +70,7 @@ func requestTime() (string, error) {
 	if week == 0 {
 		week = 7
 	}
-	response := fmt.Sprintf("current_time:%s%02d%s;#", now.Format("0504150201"), week, now.Format("06"))
+	response := fmt.Sprintf("current_time:%s%02d%s;", now.Format("0504150201"), week, now.Format("06"))
 	return response, nil
 }
 
@@ -98,7 +97,7 @@ func requestNTP() (time.Time, error) {
 	}
 
 	if result.IsZero() {
-		return time.Time{}, errors.New("error:Request NTP failed;#")
+		return time.Time{}, errors.New("Request NTP failed")
 	}
 	return result, nil
 }

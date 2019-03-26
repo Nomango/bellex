@@ -25,7 +25,7 @@ func PacketHandler(req []byte, conn net.Conn) {
 
 	defer func() {
 		if err != nil {
-			write("error:" + err.Error() + ";", conn)
+			write("error:"+err.Error()+";", conn)
 		} else {
 			write(response, conn)
 		}
@@ -36,7 +36,13 @@ func PacketHandler(req []byte, conn net.Conn) {
 		return
 	}
 
-	if !tcpPacket.Verify(packet) {
+	ok, err := tcpPacket.Verify(packet)
+	if err != nil {
+		return
+	}
+
+	if !ok {
+		fmt.Println("Permission denied", string(req))
 		err = errors.New("Permission denied")
 		return
 	}

@@ -3,6 +3,8 @@
 package tcppacket
 
 import (
+	"fmt"
+
 	"github.com/nomango/bellex/server/models"
 	"github.com/nomango/bellex/server/services/tcp/types"
 )
@@ -14,6 +16,7 @@ func Verify(packet *types.Packet) (bool, error) {
 	}
 	bells := models.GetAllBells()
 	if bell, ok := bells[packet.Auth.ID]; ok {
+		fmt.Println(bell.ID, bell.Code)
 		return bell.ID == packet.Auth.ID && bell.Code == packet.Auth.Code, nil
 	}
 	return false, nil

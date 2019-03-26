@@ -65,7 +65,7 @@ func requestConnect(packet *types.Packet, conn net.Conn) (string, error) {
 	// 	return tcpPacket.NewError("ID exists")
 	// }
 	code := utils.RandString(8)
-	bell := models.NewBell(packet.Auth.ID, packet.Auth.Code, conn)
+	bell := models.NewBell(packet.Auth.ID, code, conn)
 	if err := models.AddBell(bell); err != nil {
 		return "", err
 	}

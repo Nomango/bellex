@@ -15,10 +15,10 @@ func Verify(packet *types.Packet) (bool, error) {
 		return true, nil // ignore connect verify
 	}
 	bells := models.GetAllBells()
-	fmt.Println(bells)
-	fmt.Println(packet.Auth.ID, packet.Auth.Code)
 	if bell, ok := bells[packet.Auth.ID]; ok {
+		fmt.Println(bell.ID, bell.Code)
 		return bell.ID == packet.Auth.ID && bell.Code == packet.Auth.Code, nil
 	}
+	fmt.Println(bells)
 	return false, nil
 }

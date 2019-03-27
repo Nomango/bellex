@@ -1,6 +1,11 @@
 #ifndef __BELL_REQUEST_H__
 #define __BELL_REQUEST_H__
 
+#include "sys.h"
+#include "usart.h"
+#include "ntp.h"
+#include "bell.h"
+
 enum BellRequestType
 {
     TYPE_CONNECT = 1,
@@ -9,7 +14,7 @@ enum BellRequestType
     TYPE_NTP_REQUEST,
 };
 
-extern BellRequestType g_RequestType;
+extern enum BellRequestType g_RequestType;
 
 // 请求连接服务器
 void SendConnect();

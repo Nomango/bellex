@@ -1,15 +1,9 @@
 #include "request.h"
-#include "key.h"
-#include "sys.h"
-#include "delay.h"
-#include "usart.h"
-#include "ntp.h"
-#include "../UTIL/util.h"
 
 char g_Buffer[261] = { 0 };
 int g_BufferSize = 0;
 
-BellRequestType g_RequestType = 0;
+enum BellRequestType g_RequestType = 0;
 
 void MakeRequest(const char* request_str)
 {
@@ -34,7 +28,6 @@ void MakeRequest(const char* request_str)
     pos += 2;
     g_BufferSize = pos;
 
-    return g_Buffer;
 }
 
 void SendConnect()

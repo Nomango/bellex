@@ -1,6 +1,6 @@
 #include "sys.h"
-#include "usart.h"
-#include "delay.h"
+#include "usart.h"	
+#include "delay.h"	
 #include "ntp.h"
 #include "string.h"
 //////////////////////////////////////////////////////////////////////////////////
@@ -27,18 +27,17 @@ struct __FILE
 	int handle;
 };
 
-FILE __stdout;
-//定义_sys_exit()以避免使用半主机模式
-_sys_exit(int x)
-{
-	x = x;
-}
-//重定义fputc函数
+FILE __stdout;       
+//定义_sys_exit()以避免使用半主机模式    
+_sys_exit(int x) 
+{ 
+	x = x; 
+} 
+//重定义fputc函数 
 int fputc(int ch, FILE *f)
-{
-	while ((USART2->SR & 0X40) == 0)
-		; //循环发送,直到发送完毕
-	USART2->DR = (u8)ch;
+{      
+	while((USART2->SR&0X40)==0);//循环发送,直到发送完毕   
+    USART2->DR = (u8) ch;      
 	return ch;
 }
 #endif
@@ -88,8 +87,7 @@ void uart2_init(u32 bound)
 void usart1_send(u8 data)
 {
 	USART1->DR = data;
-	while ((USART1->SR & 0x40) == 0)
-		;
+	while ((USART1->SR & 0x40) == 0);
 }
 #if EN_USART1_RX //如果使能了接收
 

@@ -1,5 +1,5 @@
 #include "main.h"
-#include "handle.h"
+
 
 struct Server_schedule schedule[30];
 
@@ -44,10 +44,12 @@ int main(void)
 			switch (g_RequestType)
 			{
 			case TYPE_CONNECT:
+				HandleConncetResponse(g_RecvBuffer, g_RecvBufferSize);
 				break;
 			case TYPE_HEART_BEAT:
 				break;
 			case TYPE_REQUEST_TIME:
+				HandleTimeResponse(g_RecvBuffer, g_RecvBufferSize);
 				break;
 			case TYPE_NTP_REQUEST:
 				HandleNtpResponse(g_RecvBuffer, g_RecvBufferSize);

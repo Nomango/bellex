@@ -8,6 +8,8 @@ import (
 	"net"
 	"time"
 
+	"github.com/astaxie/beego"
+
 	"github.com/nomango/bellex/server/models"
 	"github.com/nomango/bellex/server/services/ntp"
 	tcpPacket "github.com/nomango/bellex/server/services/tcp/packet"
@@ -39,7 +41,7 @@ func PacketHandler(req []byte, conn net.Conn) {
 
 	err = tcpPacket.Verify(packet)
 	if err != nil {
-		fmt.Println("Permission denied", string(req))
+		beego.Error("Permission denied", string(req))
 		err = errors.New("Permission denied")
 		return
 	}
@@ -66,7 +68,7 @@ func requestConnect(packet *types.Packet, conn net.Conn) (string, error) {
 		return "", err
 	}
 	if err := models.AddConnection(bell, conn); err != nil {
-		fmt.Println("Add connection failed", err)
+		beego.Error("Add connection failed", err)
 	}
 	return "unique_code:" + code + ";", nil
 }

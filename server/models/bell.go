@@ -1,58 +1,50 @@
 package models
 
 import (
-	"errors"
-	"net"
-	"sync"
-)
+	"time"
 
-var (
-	Bells map[string]*Bell
-	mutex sync.Mutex
+	"github.com/astaxie/beego/orm"
 )
 
 type Bell struct {
-	ID   string
-	Code string
-	conn net.Conn
+	Id      int
+	Code    string    `orm:"unique;size(30)"`
+	Secret  string    `orm:"size(30)"`
+	Created time.Time `orm:"auto_now_add"`
+	Updated time.Time `orm:"auto_now"`
 }
 
-func init() {
-	Bells = make(map[string]*Bell)
-}
-
-func NewBell(ID string, Code string, conn net.Conn) *Bell {
+// NewBell ...
+func NewBell(Code string, Secret string) *Bell {
 	return &Bell{
-		ID:   ID,
-		Code: Code,
-		conn: conn,
+		Code:   Code,
+		Secret: Secret,
 	}
 }
 
-func AddBell(bell *Bell) error {
-	Bells[bell.ID] = bell
-	return nil
+// Insert ...
+func (b *Bell) Insert() error {
+	_, err := orm.NewOrm().Insert(b)
+	return err
 }
 
-func GetBell(ID string) (bell *Bell, err error) {
-	if v, ok := Bells[ID]; ok {
-		return v, nil
-	}
-	return nil, errors.New("ID Not Exist")
+// Read ...
+func (b *Bell) Read(fields ...string) error {
+	return orm.NewOrm().Read(b, fields...)
 }
 
-func GetAllBells() map[string]*Bell {
-	return Bells
+// Update ...
+func (b *Bell) Update(fields ...string) error {
+	_, err := orm.NewOrm().Update(b, fields...)
+	return err
 }
 
-func UpdateBell(ID string, Code string) (err error) {
-	if v, ok := Bells[ID]; ok {
-		v.Code = Code
-		return nil
-	}
-	return errors.New("ID Not Exist")
+// Delete ...
+func (b *Bell) Delete() error {
+	_, err := orm.NewOrm().Delete(b)
+	return err
 }
 
-func DeleteBell(ID string) {
-	delete(Bells, ID)
+func Bells() orm.QuerySeter {
+	return orm.NewOrm().QueryTable((*Bell)(nil)).OrderBy("-Created")
 }

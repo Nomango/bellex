@@ -44,8 +44,8 @@ func LoadPacket(req string) (*types.Packet, error) {
 
 	packet := &types.Packet{
 		Auth: types.AuthPacket{
-			ID:   params[1],
-			Code: params[2],
+			Code:   params[1],
+			Secret: params[2],
 		},
 		Type: packetType,
 	}

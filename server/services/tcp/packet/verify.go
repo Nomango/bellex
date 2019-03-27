@@ -3,18 +3,23 @@
 package tcppacket
 
 import (
+	"errors"
+
 	"github.com/nomango/bellex/server/models"
 	"github.com/nomango/bellex/server/services/tcp/types"
 )
 
 // Verify check if the client has permissions
-func Verify(packet *types.Packet) (bool, error) {
+func Verify(packet *types.Packet) error {
 	if packet.Type == types.PacketTypeConnect {
-		return true, nil // ignore connect verify
+		return nil // ignore connect
 	}
-	bells := models.GetAllBells()
-	if bell, ok := bells[packet.Auth.ID]; ok {
-		return bell.ID == packet.Auth.ID && bell.Code == packet.Auth.Code, nil
+	bell := &models.Bell{Code: packet.Auth.Code}
+	if err := bell.Read("Code"); err != nil {
+		return err
 	}
-	return false, nil
+	if bell.Code == packet.Auth.Code && bell.Secret == packet.Auth.Secret {
+		return nil
+	}
+	return errors.New("Verify secret failed")
 }

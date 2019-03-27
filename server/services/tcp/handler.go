@@ -37,12 +37,8 @@ func PacketHandler(req []byte, conn net.Conn) {
 		return
 	}
 
-	ok, err := tcpPacket.Verify(packet)
+	err = tcpPacket.Verify(packet)
 	if err != nil {
-		return
-	}
-
-	if !ok {
 		fmt.Println("Permission denied", string(req))
 		err = errors.New("Permission denied")
 		return
@@ -61,13 +57,16 @@ func PacketHandler(req []byte, conn net.Conn) {
 }
 
 func requestConnect(packet *types.Packet, conn net.Conn) (string, error) {
-	// if _, ok := bells[packet.Auth.ID]; ok {
-	// 	return tcpPacket.NewError("ID exists")
+	// if _, ok := bells[packet.Auth.Code]; ok {
+	// 	return tcpPacket.NewError("Code exists")
 	// }
 	code := utils.RandString(8)
-	bell := models.NewBell(packet.Auth.ID, code, conn)
-	if err := models.AddBell(bell); err != nil {
+	bell := models.NewBell(packet.Auth.Code, code)
+	if err := bell.Insert(); err != nil {
 		return "", err
+	}
+	if err := models.AddConnection(bell, conn); err != nil {
+		fmt.Println("Add connection failed", err)
 	}
 	return "unique_code:" + code + ";", nil
 }

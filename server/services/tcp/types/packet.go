@@ -11,8 +11,8 @@ const (
 
 // AuthPacket contains authority verification infofmation
 type AuthPacket struct {
-	ID   string `json:"id"`
-	Code string `json:"code"`
+	Code   string `json:"id"`
+	Secret string `json:"code"`
 }
 
 // Packet send & recive data format
@@ -26,8 +26,8 @@ type Packet struct {
 func DefaultPacket() *Packet {
 	return &Packet{
 		Auth: AuthPacket{
-			ID:   "BW123",
-			Code: "Xwa8pj7",
+			Code:   "BW123",
+			Secret: "Xwa8pj7",
 		},
 		Type: 0,
 		Data: make([]byte, 0),

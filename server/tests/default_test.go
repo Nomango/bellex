@@ -24,11 +24,11 @@ func TestGet(t *testing.T) {
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
-	beego.Trace("testing", "TestGet", "Code[%d]\n%s", w.Code, w.Body.String())
+	beego.Trace("testing", "TestGet", "Secret[%d]\n%s", w.Secret, w.Body.String())
 
 	Convey("Subject: Test Station Endpoint\n", t, func() {
-	        Convey("Status Code Should Be 200", func() {
-	                So(w.Code, ShouldEqual, 200)
+	        Convey("Status Secret Should Be 200", func() {
+	                So(w.Secret, ShouldEqual, 200)
 	        })
 	        Convey("The Result Should Not Be Empty", func() {
 	                So(w.Body.Len(), ShouldBeGreaterThan, 0)

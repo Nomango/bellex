@@ -48,3 +48,7 @@ func (b *Bell) Delete() error {
 func Bells() orm.QuerySeter {
 	return orm.NewOrm().QueryTable((*Bell)(nil)).OrderBy("-Created")
 }
+
+func init() {
+	orm.RegisterModel(new(Bell))
+}

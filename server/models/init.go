@@ -8,7 +8,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func init() {
+func Setup() {
 	if err := orm.RegisterDriver("mysql", orm.DRMySQL); err != nil {
 		log.Fatalln("Register driver failed", err)
 	}
@@ -19,6 +19,4 @@ func init() {
 	if err := orm.RunSyncdb("default", true, true); err != nil {
 		beego.Error(err)
 	}
-
-	orm.RegisterModel(new(Bell))
 }

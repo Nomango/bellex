@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/nomango/bellex/server/models"
 	_ "github.com/nomango/bellex/server/routers"
 	"github.com/nomango/bellex/server/services/tcp"
 
@@ -12,6 +13,8 @@ import (
 func main() {
 	// start a tcp server
 	go startTCPServer()
+
+	models.Setup()
 
 	beego.SetViewsPath("views")
 	beego.SetStaticPath("/static", "static")

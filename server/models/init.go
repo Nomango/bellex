@@ -16,7 +16,7 @@ func Setup() {
 		log.Fatalln("Register database failed", err)
 	}
 
-	if err := orm.RunSyncdb("default", true, true); err != nil {
+	if err := orm.RunSyncdb("default", false, true); err != nil {
 		beego.Error(err)
 	}
 }

@@ -13,9 +13,9 @@ func init() {
 	beego.Router("/", &controllers.AdminController{})
 
 	ns := beego.NewNamespace("/api/v1",
-		beego.NSNamespace("/object",
+		beego.NSNamespace("/bell",
 			beego.NSInclude(
-				&v1.ObjectController{},
+				&v1.BellController{},
 			),
 		),
 		beego.NSNamespace("/user",

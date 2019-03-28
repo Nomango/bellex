@@ -28,6 +28,12 @@ func (b *Bell) Insert() error {
 	return err
 }
 
+// Insert ...
+func (b *Bell) InsertOrUpdate() error {
+	_, err := orm.NewOrm().InsertOrUpdate(b)
+	return err
+}
+
 // Read ...
 func (b *Bell) Read(fields ...string) error {
 	return orm.NewOrm().Read(b, fields...)

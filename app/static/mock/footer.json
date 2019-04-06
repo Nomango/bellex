@@ -1,0 +1,21 @@
+{
+  "ret": true,
+  "data": {
+    "footerList": [{
+        "id": "1",
+        "icon": "icon-home",
+        "name": "首页",
+        "link": "/"
+      }, {
+        "id": "2",
+        "icon": "icon-dingdan",
+        "name": "订单",
+        "link": "/order"
+      }, {
+        "id": "3",
+        "icon": "icon-wode",
+        "name": "我的",
+        "link": "/my"
+      }]
+  }
+}

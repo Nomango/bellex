@@ -12,7 +12,7 @@ import (
 
 func main() {
 	// start a tcp server
-	go startTCPServer()
+	//go startTCPServer()
 
 	models.Setup()
 

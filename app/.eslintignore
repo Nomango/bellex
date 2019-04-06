@@ -1,0 +1,6 @@
+/build/
+/config/
+/dist/
+/*.js
+/* global _MEIQIA */
+src/pages/My/info/customer.vue

@@ -123,16 +123,16 @@ func HasUser(usernameOrEmail string) bool {
 
 // FindUser ...
 func FindUser(usernameOrEmail string) (*User, error) {
-	var user *User
+	var user User
 	users := Users()
 
 	if strings.IndexRune(usernameOrEmail, '@') == -1 {
-		err := users.Filter("UserName", usernameOrEmail).One(user)
-		return user, err
+		err := users.Filter("UserName", usernameOrEmail).One(&user)
+		return &user, err
 	}
 
-	err := users.Filter("Email", usernameOrEmail).One(user)
-	return user, err
+	err := users.Filter("Email", usernameOrEmail).One(&user)
+	return &user, err
 }
 
 // RegisterUser ...

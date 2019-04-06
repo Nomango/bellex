@@ -7,47 +7,38 @@ import (
 
 func init() {
 
-    beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:ObjectController"] = append(beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:ObjectController"],
+    beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:UserController"] = append(beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:UserController"],
         beego.ControllerComments{
-            Method: "Post",
-            Router: `/`,
+            Method: "GetAll",
+            Router: `/all`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:UserController"] = append(beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:UserController"],
+        beego.ControllerComments{
+            Method: "Login",
+            Router: `/login`,
             AllowHTTPMethods: []string{"post"},
             MethodParams: param.Make(),
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:ObjectController"] = append(beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:ObjectController"],
+    beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:UserController"] = append(beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:UserController"],
         beego.ControllerComments{
-            Method: "GetAll",
-            Router: `/`,
+            Method: "Logout",
+            Router: `/logout`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:UserController"] = append(beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:UserController"],
+        beego.ControllerComments{
+            Method: "Status",
+            Router: `/status`,
             AllowHTTPMethods: []string{"get"},
-            MethodParams: param.Make(),
-            Filters: nil,
-            Params: nil})
-
-    beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:ObjectController"] = append(beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:ObjectController"],
-        beego.ControllerComments{
-            Method: "Get",
-            Router: `/:objectId`,
-            AllowHTTPMethods: []string{"get"},
-            MethodParams: param.Make(),
-            Filters: nil,
-            Params: nil})
-
-    beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:ObjectController"] = append(beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:ObjectController"],
-        beego.ControllerComments{
-            Method: "Put",
-            Router: `/:objectId`,
-            AllowHTTPMethods: []string{"put"},
-            MethodParams: param.Make(),
-            Filters: nil,
-            Params: nil})
-
-    beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:ObjectController"] = append(beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:ObjectController"],
-        beego.ControllerComments{
-            Method: "Delete",
-            Router: `/:objectId`,
-            AllowHTTPMethods: []string{"delete"},
             MethodParams: param.Make(),
             Filters: nil,
             Params: nil})

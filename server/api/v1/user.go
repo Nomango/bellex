@@ -1,6 +1,8 @@
 package v1
 
 import (
+	"encoding/json"
+
 	"github.com/astaxie/beego"
 	"github.com/nomango/bellex/server/models"
 	"github.com/nomango/bellex/server/modules/utils"
@@ -10,6 +12,7 @@ type UserController struct {
 	BaseController
 }
 
+// @router /all [get]
 func (u *UserController) GetAll() {
 	defer u.ServeJSON()
 
@@ -90,57 +93,53 @@ func (u *UserController) Delete() {
 	defer u.ServeJSON()
 }
 
+// @router /login [post]
 func (u *UserController) Login() {
 	defer u.ServeJSON()
 
+	result := Json{
+		"success": false,
+		"message": "",
+	}
+	u.Data["json"] = &result
+
 	if u.IsLogin {
-		u.Data["json"] = Json{
-			"success": false,
-			"message": "请先退出当前帐号后再登录",
-		}
+		result["message"] = "请先退出当前帐号后再登录"
 		return
 	}
 
-	var (
-		username string
-		password string
-	)
-
-	username = u.GetString("username")
-
-	if !models.HasUser(username) {
-		u.Data["json"] = Json{
-			"success": false,
-			"message": "用户不存在",
-		}
+	var params struct {
+		UserName string `json:"username"`
+		Password string `json:"password"`
+	}
+	if err := json.Unmarshal(u.Ctx.Input.RequestBody, &params); err != nil {
+		result["message"] = "数据有误"
 		return
 	}
 
-	user, err := models.FindUser(username)
+	if !models.HasUser(params.UserName) {
+		result["message"] = "用户不存在"
+		return
+	}
+
+	user, err := models.FindUser(params.UserName)
 	if err != nil {
 		beego.Error(err.Error())
-		u.Data["json"] = Json{
-			"success": false,
-			"message": "数据异常",
-		}
+		result["message"] = "数据异常"
 		return
 	}
 
-	if !verifyPassword(password, user.Password) {
-		u.Data["json"] = Json{
-			"success": false,
-			"message": "密码错误，请重新输入",
-		}
+	if !verifyPassword(params.Password, user.Password) {
+		result["message"] = "密码错误，请重新输入"
 		return
 	}
 
 	u.LoginUser(user)
-	u.Data["json"] = Json{
-		"success": true,
-		"message": "登录成功",
-	}
+	result["success"] = true
+	result["message"] = "登录成功"
 }
 
+// @router /logout [post]
 func (u *UserController) Logout() {
 	defer u.ServeJSON()
 
@@ -150,6 +149,22 @@ func (u *UserController) Logout() {
 
 	u.Data["json"] = Json{
 		"success": true,
+	}
+}
+
+// @router /status [get]
+func (u *UserController) Status() {
+	defer u.ServeJSON()
+
+	if u.IsLogin {
+		u.Data["json"] = Json{
+			"is_login": true,
+			"user":     &u.User,
+		}
+	}
+
+	u.Data["json"] = Json{
+		"is_login": false,
 	}
 }
 

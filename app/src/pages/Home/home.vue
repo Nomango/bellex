@@ -18,6 +18,8 @@ import bellHeader from './components/bellHeader'
 import bellMenu from './components/bellMenu'
 import bellBody from './components/bellContent'
 import { mapState } from 'vuex'
+import homeAjax from '@/api/home.js'
+import { setSession } from '@/utils/storage.js'
 export default {
   name: 'home',
   components: {
@@ -31,6 +33,14 @@ export default {
   },
   computed: {
     ...mapState(['ajaxLoading'])
+  },
+  created() {
+    homeAjax.getLogin().then(res => {
+      console.log(res)
+      setSession('is_login', res.is_login)
+    }).catch(err => {
+      console.log(err)
+    })
   },
   mounted () {
 

@@ -10,7 +10,8 @@ import (
 )
 
 func init() {
-	beego.Router("/", &controllers.AdminController{})
+	beego.Router("/", &controllers.AdminController{}, "GET:Index")
+	beego.Router("/login", &controllers.AdminController{}, "GET:Login")
 
 	ns := beego.NewNamespace("/api/v1",
 		beego.NSNamespace("/mechine",

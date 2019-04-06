@@ -13,9 +13,14 @@ func init() {
 	beego.Router("/", &controllers.AdminController{})
 
 	ns := beego.NewNamespace("/api/v1",
-		beego.NSNamespace("/bell",
+		beego.NSNamespace("/mechine",
 			beego.NSInclude(
-				&v1.BellController{},
+				&v1.MechineController{},
+			),
+		),
+		beego.NSNamespace("/schedule",
+			beego.NSInclude(
+				&v1.ScheduleController{},
 			),
 		),
 		beego.NSNamespace("/user",

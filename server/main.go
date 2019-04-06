@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/nomango/bellex/server/models"
+	"github.com/nomango/bellex/server/modules/settings"
 	_ "github.com/nomango/bellex/server/routers"
 	"github.com/nomango/bellex/server/services/tcp"
 
@@ -11,13 +12,14 @@ import (
 )
 
 func main() {
-	// start a tcp server
-	go startTCPServer()
 
+	settings.Setup()
 	models.Setup()
 
-	beego.SetViewsPath("views")
-	beego.SetStaticPath("/static", "static")
+	if settings.Mode == settings.ModeProduct {
+		// start a tcp server
+		go startTCPServer()
+	}
 
 	beego.Run()
 }
@@ -25,21 +27,21 @@ func main() {
 func startTCPServer() {
 	tcpServer, err := tcp.NewServer("7777")
 	if err != nil {
-		log.Fatalln("[Bellex] Start TCP server failed: ", err)
+		log.Fatalln("[Mechineex] Start TCP server failed: ", err)
 	}
 
 	defer tcpServer.Close()
 
-	log.Println("[Bellex] TCP server is running on", tcpServer.Addr())
+	log.Println("[Mechineex] TCP server is running on", tcpServer.Addr())
 
 	// start to accept connections
 	for {
 		conn, err := tcpServer.Accept()
 		if err != nil {
-			log.Println("[Bellex] Accept TCP connection failed:", err)
+			log.Println("[Mechineex] Accept TCP connection failed:", err)
 			continue
 		}
-		log.Println("[Bellex] Accept TCP connection from", conn.RemoteAddr().String())
+		log.Println("[Mechineex] Accept TCP connection from", conn.RemoteAddr().String())
 
 		// handle conn in goroutine
 		go tcpServer.Handle(conn, tcp.PacketHandler)

@@ -4,18 +4,17 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/nomango/bellex/server/models"
-
 	"github.com/astaxie/beego"
+	"github.com/nomango/bellex/server/models"
 )
 
-// BellController ...
-type BellController struct {
-	beego.Controller
+// ScheduleController ...
+type ScheduleController struct {
+	BaseController
 }
 
 // Post ...
-func (b *BellController) Post() {
+func (b *ScheduleController) Post() {
 	result := Json{
 		"ok": false,
 	}
@@ -25,7 +24,7 @@ func (b *BellController) Post() {
 		b.ServeJSON()
 	}()
 
-	var ob models.Bell
+	var ob models.Schedule
 	if err := json.Unmarshal(b.Ctx.Input.RequestBody, &ob); err != nil {
 		result["message"] = err.Error()
 		return
@@ -41,36 +40,36 @@ func (b *BellController) Post() {
 }
 
 // Get ...
-func (b *BellController) Get() {
+func (b *ScheduleController) Get() {
 	defer b.ServeJSON()
 
-	bellID, err := strconv.Atoi(b.Ctx.Input.Param(":bellId"))
+	scheduleID, err := strconv.Atoi(b.Ctx.Input.Param(":schedule_id"))
 	if err != nil {
 		b.Data["json"] = Json{"ok": false, "message": err.Error()}
 		return
 	}
 
-	bell := models.Bell{Id: bellID}
-	if err := bell.Read(); err != nil {
+	schedule := models.Schedule{Id: scheduleID}
+	if err := schedule.Read(); err != nil {
 		b.Data["json"] = Json{"ok": false, "message": err.Error()}
 		return
 	}
-	b.Data["json"] = Json{"ok": true, "data": bell}
+	b.Data["json"] = Json{"ok": true, "data": schedule}
 }
 
 // GetAll ...
-func (b *BellController) GetAll() {
-	var bells []*models.Bell
-	if _, err := models.Bells().All(&bells); err != nil {
+func (b *ScheduleController) GetAll() {
+	var schedules []*models.Schedule
+	if _, err := models.Schedules().All(&schedules); err != nil {
 		b.Data["json"] = Json{"ok": false, "message": err.Error()}
 	} else {
-		b.Data["json"] = Json{"ok": true, "data": bells}
+		b.Data["json"] = Json{"ok": true, "data": schedules}
 	}
 	b.ServeJSON()
 }
 
 // Put ...
-func (b *BellController) Put() {
+func (b *ScheduleController) Put() {
 	result := Json{
 		"ok": false,
 	}
@@ -80,19 +79,19 @@ func (b *BellController) Put() {
 		b.ServeJSON()
 	}()
 
-	var ob models.Bell
+	var ob models.Schedule
 	if err := json.Unmarshal(b.Ctx.Input.RequestBody, &ob); err != nil {
 		result["message"] = err.Error()
 		return
 	}
 
-	bellID, err := strconv.Atoi(b.Ctx.Input.Param(":bellId"))
+	scheduleID, err := strconv.Atoi(b.Ctx.Input.Param(":schedule_id"))
 	if err != nil {
 		result["message"] = err.Error()
 		return
 	}
 
-	ob.Id = bellID
+	ob.Id = scheduleID
 	if err := ob.InsertOrUpdate(); err != nil {
 		beego.Error(err)
 		result["message"] = err.Error()
@@ -103,7 +102,7 @@ func (b *BellController) Put() {
 }
 
 // Delete ...
-func (b *BellController) Delete() {
+func (b *ScheduleController) Delete() {
 	result := Json{
 		"ok": false,
 	}
@@ -113,13 +112,13 @@ func (b *BellController) Delete() {
 		b.ServeJSON()
 	}()
 
-	bellID, err := strconv.Atoi(b.Ctx.Input.Param(":bellId"))
+	scheduleID, err := strconv.Atoi(b.Ctx.Input.Param(":schedule_id"))
 	if err != nil {
 		result["message"] = err.Error()
 		return
 	}
 
-	ob := models.Bell{Id: bellID}
+	ob := models.Schedule{Id: scheduleID}
 	if err := ob.Delete(); err != nil {
 		result["message"] = err.Error()
 		return

@@ -1,119 +1,167 @@
 package v1
 
 import (
-	"encoding/json"
-
-	"github.com/nomango/bellex/server/models"
-
 	"github.com/astaxie/beego"
+	"github.com/nomango/bellex/server/models"
+	"github.com/nomango/bellex/server/modules/utils"
 )
 
-// Operations about Users
 type UserController struct {
-	beego.Controller
+	BaseController
 }
 
-// @Title CreateUser
-// @Description create users
-// @Param	body		body 	models.User	true		"body for user content"
-// @Success 200 {int} models.User.Id
-// @Failure 403 body is empty
-// @router / [post]
-func (u *UserController) Post() {
-	var user models.User
-	json.Unmarshal(u.Ctx.Input.RequestBody, &user)
-	uid := models.AddUser(user)
-	u.Data["json"] = map[string]string{"uid": uid}
-	u.ServeJSON()
-}
-
-// @Title GetAll
-// @Description get all Users
-// @Success 200 {object} models.User
-// @router / [get]
 func (u *UserController) GetAll() {
-	users := models.GetAllUsers()
-	u.Data["json"] = users
-	u.ServeJSON()
+	defer u.ServeJSON()
+
+	if u.IsLogin {
+		var users []*models.User
+		if u.User.IsAdmin() {
+			if _, err := models.Users().Filter("Parent", u.User.Id).All(&users); err != nil {
+				beego.Error(err.Error())
+			}
+		} else if u.User.IsSuperAdmin() {
+			if _, err := models.Users().All(&users); err != nil {
+				beego.Error(err.Error())
+			}
+		}
+		u.Data["json"] = Json{
+			"success": true,
+			"data":    users,
+		}
+	}
+
+	u.Data["json"] = Json{
+		"success": false,
+		"message": "权限不足",
+	}
 }
 
-// @Title Get
-// @Description get user by uid
-// @Param	uid		path 	string	true		"The key for staticblock"
-// @Success 200 {object} models.User
-// @Failure 403 :uid is empty
-// @router /:uid [get]
 func (u *UserController) Get() {
-	uid := u.GetString(":uid")
-	if uid != "" {
-		user, err := models.GetUser(uid)
-		if err != nil {
-			u.Data["json"] = err.Error()
-		} else {
-			u.Data["json"] = user
+	defer u.ServeJSON()
+
+	id, err := u.GetInt("user_id")
+
+	if err != nil {
+		u.Data["json"] = Json{
+			"success": false,
+			"message": "User ID 必须为整数",
+		}
+		return
+	}
+
+	user := &models.User{Id: id}
+
+	if err := user.Read(); err != nil {
+		u.Data["json"] = Json{
+			"success": false,
+			"message": "用户不存在",
+		}
+		return
+	}
+
+	if u.IsLogin {
+		if u.User.IsAdmin() && user.Parent == u.User.Id {
+			u.Data["json"] = Json{
+				"success": true,
+				"data":    user,
+			}
+			return
+		}
+		if u.User.IsSuperAdmin() {
+			u.Data["json"] = Json{
+				"success": true,
+				"data":    user,
+			}
+			return
 		}
 	}
-	u.ServeJSON()
-}
 
-// @Title Update
-// @Description update the user
-// @Param	uid		path 	string	true		"The uid you want to update"
-// @Param	body		body 	models.User	true		"body for user content"
-// @Success 200 {object} models.User
-// @Failure 403 :uid is not int
-// @router /:uid [put]
-func (u *UserController) Put() {
-	uid := u.GetString(":uid")
-	if uid != "" {
-		var user models.User
-		json.Unmarshal(u.Ctx.Input.RequestBody, &user)
-		uu, err := models.UpdateUser(uid, &user)
-		if err != nil {
-			u.Data["json"] = err.Error()
-		} else {
-			u.Data["json"] = uu
-		}
+	u.Data["json"] = Json{
+		"success": false,
+		"message": "权限不足",
 	}
-	u.ServeJSON()
 }
 
-// @Title Delete
-// @Description delete the user
-// @Param	uid		path 	string	true		"The uid you want to delete"
-// @Success 200 {string} delete success!
-// @Failure 403 uid is empty
-// @router /:uid [delete]
+func (u *UserController) Post() {
+	defer u.ServeJSON()
+}
+
 func (u *UserController) Delete() {
-	uid := u.GetString(":uid")
-	models.DeleteUser(uid)
-	u.Data["json"] = "delete success!"
-	u.ServeJSON()
+	defer u.ServeJSON()
 }
 
-// @Title Login
-// @Description Logs user into the system
-// @Param	username		query 	string	true		"The username for login"
-// @Param	password		query 	string	true		"The password for login"
-// @Success 200 {string} login success
-// @Failure 403 user not exist
-// @router /login [get]
 func (u *UserController) Login() {
-	username := u.GetString("username")
-	password := u.GetString("password")
-	if models.Login(username, password) {
-		u.Data["json"] = "login success"
-	} else {
-		u.Data["json"] = "user not exist"
+	defer u.ServeJSON()
+
+	if u.IsLogin {
+		u.Data["json"] = Json{
+			"success": false,
+			"message": "请先退出当前帐号后再登录",
+		}
+		return
 	}
-	u.ServeJSON()
+
+	var (
+		username string
+		password string
+	)
+
+	username = u.GetString("username")
+
+	if !models.HasUser(username) {
+		u.Data["json"] = Json{
+			"success": false,
+			"message": "用户不存在",
+		}
+		return
+	}
+
+	user, err := models.FindUser(username)
+	if err != nil {
+		beego.Error(err.Error())
+		u.Data["json"] = Json{
+			"success": false,
+			"message": "数据异常",
+		}
+		return
+	}
+
+	if !verifyPassword(password, user.Password) {
+		u.Data["json"] = Json{
+			"success": false,
+			"message": "密码错误，请重新输入",
+		}
+		return
+	}
+
+	u.LoginUser(user)
+	u.Data["json"] = Json{
+		"success": true,
+		"message": "登录成功",
+	}
 }
 
-// @Title logout
-// @Description Logs out current logged in user session
-// @Success 200 {string} logout success
-// @router /logout [get]
 func (u *UserController) Logout() {
-	u.Data["json"] = "logout success"
-	u.ServeJSON()
+	defer u.ServeJSON()
+
+	if u.IsLogin {
+		u.Logout()
+	}
+
+	u.Data["json"] = Json{
+		"success": true,
+	}
+}
+
+// VerifyPassword compare raw password and encoded password
+func verifyPassword(rawPwd, encodedPwd string) bool {
+
+	// split
+	var salt, encoded string
+	if len(encodedPwd) > 11 {
+		salt = encodedPwd[:10]
+		encoded = encodedPwd[11:]
+	}
+
+	return utils.EncodePassword(rawPwd, salt) == encoded
 }

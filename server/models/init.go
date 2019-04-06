@@ -19,4 +19,6 @@ func Setup() {
 	if err := orm.RunSyncdb("default", false, true); err != nil {
 		beego.Error(err)
 	}
+
+	CreateAdminUser()
 }

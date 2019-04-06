@@ -11,10 +11,10 @@ import (
 	"github.com/astaxie/beego"
 
 	"github.com/nomango/bellex/server/models"
+	"github.com/nomango/bellex/server/modules/utils"
 	"github.com/nomango/bellex/server/services/ntp"
 	tcpPacket "github.com/nomango/bellex/server/services/tcp/packet"
 	"github.com/nomango/bellex/server/services/tcp/types"
-	"github.com/nomango/bellex/server/services/utils"
 )
 
 // PacketHandler handle request packets
@@ -63,11 +63,11 @@ func requestConnect(packet *types.Packet, conn net.Conn) (string, error) {
 	// 	return tcpPacket.NewError("Code exists")
 	// }
 	code := utils.RandString(8)
-	bell := models.NewBell(packet.Auth.Code, code)
-	if err := bell.Insert(); err != nil {
+	mechine := models.NewMechine(packet.Auth.Code, code)
+	if err := mechine.Insert(); err != nil {
 		return "", err
 	}
-	if err := models.AddConnection(bell, conn); err != nil {
+	if err := models.AddConnection(mechine, conn); err != nil {
 		beego.Error("Add connection failed", err)
 	}
 	return "unique_code:" + code + ";", nil

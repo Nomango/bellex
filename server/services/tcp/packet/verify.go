@@ -14,11 +14,11 @@ func Verify(packet *types.Packet) error {
 	if packet.Type == types.PacketTypeConnect {
 		return nil // ignore connect
 	}
-	bell := &models.Bell{Code: packet.Auth.Code}
-	if err := bell.Read("Code"); err != nil {
+	mechine := &models.Mechine{Code: packet.Auth.Code}
+	if err := mechine.Read("Code"); err != nil {
 		return err
 	}
-	if bell.Code == packet.Auth.Code && bell.Secret == packet.Auth.Secret {
+	if mechine.Code == packet.Auth.Code && mechine.Secret == packet.Auth.Secret {
 		return nil
 	}
 	return errors.New("Verify secret failed")

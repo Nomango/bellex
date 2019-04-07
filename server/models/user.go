@@ -23,7 +23,7 @@ type User struct {
 	Id       int    `json:"id"`
 	UserName string `orm:"size(30)" json:"username"`
 	Password string `orm:"size(128)" json:"-"`
-	Email    string `orm:"size(80);unique" json:"-"`
+	Email    string `orm:"size(80);unique" json:"email"`
 	Role     int    `orm:"index;default(0)" json:"role"`
 	IsForbid bool   `orm:"index" json:"is_forbid"`
 	Parent   int    `orm:"default(0)" json:"-"`

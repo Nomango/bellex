@@ -6,6 +6,7 @@ import (
 
 	"github.com/astaxie/beego"
 	"github.com/nomango/bellex/server/models"
+	"github.com/nomango/bellex/server/modules/forms"
 )
 
 // MechineController ...
@@ -40,11 +41,18 @@ func (c *MechineController) GetAll() {
 // @router /new [post]
 func (c *MechineController) Post() {
 
-	var mechine models.Mechine
-	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &mechine); err != nil {
+	var (
+		mechine models.Mechine
+		form    forms.MechineForm
+	)
+
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &form); err != nil {
 		c.WriteJson(Json{"message": "数据格式有误"}, 400)
 		return
 	}
+
+	form.Update(&mechine)
+	mechine.User = &c.User
 
 	if err := mechine.Insert(); err != nil {
 		beego.Error(err)
@@ -52,7 +60,7 @@ func (c *MechineController) Post() {
 		return
 	}
 
-	c.WriteJson(Json{"message": "请求成功"}, 200)
+	c.WriteJson(Json{"message": "添加成功"}, 200)
 }
 
 // @router /:id([0-9]+) [get]
@@ -79,7 +87,7 @@ func (c *MechineController) Get() {
 }
 
 // @router /:id([0-9]+) [put]
-func (c *MechineController) Put() {
+func (c *MechineController) Update() {
 	mechineID, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	mechine := models.Mechine{Id: mechineID}
 
@@ -100,11 +108,13 @@ func (c *MechineController) Put() {
 		return
 	}
 
-	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &mechine); err != nil {
+	var form forms.MechineForm
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &form); err != nil {
 		c.WriteJson(Json{"message": "数据格式有误"}, 400)
 		return
 	}
 
+	form.Update(&mechine)
 	if err := mechine.Update(); err != nil {
 		beego.Error(err)
 		c.WriteJson(Json{"message": "系统异常，请稍后再试"}, 400)

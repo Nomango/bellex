@@ -6,6 +6,7 @@ import (
 
 	"github.com/astaxie/beego"
 	"github.com/nomango/bellex/server/models"
+	"github.com/nomango/bellex/server/modules/forms"
 )
 
 // ScheduleController ...
@@ -40,19 +41,26 @@ func (c *ScheduleController) GetAll() {
 // @router /new [post]
 func (c *ScheduleController) Post() {
 
-	var s models.Schedule
-	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &s); err != nil {
+	var (
+		schedule models.Schedule
+		form     forms.ScheduleForm
+	)
+
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &form); err != nil {
 		c.WriteJson(Json{"message": "数据格式有误"}, 400)
 		return
 	}
 
-	if err := s.Insert(); err != nil {
+	form.Update(&schedule)
+	schedule.User = &c.User
+
+	if err := schedule.Insert(); err != nil {
 		beego.Error(err)
 		c.WriteJson(Json{"message": "系统异常，请稍后再试"}, 400)
 		return
 	}
 
-	c.WriteJson(Json{"message": "请求成功"}, 200)
+	c.WriteJson(Json{"message": "添加成功"}, 200)
 }
 
 // @router /:id([0-9]+) [get]
@@ -79,7 +87,7 @@ func (c *ScheduleController) Get() {
 }
 
 // @router /:id([0-9]+) [put]
-func (c *ScheduleController) Put() {
+func (c *ScheduleController) Update() {
 	scheduleID, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	schedule := models.Schedule{Id: scheduleID}
 
@@ -100,11 +108,13 @@ func (c *ScheduleController) Put() {
 		return
 	}
 
-	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &schedule); err != nil {
+	var form forms.ScheduleForm
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &form); err != nil {
 		c.WriteJson(Json{"message": "数据格式有误"}, 400)
 		return
 	}
 
+	form.Update(&schedule)
 	if err := schedule.Update(); err != nil {
 		beego.Error(err)
 		c.WriteJson(Json{"message": "系统异常，请稍后再试"}, 400)

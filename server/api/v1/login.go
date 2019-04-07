@@ -5,6 +5,7 @@ import (
 
 	"github.com/astaxie/beego"
 	"github.com/nomango/bellex/server/models"
+	"github.com/nomango/bellex/server/modules/forms"
 	"github.com/nomango/bellex/server/modules/utils"
 )
 
@@ -21,34 +22,31 @@ func (u *UserLoginController) Login() {
 		return
 	}
 
-	var params struct {
-		UserName string `json:"username"`
-		Password string `json:"password"`
-	}
-	if err := json.Unmarshal(u.Ctx.Input.RequestBody, &params); err != nil {
+	var form forms.UserLoginForm
+	if err := json.Unmarshal(u.Ctx.Input.RequestBody, &form); err != nil {
 		u.WriteJson(Json{"message": "账号数据有误"}, 400)
 		return
 	}
 
-	if !models.HasUser(params.UserName) {
+	if !models.HasUser(form.UserName) {
 		u.WriteJson(Json{"message": "用户不存在"}, 400)
 		return
 	}
 
-	user, err := models.FindUser(params.UserName)
+	user, err := models.FindUser(form.UserName)
 	if err != nil {
 		beego.Error(err.Error())
 		u.WriteJson(Json{"message": "数据异常"}, 400)
 		return
 	}
 
-	if !verifyPassword(params.Password, user.Password) {
+	if !verifyPassword(form.Password, user.Password) {
 		u.WriteJson(Json{"message": "密码错误，请重新输入"}, 400)
 		return
 	}
 
 	u.LoginUser(user)
-	u.WriteJson(Json{"message": "登录成功"}, 200)
+	u.WriteJson(Json{"message": "登录成功", "redirect_url": "/"}, 200)
 }
 
 // @router /logout [post]

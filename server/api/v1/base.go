@@ -9,8 +9,8 @@ type APIController struct {
 }
 
 func (c *APIController) WriteJson(data interface{}, code int) {
-	c.Ctx.ResponseWriter.WriteHeader(404)
-	c.Data["json"] = Json{"message": "不存在指定用户"}
+	c.Ctx.ResponseWriter.WriteHeader(code)
+	c.Data["json"] = data
 	c.ServeJSON()
 }
 

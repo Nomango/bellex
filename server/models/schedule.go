@@ -11,14 +11,15 @@ func init() {
 }
 
 type Schedule struct {
-	Id      int
-	Content string `orm:"size(130)"`
+	Id      int    `json:"id"`
+	Name    string `orm:"size(30)" json:"name"`
+	Content string `orm:"size(130)" json:"content"`
 
-	User     *User      `orm:"rel(fk)"`
+	User     *User      `orm:"rel(fk)" json:"-"`
 	Mechines []*Mechine `orm:"reverse(many)" json:"-"`
 
-	CreateTime time.Time `orm:"auto_now_add"`
-	UpdateTime time.Time `orm:"auto_now"`
+	CreateTime time.Time `orm:"auto_now_add" json:"-"`
+	UpdateTime time.Time `orm:"auto_now" json:"-"`
 }
 
 // Insert ...

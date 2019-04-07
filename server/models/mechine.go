@@ -11,15 +11,15 @@ func init() {
 }
 
 type Mechine struct {
-	Id     int
-	Code   string `orm:"unique;size(30)"`
-	Secret string `orm:"size(30)"`
+	Id     int    `json:"id"`
+	Code   string `orm:"unique;size(30)" json:"code"`
+	Secret string `orm:"size(30)" json:"secret"`
 
-	User     *User     `orm:"rel(fk)"`
-	Schedule *Schedule `orm:"rel(fk)"`
+	User     *User     `orm:"rel(fk)" json:"-"`
+	Schedule *Schedule `orm:"rel(fk)" json:"-"`
 
-	CreateTime time.Time `orm:"auto_now_add"`
-	UpdateTime time.Time `orm:"auto_now"`
+	CreateTime time.Time `orm:"auto_now_add" json:"-"`
+	UpdateTime time.Time `orm:"auto_now" json:"-"`
 }
 
 // NewMechine ...

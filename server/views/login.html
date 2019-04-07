@@ -5,11 +5,11 @@
 {{ end }}
 
 {{ define "css" }}
-<link href="/static/css/login.css" rel="stylesheet" />
+<link href='{{StaticUrlFor  "/static/css/login.css" }}' rel="stylesheet" />
 {{ end }}
 
 {{ define "js" }}
-<script type="text/javascript" src="/static/js/manifest.js"></script>
-<script type="text/javascript" src="/static/js/vendor.js"></script>
-<script type="text/javascript" src="/static/js/login.js"></script>
+<script type="text/javascript" src='{{StaticUrlFor  "/static/js/manifest.js" }}'></script>
+<script type="text/javascript" src='{{StaticUrlFor  "/static/js/vendor.js" }}'></script>
+<script type="text/javascript" src='{{StaticUrlFor  "/static/js/login.js" }}'></script>
 {{ end }}

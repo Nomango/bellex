@@ -1,17 +1,23 @@
 package controllers
 
-import (
-	"github.com/astaxie/beego"
-)
-
-type AdminController struct {
-	beego.Controller
+type HomeController struct {
+	BaseController
 }
 
-func (c *AdminController) Index() {
+func (c *HomeController) Index() {
+	if !c.IsLogin {
+		c.Redirect("/login", 302)
+		return
+	}
+
 	c.TplName = "index.html"
 }
 
-func (c *AdminController) Login() {
+func (c *HomeController) Login() {
+	if c.IsLogin {
+		c.Redirect("/", 302)
+		return
+	}
+
 	c.TplName = "login.html"
 }

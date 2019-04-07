@@ -10,7 +10,7 @@ import (
 
 // ScheduleController ...
 type ScheduleController struct {
-	BaseController
+	LoginValidateController
 }
 
 // Post ...

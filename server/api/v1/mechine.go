@@ -11,7 +11,7 @@ import (
 
 // MechineController ...
 type MechineController struct {
-	BaseController
+	LoginValidateController
 }
 
 // Post ...

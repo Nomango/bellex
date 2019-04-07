@@ -21,7 +21,8 @@ func Setup() {
 
 	beego.BConfig.WebConfig.Session.SessionOn = true
 	beego.BConfig.WebConfig.Session.SessionName = "bellex_session"
-	beego.BConfig.WebConfig.Session.SessionProvider = "memory"
+	beego.BConfig.WebConfig.Session.SessionProvider = "file"
+	beego.BConfig.WebConfig.Session.SessionProviderConfig = "./session"
 
 	beego.BConfig.CopyRequestBody = true
 	beego.BConfig.WebConfig.EnableXSRF = false

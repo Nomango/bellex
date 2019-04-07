@@ -73,21 +73,13 @@ export default {
           password: this.form.psd
         })
           .then(res => {
-            console.log('login111', res.status)
-            if (res.redirect_url !== undefined) {
+            if (res.data.redirect_url !== undefined) {
               this.showMsg('登入成功', 'success')
-              setTimeout(() => {
-                this.buttonLoading = false
-                // this.$router.replace('/')
-                window.location.href = '/admin.html#/'
-              }, 2000)
+              window.location.href = res.data.redirect_url
             }
           })
           .catch(err => {
-            console.log('222', err)
-            setTimeout(() => {
-              this.buttonLoading = false
-            }, 500)
+            this.buttonLoading = false
           })
       } else {
         this.showMsg('请输入必要字段', 'warning')

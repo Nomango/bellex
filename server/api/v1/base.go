@@ -21,7 +21,7 @@ type LoginValidateController struct {
 
 func (c *LoginValidateController) NestPrepare() {
 	if !c.IsLogin {
-		c.Ctx.ResponseWriter.WriteHeader(403)
+		c.Ctx.ResponseWriter.WriteHeader(401)
 		c.Data["json"] = Json{"message": "Permission denied"}
 		c.ServeJSON()
 		c.StopRun()

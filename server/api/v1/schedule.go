@@ -13,116 +13,134 @@ type ScheduleController struct {
 	LoginValidateController
 }
 
-// Post ...
-func (b *ScheduleController) Post() {
-	result := Json{
-		"ok": false,
+// @router /all [get]
+func (c *ScheduleController) GetAll() {
+	var (
+		schedules []*models.Schedule
+		err       error
+	)
+
+	switch {
+	case c.User.IsNormal():
+		_, err = models.Schedules().Filter("user_id", c.User.Parent).All(&schedules)
+	case c.User.IsAdmin():
+		_, err = models.Schedules().Filter("User", &c.User).All(&schedules)
+	case c.User.IsSuperAdmin():
+		_, err = models.Schedules().OrderBy("User").All(&schedules)
 	}
 
-	defer func() {
-		b.Data["json"] = result
-		b.ServeJSON()
-	}()
-
-	var ob models.Schedule
-	if err := json.Unmarshal(b.Ctx.Input.RequestBody, &ob); err != nil {
-		result["message"] = err.Error()
-		return
-	}
-
-	if err := ob.Insert(); err != nil {
-		beego.Error(err)
-		result["message"] = err.Error()
-		return
-	}
-
-	result["ok"] = true
-}
-
-// Get ...
-func (b *ScheduleController) Get() {
-	defer b.ServeJSON()
-
-	scheduleID, err := strconv.Atoi(b.Ctx.Input.Param(":schedule_id"))
 	if err != nil {
-		b.Data["json"] = Json{"ok": false, "message": err.Error()}
-		return
-	}
-
-	schedule := models.Schedule{Id: scheduleID}
-	if err := schedule.Read(); err != nil {
-		b.Data["json"] = Json{"ok": false, "message": err.Error()}
-		return
-	}
-	b.Data["json"] = Json{"ok": true, "data": schedule}
-}
-
-// GetAll ...
-func (b *ScheduleController) GetAll() {
-	var schedules []*models.Schedule
-	if _, err := models.Schedules().All(&schedules); err != nil {
-		b.Data["json"] = Json{"ok": false, "message": err.Error()}
+		beego.Error(err.Error())
+		c.WriteJson(Json{"message": "系统异常，请稍后再试"}, 400)
 	} else {
-		b.Data["json"] = Json{"ok": true, "data": schedules}
+		c.WriteJson(Json{"data": schedules}, 200)
 	}
-	b.ServeJSON()
 }
 
-// Put ...
-func (b *ScheduleController) Put() {
-	result := Json{
-		"ok": false,
-	}
+// @router /new [post]
+func (c *ScheduleController) Post() {
 
-	defer func() {
-		b.Data["json"] = result
-		b.ServeJSON()
-	}()
-
-	var ob models.Schedule
-	if err := json.Unmarshal(b.Ctx.Input.RequestBody, &ob); err != nil {
-		result["message"] = err.Error()
+	var s models.Schedule
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &s); err != nil {
+		c.WriteJson(Json{"message": "数据格式有误"}, 400)
 		return
 	}
 
-	scheduleID, err := strconv.Atoi(b.Ctx.Input.Param(":schedule_id"))
-	if err != nil {
-		result["message"] = err.Error()
-		return
-	}
-
-	ob.Id = scheduleID
-	if err := ob.InsertOrUpdate(); err != nil {
+	if err := s.Insert(); err != nil {
 		beego.Error(err)
-		result["message"] = err.Error()
+		c.WriteJson(Json{"message": "系统异常，请稍后再试"}, 400)
 		return
 	}
 
-	result["ok"] = true
+	c.WriteJson(Json{"message": "请求成功"}, 200)
 }
 
-// Delete ...
-func (b *ScheduleController) Delete() {
-	result := Json{
-		"ok": false,
-	}
+// @router /:id([0-9]+) [get]
+func (c *ScheduleController) Get() {
 
-	defer func() {
-		b.Data["json"] = result
-		b.ServeJSON()
-	}()
+	scheduleID, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
+	schedule := models.Schedule{Id: scheduleID}
 
-	scheduleID, err := strconv.Atoi(b.Ctx.Input.Param(":schedule_id"))
-	if err != nil {
-		result["message"] = err.Error()
+	if err := schedule.Read(); err != nil {
+		c.WriteJson(Json{"message": "不存在指定时间表"}, 404)
 		return
 	}
 
-	ob := models.Schedule{Id: scheduleID}
-	if err := ob.Delete(); err != nil {
-		result["message"] = err.Error()
+	switch {
+	case c.User.IsNormal() && schedule.User.Id == c.User.Parent:
+		fallthrough
+	case c.User.IsAdmin() && schedule.User.Id == c.User.Id:
+		fallthrough
+	case c.User.IsSuperAdmin():
+		c.WriteJson(Json{"data": schedule}, 200)
+	default:
+		c.WriteJson(Json{"message": "无访问权限"}, 403)
+	}
+}
+
+// @router /:id([0-9]+) [put]
+func (c *ScheduleController) Put() {
+	scheduleID, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
+	schedule := models.Schedule{Id: scheduleID}
+
+	if err := schedule.Read(); err != nil {
+		c.WriteJson(Json{"message": "不存在指定时间表"}, 404)
 		return
 	}
 
-	result["ok"] = true
+	switch {
+	case c.User.IsNormal() && schedule.User.Id == c.User.Parent:
+		fallthrough
+	case c.User.IsAdmin() && schedule.User.Id == c.User.Id:
+		fallthrough
+	case c.User.IsSuperAdmin():
+		break
+	default:
+		c.WriteJson(Json{"message": "无访问权限"}, 403)
+		return
+	}
+
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &schedule); err != nil {
+		c.WriteJson(Json{"message": "数据格式有误"}, 400)
+		return
+	}
+
+	if err := schedule.Update(); err != nil {
+		beego.Error(err)
+		c.WriteJson(Json{"message": "系统异常，请稍后再试"}, 400)
+		return
+	}
+
+	c.WriteJson(Json{"message": "更新成功"}, 201)
+}
+
+// @router /:id([0-9]+) [delete]
+func (c *ScheduleController) Delete() {
+	scheduleID, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
+	schedule := models.Schedule{Id: scheduleID}
+
+	if err := schedule.Read(); err != nil {
+		c.WriteJson(Json{"message": "不存在指定时间表"}, 404)
+		return
+	}
+
+	switch {
+	case c.User.IsNormal() && schedule.User.Id == c.User.Parent:
+		fallthrough
+	case c.User.IsAdmin() && schedule.User.Id == c.User.Id:
+		fallthrough
+	case c.User.IsSuperAdmin():
+		break
+	default:
+		c.WriteJson(Json{"message": "无访问权限"}, 403)
+		return
+	}
+
+	if err := schedule.Delete(); err != nil {
+		beego.Error(err)
+		c.WriteJson(Json{"message": "系统异常，请稍后再试"}, 400)
+		return
+	}
+
+	c.WriteJson(Json{"message": "删除成功"}, 200)
 }

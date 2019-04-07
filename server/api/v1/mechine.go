@@ -4,9 +4,8 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/nomango/bellex/server/models"
-
 	"github.com/astaxie/beego"
+	"github.com/nomango/bellex/server/models"
 )
 
 // MechineController ...
@@ -14,116 +13,134 @@ type MechineController struct {
 	LoginValidateController
 }
 
-// Post ...
-func (b *MechineController) Post() {
-	result := Json{
-		"ok": false,
+// @router /all [get]
+func (c *MechineController) GetAll() {
+	var (
+		mechines []*models.Mechine
+		err      error
+	)
+
+	switch {
+	case c.User.IsNormal():
+		_, err = models.Mechines().Filter("user_id", c.User.Parent).All(&mechines)
+	case c.User.IsAdmin():
+		_, err = models.Mechines().Filter("User", &c.User).All(&mechines)
+	case c.User.IsSuperAdmin():
+		_, err = models.Mechines().OrderBy("User").All(&mechines)
 	}
 
-	defer func() {
-		b.Data["json"] = result
-		b.ServeJSON()
-	}()
-
-	var ob models.Mechine
-	if err := json.Unmarshal(b.Ctx.Input.RequestBody, &ob); err != nil {
-		result["message"] = err.Error()
-		return
-	}
-
-	if err := ob.Insert(); err != nil {
-		beego.Error(err)
-		result["message"] = err.Error()
-		return
-	}
-
-	result["ok"] = true
-}
-
-// Get ...
-func (b *MechineController) Get() {
-	defer b.ServeJSON()
-
-	mechineID, err := strconv.Atoi(b.Ctx.Input.Param(":mechine_id"))
 	if err != nil {
-		b.Data["json"] = Json{"ok": false, "message": err.Error()}
-		return
-	}
-
-	mechine := models.Mechine{Id: mechineID}
-	if err := mechine.Read(); err != nil {
-		b.Data["json"] = Json{"ok": false, "message": err.Error()}
-		return
-	}
-	b.Data["json"] = Json{"ok": true, "data": mechine}
-}
-
-// GetAll ...
-func (b *MechineController) GetAll() {
-	var mechines []*models.Mechine
-	if _, err := models.Mechines().All(&mechines); err != nil {
-		b.Data["json"] = Json{"ok": false, "message": err.Error()}
+		beego.Error(err.Error())
+		c.WriteJson(Json{"message": "系统异常，请稍后再试"}, 400)
 	} else {
-		b.Data["json"] = Json{"ok": true, "data": mechines}
+		c.WriteJson(Json{"data": mechines}, 200)
 	}
-	b.ServeJSON()
 }
 
-// Put ...
-func (b *MechineController) Put() {
-	result := Json{
-		"ok": false,
-	}
+// @router /new [post]
+func (c *MechineController) Post() {
 
-	defer func() {
-		b.Data["json"] = result
-		b.ServeJSON()
-	}()
-
-	var ob models.Mechine
-	if err := json.Unmarshal(b.Ctx.Input.RequestBody, &ob); err != nil {
-		result["message"] = err.Error()
+	var mechine models.Mechine
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &mechine); err != nil {
+		c.WriteJson(Json{"message": "数据格式有误"}, 400)
 		return
 	}
 
-	mechineID, err := strconv.Atoi(b.Ctx.Input.Param(":mechine_id"))
-	if err != nil {
-		result["message"] = err.Error()
-		return
-	}
-
-	ob.Id = mechineID
-	if err := ob.InsertOrUpdate(); err != nil {
+	if err := mechine.Insert(); err != nil {
 		beego.Error(err)
-		result["message"] = err.Error()
+		c.WriteJson(Json{"message": "系统异常，请稍后再试"}, 400)
 		return
 	}
 
-	result["ok"] = true
+	c.WriteJson(Json{"message": "请求成功"}, 200)
 }
 
-// Delete ...
-func (b *MechineController) Delete() {
-	result := Json{
-		"ok": false,
-	}
+// @router /:id([0-9]+) [get]
+func (c *MechineController) Get() {
 
-	defer func() {
-		b.Data["json"] = result
-		b.ServeJSON()
-	}()
+	mechineID, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
+	mechine := models.Mechine{Id: mechineID}
 
-	mechineID, err := strconv.Atoi(b.Ctx.Input.Param(":mechine_id"))
-	if err != nil {
-		result["message"] = err.Error()
+	if err := mechine.Read(); err != nil {
+		c.WriteJson(Json{"message": "不存在指定主控机"}, 404)
 		return
 	}
 
-	ob := models.Mechine{Id: mechineID}
-	if err := ob.Delete(); err != nil {
-		result["message"] = err.Error()
+	switch {
+	case c.User.IsNormal() && mechine.User.Id == c.User.Parent:
+		fallthrough
+	case c.User.IsAdmin() && mechine.User.Id == c.User.Id:
+		fallthrough
+	case c.User.IsSuperAdmin():
+		c.WriteJson(Json{"data": mechine}, 200)
+	default:
+		c.WriteJson(Json{"message": "无访问权限"}, 403)
+	}
+}
+
+// @router /:id([0-9]+) [put]
+func (c *MechineController) Put() {
+	mechineID, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
+	mechine := models.Mechine{Id: mechineID}
+
+	if err := mechine.Read(); err != nil {
+		c.WriteJson(Json{"message": "不存在指定主控机"}, 404)
 		return
 	}
 
-	result["ok"] = true
+	switch {
+	case c.User.IsNormal() && mechine.User.Id == c.User.Parent:
+		fallthrough
+	case c.User.IsAdmin() && mechine.User.Id == c.User.Id:
+		fallthrough
+	case c.User.IsSuperAdmin():
+		break
+	default:
+		c.WriteJson(Json{"message": "无访问权限"}, 403)
+		return
+	}
+
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &mechine); err != nil {
+		c.WriteJson(Json{"message": "数据格式有误"}, 400)
+		return
+	}
+
+	if err := mechine.Update(); err != nil {
+		beego.Error(err)
+		c.WriteJson(Json{"message": "系统异常，请稍后再试"}, 400)
+		return
+	}
+
+	c.WriteJson(Json{"message": "更新成功"}, 201)
+}
+
+// @router /:id([0-9]+) [delete]
+func (c *MechineController) Delete() {
+	mechineID, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
+	mechine := models.Mechine{Id: mechineID}
+
+	if err := mechine.Read(); err != nil {
+		c.WriteJson(Json{"message": "不存在指定主控机"}, 404)
+		return
+	}
+
+	switch {
+	case c.User.IsNormal() && mechine.User.Id == c.User.Parent:
+		fallthrough
+	case c.User.IsAdmin() && mechine.User.Id == c.User.Id:
+		fallthrough
+	case c.User.IsSuperAdmin():
+		break
+	default:
+		c.WriteJson(Json{"message": "无访问权限"}, 403)
+		return
+	}
+
+	if err := mechine.Delete(); err != nil {
+		beego.Error(err)
+		c.WriteJson(Json{"message": "系统异常，请稍后再试"}, 400)
+		return
+	}
+
+	c.WriteJson(Json{"message": "删除成功"}, 200)
 }

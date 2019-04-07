@@ -11,10 +11,12 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
-      '/api': {
-        target: 'http://localhost:8081',
+      '/api/v1': {
+        // target: 'http://localhost:8081',
+        target: 'http://192.168.43.136:8080',
         pathRewrite: {
-          '^/api': '/static/mock'
+          // '^/api': '/static/mock'
+          '^/api/v1': ''
         }
       }
     },
@@ -52,8 +54,7 @@ module.exports = {
 
   build: {
     // Template for index.html
-    // index: path.resolve(__dirname, '../../server/index.html'),
-    index: '',
+    index: path.resolve(__dirname, '../dist/index.html'),
 
     // Paths
     assetsRoot: path.resolve(__dirname, '../../server'),

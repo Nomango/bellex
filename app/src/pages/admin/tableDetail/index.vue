@@ -31,6 +31,7 @@
 </template>
 <script>
 import bellCard from 'common/card/card'
+import homeAjax from '@/api/home.js'
 export default {
   components: {
     bellCard
@@ -45,7 +46,27 @@ export default {
       }
     }
   },
+  created () {
+    console.log('ss', this.$route)
+    this.getdetailData()
+  },
   methods: {
+    getdetailData () {
+      homeAjax.getControllers({})
+        .then(res => {
+          console.log('res', res)
+          if (res.code === 0) {
+            res = res.data
+            let filterData = []
+            filterData = res.controllerList.filter(item => item.id === this.$route.params.id)
+            console.log(filterData, 'aaa')
+            this.detailForm = Object.assign({}, filterData[0])
+          }
+        })
+        .catch(err => {
+          console.log('err', err)
+        })
+    },
     handleBack () {
       this.$router.go(-1)
     },

@@ -46,6 +46,7 @@
   </div>
 </template>
 <script>
+import loginAjax from '@/api/login.js'
 export default {
   data () {
     return {
@@ -67,16 +68,32 @@ export default {
     onSubmit () {
       this.buttonLoading = true
       if (this.form.username && this.form.psd) {
-        this.showMsg('登入成功', 'success')
-        setTimeout(() => {
-          this.buttonLoading = false
-          this.$router.replace('/')
-        }, 2000)
+        loginAjax.getLogin({
+          username: this.form.username,
+          password: this.form.psd
+        })
+          .then(res => {
+            console.log('login111', res.status)
+            if (res.redirect_url !== undefined) {
+              this.showMsg('登入成功', 'success')
+              setTimeout(() => {
+                this.buttonLoading = false
+                // this.$router.replace('/')
+                window.location.href = '/admin.html#/'
+              }, 2000)
+            }
+          })
+          .catch(err => {
+            console.log('222', err)
+            setTimeout(() => {
+              this.buttonLoading = false
+            }, 500)
+          })
       } else {
         this.showMsg('请输入必要字段', 'warning')
         setTimeout(() => {
           this.buttonLoading = false
-        }, 800)
+        }, 500)
       }
     }
   }

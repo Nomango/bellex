@@ -1,0 +1,22 @@
+{
+  "code": 0,
+  "data": {
+    "userList": [{
+      "id": 1,
+      "account": "admin",
+      "name": "张三",
+      "password": "admin"
+    }, {
+      "id": 2,
+      "account": "admin",
+      "name": "刘柳",
+      "password": "admin"
+    }, {
+      "id": 4,
+      "account": "admin",
+      "name": "李四",
+      "password": "admin"
+    }],
+    "total": 3
+  }
+}

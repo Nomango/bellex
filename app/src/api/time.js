@@ -1,9 +1,9 @@
 import * as API from './'
 export default {
-  getControllers: params => {
-    return API.GET('static/mock/controllers.json', params)
+  getTimeList: params => {
+    return API.GET('static/mock/time.json', params)
   },
-  delControllers: params => {
+  delTimeList: params => {
     return new Promise(function (resolve, reject) {
       if (params !== undefined) {
         resolve({

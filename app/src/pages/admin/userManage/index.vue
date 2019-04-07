@@ -6,16 +6,22 @@
       </div>
       <div class="card-content-body" slot="card-content">
         <el-table
-          :data="subUserData"
-          stripe
-          border
-          style="width: 100%">
+            :data="subUserData"
+            stripe
+            border
+            style="width: 100%">
           <el-table-column
-            v-for="item of columns"
-            :key="item.prop"
-            :prop="item.prop"
-            :label="item.label"
-            align="center" />
+            prop="name"
+            label="名称"
+            width="" />
+          <el-table-column
+            prop="account"
+            label="账号"
+            width="" />
+          <el-table-column
+            prop="password"
+            label="密码"
+            width="" />
           <el-table-column
             prop="address"
             label="操作"
@@ -34,13 +40,6 @@
             @sizeChange="handleSizeChange"
             @currentChange="handleCurrentChange" />
         </div>
-        <div class="normal-dialog">
-          <bell-dialog
-            width="24%"
-            :dialogVisible="subUserDialog"
-            @confirm="handleConfirm"
-            @cancel="handleCancel" />
-        </div>
         <div class="add-dialog">
           <add-dialog
             width="40%"
@@ -48,14 +47,14 @@
             @cancel="handleAddCancel"
             @confirm="handleAddConfirm">
             <div class="content" slot="content">
-              <el-form ref="subUserForm" :model="subUserForm" label-width="60px">
-                <el-form-item label="名称: ">
+              <el-form ref="subUserForm" :model="subUserForm" :rules="rules" label-width="60px">
+                <el-form-item label="名称: " prop="name">
                   <el-input v-model="subUserForm.name" placeholder="请输入名称" />
                 </el-form-item>
-                <el-form-item label="账号: ">
+                <el-form-item label="账号: " prop="account">
                   <el-input v-model="subUserForm.account" placeholder="请输入账号" />
                 </el-form-item>
-                <el-form-item label="密码: ">
+                <el-form-item label="密码: " prop="password">
                   <el-input v-model="subUserForm.password" placeholder="请输入密码"/>
                 </el-form-item>
               </el-form>
@@ -69,18 +68,17 @@
 <script>
 import bellCard from 'common/card/card'
 import bellPagination from 'common/pagination/pagination'
-import bellDialog from 'common/dialog/dialog'
 import addDialog from 'common/dialog/addDialog'
+import userAjax from '@/api/user.js'
 export default {
   components: {
     bellCard,
     bellPagination,
-    bellDialog,
     addDialog
   },
   data () {
     return {
-      totalPage: 20,
+      totalPage: 0,
       currentPage: 1,
       subUserDialog: false,
       addDialog: false,
@@ -89,42 +87,65 @@ export default {
         account: '',
         password: ''
       },
-      columns: [{
-        label: '名称',
-        prop: 'name'
-      }, {
-        label: '账号',
-        prop: 'account'
-      }, {
-        label: '密码',
-        prop: 'password'
-      }],
-      subUserData: [{
-        name: '张三',
-        account: 'leoGoGo',
-        password: '123456'
-      }, {
-        name: '李四',
-        account: 'leoGoGo',
-        password: '123456'
-      }, {
-        name: '刘六',
-        account: 'leoGoGo',
-        password: '123456'
-      }]
+      subUserData: [],
+      clickType: null,
+      rules: {
+        name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
+        account: [{ required: true, message: '请输入账号', trigger: 'blur' }],
+        password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
+      }
     }
   },
-  mounted () {
+  created () {
+    this.getUserList()
   },
   methods: {
+    getUserList () {
+      userAjax.getUserList()
+        .then(res => {
+          console.log('user', res)
+          if (res.code === 0) {
+            res = res.data
+            this.subUserData = res.userList
+            this.totalPage = res.total
+          }
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    },
     addClick () {
+      this.resetFormData()
       this.addDialog = true
+      this.clickType = 'create'
+      this.resetForm()
     },
     handleEdit (data) {
+      this.subUserForm = Object.assign({}, data)
+      this.clickType = 'update'
       this.addDialog = true
+      this.resetForm()
     },
     handleDelete (data) {
-      this.subUserDialog = true
+      this.$confirm('此操作将永久删除, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        userAjax.delUser({
+          id: data.id
+        })
+          .then(res => {
+            if (res.code === 0) {
+              this.showMsg('success', '删除成功!')
+            }
+          })
+          .catch(err => {
+            console.log(err)
+          })
+      }).catch(() => {
+        this.showMsg('info', '已取消删除')
+      })
     },
     handleSizeChange (val) {
       console.log('handleSizeChange', val)
@@ -132,17 +153,37 @@ export default {
     handleCurrentChange (val) {
       console.log('handleCurrentChange', val)
     },
-    handleConfirm (val) {
-      this.subUserDialog = val
-    },
-    handleCancel (val) {
-      this.subUserDialog = val
-    },
     handleAddConfirm (val) {
-      this.addDialog = val
+      this.$refs['subUserForm'].validate((valid) => {
+        if (valid) {
+          this.addDialog = val
+          console.log('submit!')
+        } else {
+          console.log('error submit!!')
+          return false
+        }
+      });
     },
     handleAddCancel (val) {
       this.addDialog = val
+    },
+    resetFormData () {
+      this.subUserForm = {
+        name: '',
+        account: '',
+        password: ''
+      }
+    },
+    resetForm () {
+      this.$nextTick(() => {
+        this.$refs['subUserForm'].clearValidate();
+      })
+    },
+    showMsg (type, msg) {
+      this.$message({
+        type: type,
+        message: msg
+      })
     }
   }
 }
@@ -155,30 +196,6 @@ export default {
     &:hover
       opacity: .8;
       color: #fff;
-  .normal-dialog
-    .el-dialog__header
-      padding: 0 80px 0 20px;
-      height: 42px;
-      line-height: 42px;
-      border-bottom: 1px solid #eee;
-      font-size: 14px;
-      color: #333;
-      overflow: hidden;
-      background-color: #F8F8F8;
-      border-radius: 2px 2px 0 0;
-    .el-dialog__headerbtn
-      top: 13px;
-      right: 17px;
-    .el-dialog__body
-      padding 20px
-    .el-dialog__footer
-      .el-button
-        height: 28px;
-        line-height: 28px;
-        margin: 5px 5px 0;
-        padding: 0 15px;
-        border-radius: 2px;
-        font-weight: 400;
   .add-dialog
     .el-dialog__title
       color #fff

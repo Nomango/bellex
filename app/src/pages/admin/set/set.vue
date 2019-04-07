@@ -5,15 +5,15 @@
         修改密码
       </div>
       <div slot="card-content">
-        <el-form ref="form" :model="form" label-width="100px">
-          <el-form-item label="当前密码">
+        <el-form ref="setForm" :model="form" :rules="rules" label-width="100px">
+          <el-form-item label="当前密码" prop="psd">
             <el-input v-model="form.psd" />
           </el-form-item>
-          <el-form-item label="新密码">
+          <el-form-item label="新密码" prop="newPsd">
             <el-input v-model="form.newPsd" />
             <span class="form-word-aux">6到16个字符</span>
           </el-form-item>
-          <el-form-item label="确认新密码">
+          <el-form-item label="确认新密码" prop="confirmPsd">
             <el-input v-model="form.confirmPsd" />
           </el-form-item>
           <el-form-item>
@@ -36,11 +36,27 @@ export default {
         psd: '',
         newPsd: '',
         confirmPsd: ''
+      },
+      rules: {
+        psd: [
+          { required: true, message: '请输入活动名称', trigger: 'blur' },
+          { min: 6, max: 16, message: '长度在 6 到 16 个字符', trigger: 'blur' }
+        ],
+        newPsd: [{ required: true, message: '请输入新密码', trigger: 'blur' }],
+        confirmPsd: [{ required: true, message: '请确认密码', trigger: 'blur' }]
       }
     }
   },
   methods: {
     onSubmit () {
+      this.$refs['setForm'].validate((valid) => {
+        if (valid) {
+          console.log('submit!')
+        } else {
+          console.log('error submit!!')
+          return false
+        }
+      });
       console.log('aaa')
     }
   }

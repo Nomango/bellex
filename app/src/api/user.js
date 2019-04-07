@@ -1,9 +1,9 @@
 import * as API from './'
 export default {
-  getControllers: params => {
-    return API.GET('static/mock/controllers.json', params)
+  getUserList: params => {
+    return API.GET('static/mock/user.json', params)
   },
-  delControllers: params => {
+  delUser: params => {
     return new Promise(function (resolve, reject) {
       if (params !== undefined) {
         resolve({

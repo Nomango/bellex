@@ -6,7 +6,7 @@
       </div>
       <div class="card-content-body" slot="card-content">
           <el-table
-            :data="buildingData"
+            :data="timeLists"
             stripe
             border
             style="width: 100%">
@@ -14,10 +14,11 @@
             prop="name"
             label="名称"
             width="" />
-          <el-table-column
-            prop="date"
-            label="时间"
-            width="" />
+          <el-table-column label="时间"  width="">
+            <template slot-scope="{row}">
+              <el-tag v-for="itemTime of row.list" :key="itemTime.id" type="success">{{itemTime}}</el-tag>
+            </template>
+          </el-table-column>
           <el-table-column
             prop="address"
             label="操作"
@@ -37,13 +38,6 @@
             @sizeChange="handleSizeChange"
             @currentChange="handleCurrentChange" />
         </div>
-        <div class="normal-dialog">
-          <bell-dialog
-            width="24%"
-            :dialogVisible="buildingDialog"
-            @confirm="handleConfirm"
-            @cancel="handleCancel" />
-        </div>
         <div class="add-dialog">
           <add-dialog
             width="40%"
@@ -51,16 +45,16 @@
             @cancel="handleAddCancel"
             @confirm="handleAddConfirm">
             <div class="content" slot="content">
-              <el-form ref="buildingForm" :model="buildingForm" label-width="80px">
+              <el-form ref="buildingForm" :model="timeForm" label-width="80px">
                 <el-form-item label="名称: ">
-                  <el-input v-model="buildingForm.name"></el-input>
+                  <el-input v-model="timeForm.name"></el-input>
                 </el-form-item>
                 <el-form-item label="时间表: ">
                   <div class="time-wrapper">
                     <el-tag
-                      v-if="buildingForm.timeTags.length"
+                      v-if="timeForm.timeTags.length"
                       :key="tag"
-                      v-for="tag in buildingForm.timeTags"
+                      v-for="tag in timeForm.timeTags"
                       closable
                       :disable-transitions="true"
                       @close="handleCloseTag(tag)">
@@ -102,6 +96,7 @@ import bellPagination from 'common/pagination/pagination'
 import bellDialog from 'common/dialog/dialog'
 import addDialog from 'common/dialog/addDialog'
 import { translateTime } from '@/utils/tools.js'
+import timeAjax from '@/api/time.js'
 export default {
   components: {
     bellCard,
@@ -117,35 +112,36 @@ export default {
       buildingDialog: false,
       addDialog: false,
       currentPage: 1,
-      totalPage: 100,
+      totalPage: 0,
       pageSizes: {
         sizeArr: [5, 8, 10, 20],
         size: 5
       },
-      buildingForm: {
+      timeForm: {
         name: '',
         timeTags: []
       },
-      buildingData: [{
-        date: '2016-05-02',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
-      }, {
-        date: '2016-05-04',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1517 弄'
-      }, {
-        date: '2016-05-01',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1519 弄'
-      }, {
-        date: '2016-05-03',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1516 弄'
-      }]
+      timeLists: []
     }
   },
+  created () {
+    this.getTimeData()
+  },
   methods: {
+    getTimeData () {
+      timeAjax.getTimeList()
+        .then(res => {
+          console.log('time', res)
+          if (res.code === 0) {
+            res = res.data
+            this.timeLists = res.timeList
+            this.totalPage = res.total
+          }
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    },
     handleCheck (val) {
       console.log('handleCheck', val)
     },
@@ -156,15 +152,26 @@ export default {
       console.log('handleCurrentChange', val)
     },
     handleDelete (val) {
-      this.buildingDialog = true
       console.log('delete', val)
-    },
-    handleCancel (val) {
-      this.buildingDialog = val
-    },
-    handleConfirm (val) {
-      this.buildingDialog = val
-      console.log('handleConfirm', val)
+      this.$confirm('此操作将永久删除, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        timeAjax.delTimeList({
+          id: val.id
+        })
+          .then(res => {
+            if (res.code === 0) {
+              this.showMsg('success', '删除成功!')
+            }
+          })
+          .catch(err => {
+            console.log(err)
+          })
+      }).catch(() => {
+        this.showMsg('info', '已取消删除')
+      })
     },
     handleAddCancel (val) {
       this.addDialog = val
@@ -190,7 +197,6 @@ export default {
     },
     handlePickerConfirm () {
       let timeValue = this.timeValue
-
       if (timeValue) {
         let newTimeVal = translateTime(timeValue)
         if (this.buildingForm.timeTags.indexOf(newTimeVal.hms) < 0) {
@@ -204,6 +210,12 @@ export default {
       }
       this.timeVisible = false
       this.timeValue = ''
+    },
+    showMsg (type, msg) {
+      this.$message({
+        type: type,
+        message: msg
+      })
     }
   }
 }
@@ -216,30 +228,6 @@ export default {
     &:hover
       opacity: .8;
       color: #fff;
-  .normal-dialog
-    .el-dialog__header
-      padding: 0 80px 0 20px;
-      height: 42px;
-      line-height: 42px;
-      border-bottom: 1px solid #eee;
-      font-size: 14px;
-      color: #333;
-      overflow: hidden;
-      background-color: #F8F8F8;
-      border-radius: 2px 2px 0 0;
-    .el-dialog__headerbtn
-      top: 13px;
-      right: 17px;
-    .el-dialog__body
-      padding 20px
-    .el-dialog__footer
-      .el-button
-        height: 28px;
-        line-height: 28px;
-        margin: 5px 5px 0;
-        padding: 0 15px;
-        border-radius: 2px;
-        font-weight: 400;
   .add-dialog
     .el-dialog__title
       color #fff

@@ -1,5 +1,8 @@
 import axios from 'axios'
 import store from '../store/index'
+import {
+  Message
+} from 'element-ui'
 axios.defaults.withCredentials = true
 // axios.defaults.headers.common['Authorization'] = AUTH_TOKEN;
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8' || 'application/json' // 配置请求头
@@ -26,6 +29,9 @@ axios.interceptors.request.use(
     return config
   },
   error => {
+    Message.error({
+      message: '请求超时!'
+    })
     return Promise.reject(error)
   }
 )
@@ -33,21 +39,29 @@ axios.interceptors.request.use(
 axios.interceptors.response.use(function (response) {
   store.state.ajaxLoading = false
   return response
-}, function (error) {
+},
+function (err) {
   store.state.ajaxLoading = false
-  return Promise.reject(error)
+  if (err.response) {
+    Message.error({
+      message: err.response.data.message
+    })
+    return Promise.resolve(null)
+  } else {
+    Message.error({
+      message: '未知异常！'
+    })
+    return Promise.reject(err)
+  }
 })
 // 基地址 http://localhost:8080/static/mock/index.json
-export let base = process.env.API_ROOT
+export let base = '/api/v1/'
 // 通用方法
 export const POST = (url, params) => {
-  // console.info("POST请求路径" + `${base}${url}`);
-  // return axios.post(`${base}${url}`, qs.stringify(params)).then(res => res.data)
+  console.info('POST请求路径' + `${base}${url}`);
+  return axios.post(`${base}${url}`, params)
 }
 export const GET = (url, params) => {
   console.info('GET请求路径' + `${base}${url}`)
-  return axios.get(`./${url}`, {
-    params: params
-  }).then(res => res.data)
-    .catch((error) => error)
+  return axios.get(`./${url}`, params)
 }

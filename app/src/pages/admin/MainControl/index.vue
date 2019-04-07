@@ -14,6 +14,7 @@
             v-for="(item,index) of columns"
             :key="index"
             :prop="item.prop"
+            align="center"
             :label="item.label" />
           <el-table-column
             prop="address"

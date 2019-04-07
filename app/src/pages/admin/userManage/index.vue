@@ -6,22 +6,16 @@
       </div>
       <div class="card-content-body" slot="card-content">
         <el-table
-            :data="subUserData"
-            stripe
-            border
-            style="width: 100%">
+          :data="subUserData"
+          stripe
+          border
+          style="width: 100%">
           <el-table-column
-            prop="name"
-            label="名称"
-            width="" />
-          <el-table-column
-            prop="account"
-            label="账号"
-            width="" />
-          <el-table-column
-            prop="password"
-            label="密码"
-            width="" />
+            v-for="item of columns"
+            :key="item.prop"
+            :prop="item.prop"
+            :label="item.label"
+            align="center" />
           <el-table-column
             prop="address"
             label="操作"
@@ -95,6 +89,16 @@ export default {
         account: '',
         password: ''
       },
+      columns: [{
+        label: '名称',
+        prop: 'name'
+      }, {
+        label: '账号',
+        prop: 'account'
+      }, {
+        label: '密码',
+        prop: 'password'
+      }],
       subUserData: [{
         name: '张三',
         account: 'leoGoGo',

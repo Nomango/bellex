@@ -16,7 +16,7 @@
             <router-link to="/home/set">修改密码</router-link>
           </el-dropdown-item>
           <el-dropdown-item icon="">
-            <router-link to="/login">退出</router-link>
+            <router-link @click.native="handleLogOut">退出</router-link>
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
@@ -25,6 +25,7 @@
 </template>
 <script>
 import { mapMutations, mapState } from 'vuex'
+import loginAjax from '@/api/login.js'
 export default {
   data () {
     return {
@@ -39,6 +40,21 @@ export default {
   },
   methods: {
     ...mapMutations(['changeCollapse']),
+    handleLogOut() {
+      loginAjax.logout()
+        .then(res => {
+          this.$message({
+            message: '登出成功!',
+            type: 'success'
+          })
+          setTimeout(() => {
+            this.$router.go(0)
+          }, 500)
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    },
     handleVisible (val) {
       if (val) {
         this.dropIcon = 'el-icon-caret-top'

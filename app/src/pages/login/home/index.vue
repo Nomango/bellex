@@ -78,7 +78,7 @@ export default {
               window.location.href = res.data.redirect_url
             }
           })
-          .catch(err => {
+          .catch(() => {
             this.buttonLoading = false
           })
       } else {

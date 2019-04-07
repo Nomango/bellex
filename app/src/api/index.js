@@ -38,15 +38,15 @@ axios.interceptors.response.use(function (response) {
   return Promise.reject(error)
 })
 // 基地址 http://localhost:8080/static/mock/index.json
-export let base = 'api/v1/'
+export let base = process.env.API_ROOT
 // 通用方法
 export const POST = (url, params) => {
-  console.info("POST请求路径" + `${base}${url}`);
-  return axios.post(`${base}${url}`, params).then(res => res.data).catch((error) => error)
+  // console.info("POST请求路径" + `${base}${url}`);
+  // return axios.post(`${base}${url}`, qs.stringify(params)).then(res => res.data)
 }
 export const GET = (url, params) => {
   console.info('GET请求路径' + `${base}${url}`)
-  return axios.get(`${base}${url}`, {
+  return axios.get(`./${url}`, {
     params: params
   }).then(res => res.data)
     .catch((error) => error)

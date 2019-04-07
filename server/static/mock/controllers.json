@@ -1,0 +1,49 @@
+{
+  "code": 0,
+  "data": {
+    "controllerList": [{
+      "id": "1",
+      "name": "铃一",
+      "network_state": "已连接",
+      "idle_state": "待机中",
+      "create_time": "2019-4-1"
+    }, {
+      "id": "2",
+      "name": "铃二",
+      "network_state": "未连接",
+      "idle_state": "待机中",
+      "create_time": "2019-3-31"
+    }, {
+      "id": "3",
+      "name": "铃三",
+      "network_state": "已连接",
+      "idle_state": "待机中",
+      "create_time": "2019-4-1"
+    }, {
+      "id": "4",
+      "name": "铃四",
+      "network_state": "未连接",
+      "idle_state": "待机中",
+      "create_time": "2019-4-1"
+    }, {
+      "id": "5",
+      "name": "铃五",
+      "network_state": "已连接",
+      "idle_state": "待机中",
+      "create_time": "2019-3-28"
+    }, {
+      "id": "6",
+      "name": "铃六",
+      "network_state": "已连接",
+      "idle_state": "待机中",
+      "create_time": "2019-3-28"
+    }, {
+      "id": "7",
+      "name": "铃七",
+      "network_state": "已连接",
+      "idle_state": "待机中",
+      "create_time": "2019-3-28"
+    }],
+    "total": 7
+  }
+}

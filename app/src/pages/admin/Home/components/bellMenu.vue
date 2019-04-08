@@ -13,7 +13,7 @@
       text-color="rgba(255,255,255,.7)"
       active-text-color="#ffffff">
       <el-submenu
-        v-for="item of menuList"
+        v-for="item of roleMenu"
         :key="item.id"
         :index="item.id">
         <template slot="title">
@@ -46,11 +46,13 @@
 import { mapState } from 'vuex'
 export default {
   computed: {
-    ...mapState(['isCollapse'])
+    ...mapState(['isCollapse']),
+    ...mapState(['roles'])
   },
   data () {
     return {
       defaultActive: this.$route.path || '/home/mainControl',
+      roleMenu: null,
       menuList: [{
         id: '1',
         icon: 'icon-home',
@@ -65,10 +67,13 @@ export default {
       }, {
         id: '2',
         icon: 'icon-userManage',
-        name: '用户管理',
+        name: '高级管理',
         children: [{
           index: '/home/userManage',
-          name: '子用户'
+          name: '用户管理'
+        }, {
+          index: '/home/institution',
+          name: '机构管理'
         }]
       }, {
         id: '3',
@@ -83,7 +88,18 @@ export default {
       }]
     }
   },
+  created () {
+    this.handleRoleMenu()
+  },
   methods: {
+    handleRoleMenu () {
+      if (this.roles === 0) {
+        let newMenuArr = Object.assign([], this.menuList)
+        this.roleMenu = newMenuArr.splice(1, 1)
+      } else {
+        this.roleMenu = this.menuList
+      }
+    },
     handleSelect (index, indexPath) {
       if (index) {
         this.$router.push(index)
@@ -93,6 +109,14 @@ export default {
   watch: {
     $route (newVal, oVal) {
       this.defaultActive = newVal.path
+    },
+    'roles' (newVal, oVal) {
+      if (newVal) {
+        this.roleMenu = this.menuList
+      } else {
+        let newMenuArr = Object.assign([], this.menuList)
+        this.roleMenu = newMenuArr.splice(1, 1)
+      }
     }
   }
 }

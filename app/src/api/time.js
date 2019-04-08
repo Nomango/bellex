@@ -1,16 +1,15 @@
 import * as API from './'
 export default {
   getTimeList: params => {
-    return API.GET('static/mock/time.json', params)
+    return API.GET('schedule/all', params)
+  },
+  putTimeList: params => {
+    return API.PUT(`schedule/${params.id}`, params)
+  },
+  addTimeList: params => {
+    return API.POST('schedule/new', params)
   },
   delTimeList: params => {
-    return new Promise(function (resolve, reject) {
-      if (params !== undefined) {
-        resolve({
-          code: 0
-        })
-      }
-    })
-    // return API.GET('static/mock/controllers.json', params)
+    return API.DELETE(`schedule/${params.id}`)
   }
 }

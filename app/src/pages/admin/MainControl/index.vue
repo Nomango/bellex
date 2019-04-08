@@ -149,7 +149,8 @@ export default {
 <style lang='stylus' scoped>
 .mainControl-wrapper
   position: relative;
-  height 100%
+  min-height 100%
+  height auto
   margin: 0 auto;
   box-sizing border-box
   .page-wrapper

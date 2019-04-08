@@ -32,11 +32,11 @@ export default {
   computed: {
     ...mapState(['ajaxLoading'])
   },
+  created () {
+  },
   mounted () {
-
   },
   methods: {
-
   }
 };
 </script>

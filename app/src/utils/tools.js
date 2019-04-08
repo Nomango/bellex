@@ -17,7 +17,7 @@ export function translateTime (str) {
     y: d.getFullYear(),
     ym: d.getFullYear() + '-' + (d.getMonth() + 1),
     ymd: d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(),
-    hms: d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds(),
+    hm: d.getHours() + ':' + d.getMinutes(),
     all: d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds()
   }
 }

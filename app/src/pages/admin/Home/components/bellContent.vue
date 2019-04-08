@@ -25,6 +25,8 @@ export default {
   position: fixed;
   top 50px
   left: 220px;
+  width calc(100vw - 220px)
+  height auto
   bottom: 0;
   right: 0;
   z-index 1200

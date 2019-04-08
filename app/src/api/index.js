@@ -64,5 +64,17 @@ export const POST = (url, params) => {
 }
 export const GET = (url, params) => {
   console.info('GET请求路径' + `${base}${url}`)
-  return axios.get(`${base}${url}`, params)
+  return axios.get(`${base}${url}`, {
+    params
+  })
+}
+export const DELETE = (url, params) => {
+  console.info('DELETE请求路径' + `${base}${url}`)
+  return axios.delete(`${base}${url}`, {
+    params
+  })
+}
+export const PUT = (url, params) => {
+  console.info('PUT请求路径' + `${base}${url}`)
+  return axios.put(`${base}${url}`, params)
 }

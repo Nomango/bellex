@@ -11,19 +11,32 @@
             border
             style="width: 100%">
           <el-table-column
-            prop="name"
+            prop="username"
             label="名称"
+            align="center"
             width="" />
           <el-table-column
-            prop="account"
-            label="账号"
+            prop="email"
+            label="邮箱"
+            align="center"
             width="" />
           <el-table-column
-            prop="password"
-            label="密码"
-            width="" />
+            label="角色"
+            align="center"
+            width="">
+            <template slot-scope="{row}">
+              <el-tag :type="row.role | tagsFilter">{{row.role | roleFilter}}</el-tag>
+            </template>
+          </el-table-column>
+           <el-table-column
+            label="机构"
+            align="center"
+            width="">
+            <template slot-scope="{row}">
+              <span>{{row.insititution.name}}</span>
+            </template>
+          </el-table-column>
           <el-table-column
-            prop="address"
             label="操作"
             align="center"
             width="200">
@@ -48,14 +61,20 @@
             @confirm="handleAddConfirm">
             <div class="content" slot="content">
               <el-form ref="subUserForm" :model="subUserForm" :rules="rules" label-width="60px">
-                <el-form-item label="名称: " prop="name">
-                  <el-input v-model="subUserForm.name" placeholder="请输入名称" />
+                <el-form-item label="名称: " prop="username">
+                  <el-input v-model="subUserForm.username" placeholder="请输入名称" />
                 </el-form-item>
-                <el-form-item label="账号: " prop="account">
-                  <el-input v-model="subUserForm.account" placeholder="请输入账号" />
+                <el-form-item label="邮箱: " prop="email">
+                  <el-input v-model="subUserForm.email" placeholder="请输入账号" />
                 </el-form-item>
-                <el-form-item label="密码: " prop="password">
-                  <el-input v-model="subUserForm.password" placeholder="请输入密码"/>
+                <el-form-item label="机构: " prop="institution">
+                  <el-select v-model="subUserForm.institution" placeholder="请选择活动区域">
+                    <el-option
+                      v-for="item of institutionOption"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value" />
+                  </el-select>
                 </el-form-item>
               </el-form>
             </div>
@@ -76,39 +95,85 @@ export default {
     bellPagination,
     addDialog
   },
+  filters: {
+    roleFilter (status) {
+      const statusMap = {
+        0: '普通管理员',
+        1: '一级管理员',
+        2: '超级管理员'
+      }
+      return statusMap[status]
+    },
+    tagsFilter (status) {
+      const statusMap = {
+        0: 'info',
+        1: 'success',
+        2: 'primary'
+      }
+      return statusMap[status]
+    }
+  },
   data () {
     return {
       totalPage: 0,
       currentPage: 1,
+      pageSizes: 5,
       subUserDialog: false,
       addDialog: false,
       subUserForm: {
-        name: '',
-        account: '',
-        password: ''
+        username: '',
+        email: '',
+        institution: ''
       },
       subUserData: [],
       clickType: null,
+      institutionOption: [],
       rules: {
-        name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
-        account: [{ required: true, message: '请输入账号', trigger: 'blur' }],
-        password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
+        username: [{ required: true, message: '请输入名称', trigger: 'blur' }],
+        email: [{ required: true, message: '请输入账号', trigger: 'blur' }],
+        institution: [{ required: true, message: '请选择机构', trigger: 'change' }]
       }
     }
   },
   created () {
     this.getUserList()
+    this.getInstitution()
   },
   methods: {
-    getUserList () {
-      userAjax.getUserList()
+    getInstitution () {
+      userAjax.getInstitution({
+        page: 0,
+        limit: 0
+      })
         .then(res => {
-          console.log('user', res)
-          if (res.code === 0) {
-            res = res.data
-            this.subUserData = res.userList
-            this.totalPage = res.total
-          }
+          res = res.data
+          this.handleInstitutionData(res)
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    },
+    handleInstitutionData (res) {
+      res = res.data
+      let result = res.map(item => {
+        return {
+          label: item.name,
+          value: item.id
+        }
+      })
+      this.institutionOption = result
+      console.log('getInstitution', this.institutionOption)
+    },
+    getUserList () {
+      userAjax.getUserList({
+        page: this.currentPage,
+        limit: this.pageSizes
+      })
+        .then(res => {
+          res = res.data
+          console.log('res', res)
+          this.subUserData = res.data
+          this.totalPage = res.total
         })
         .catch(err => {
           console.log(err)
@@ -122,6 +187,7 @@ export default {
     },
     handleEdit (data) {
       this.subUserForm = Object.assign({}, data)
+      this.subUserForm.institution = data.insititution.name
       this.clickType = 'update'
       this.addDialog = true
       this.resetForm()
@@ -149,20 +215,54 @@ export default {
     },
     handleSizeChange (val) {
       console.log('handleSizeChange', val)
+      this.pageSizes = val
+      this.getUserList()
     },
     handleCurrentChange (val) {
       console.log('handleCurrentChange', val)
+      this.currentPage = val
+      this.getUserList()
     },
     handleAddConfirm (val) {
       this.$refs['subUserForm'].validate((valid) => {
         if (valid) {
-          this.addDialog = val
+          this.clickType === 'create' ? this.createData(val) : this.updateData(val)
           console.log('submit!')
         } else {
           console.log('error submit!!')
           return false
         }
       });
+    },
+    createData (val) {
+      let subUserForm = this.subUserForm
+      userAjax.addUser({
+        username: subUserForm.username,
+        email: subUserForm.email,
+        institution_id: subUserForm.institution
+      })
+        .then(res => {
+          this.showMsg('success', '添加成功!')
+        })
+        .catch(err => {
+          console.log(err)
+        })
+      this.addDialog = val
+    },
+    updateData (val) {
+      let subUserForm = this.subUserForm
+      userAjax.putUser({
+        username: subUserForm.username,
+        email: subUserForm.email,
+        institution_id: subUserForm.institution
+      })
+        .then(res => {
+          this.showMsg('success', '编辑成功!')
+        })
+        .catch(err => {
+          console.log(err)
+        })
+      this.addDialog = val
     },
     handleAddCancel (val) {
       this.addDialog = val
@@ -210,11 +310,14 @@ export default {
         background-color: #009688;
         &:hover
           opacity .8
+    .el-select
+      width 100%
 </style>
 <style lang='stylus' scoped>
 .userManage-wrapper
   position: relative;
-  height 100%
+  min-height 100%
+  height auto
   margin: 0 auto;
   box-sizing border-box
   .page-wrapper

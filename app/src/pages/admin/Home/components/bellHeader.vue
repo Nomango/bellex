@@ -48,7 +48,8 @@ export default {
             type: 'success'
           })
           setTimeout(() => {
-            window.history.go(0)
+            window.location.hash = ''
+            window.location.reload()
           }, 500)
         })
         .catch(err => {

@@ -43,10 +43,11 @@ axios.interceptors.response.use(function (response) {
 function (err) {
   store.state.ajaxLoading = false
   if (err.response) {
+    console.log(err.response.data)
     Message.error({
       message: err.response.data.message
     })
-    return Promise.resolve(null)
+    return Promise.reject(err)
   } else {
     Message.error({
       message: '未知异常！'
@@ -63,5 +64,5 @@ export const POST = (url, params) => {
 }
 export const GET = (url, params) => {
   console.info('GET请求路径' + `${base}${url}`)
-  return axios.get(`./${url}`, params)
+  return axios.get(`${base}${url}`, params)
 }

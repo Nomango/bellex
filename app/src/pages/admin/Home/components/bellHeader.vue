@@ -16,7 +16,7 @@
             <router-link to="/home/set">修改密码</router-link>
           </el-dropdown-item>
           <el-dropdown-item icon="">
-            <span @click="handleLogOut">退出</span>
+            <span class="dropdown-span" @click="handleLogOut">退出</span>
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
@@ -48,7 +48,7 @@ export default {
             type: 'success'
           })
           setTimeout(() => {
-            this.$router.go(0)
+            window.history.go(0)
           }, 500)
         })
         .catch(err => {
@@ -71,6 +71,9 @@ export default {
 <style lang="stylus">
 .el-dropdown-menu__item
   text-align center
+  .dropdown-span
+    display inline-block
+    width 100%
 </style>
 <style lang='stylus' scoped>
 .bell-header

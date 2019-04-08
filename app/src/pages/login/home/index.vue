@@ -25,7 +25,10 @@
             <span class="forget-span">忘记密码?</span>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" :loading="buttonLoading" @click="onSubmit">登入</el-button>
+            <el-button type="primary"
+              :loading="buttonLoading"
+              @click="onSubmit"
+              @keyup.enter="onSubmit">登入</el-button>
           </el-form-item>
           <el-form-item class="contact-item">
             <span>社交账号登入</span>

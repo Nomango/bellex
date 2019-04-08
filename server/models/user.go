@@ -26,10 +26,10 @@ type User struct {
 	Role     int    `orm:"index;default(0)" json:"role"`
 	IsForbid bool   `orm:"index" json:"is_forbid"`
 
-	Insititution *Insititution `orm:"rel(fk)" json:"insititution"`
+	Institution *Institution `orm:"rel(fk)" json:"institution"`
 
-	CreateTime time.Time `orm:"auto_now_add" json:"-"`
-	UpdateTime time.Time `orm:"auto_now" json:"-"`
+	CreateTime time.Time `orm:"auto_now_add" json:"create_time"`
+	UpdateTime time.Time `orm:"auto_now" json:"update_time"`
 }
 
 func (u *User) IsNormal() bool {

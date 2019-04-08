@@ -7,50 +7,50 @@ import (
 )
 
 func init() {
-	orm.RegisterModel(new(Insititution))
+	orm.RegisterModel(new(Institution))
 }
 
-type Insititution struct {
+type Institution struct {
 	Id   int    `json:"id"`
 	Name string `orm:"unique;size(30)" json:"name"`
 
-	Users []*User `orm:"reverse(many)" json:"-"`
+	Users     []*User     `orm:"reverse(many)" json:"-"`
 	Mechines  []*Mechine  `orm:"reverse(many)" json:"-"`
 	Schedules []*Schedule `orm:"reverse(many)" json:"-"`
 
-	CreateTime time.Time `orm:"auto_now_add" json:"-"`
-	UpdateTime time.Time `orm:"auto_now" json:"-"`
+	CreateTime time.Time `orm:"auto_now_add" json:"create_time"`
+	UpdateTime time.Time `orm:"auto_now" json:"update_time"`
 }
 
 // Insert ...
-func (i *Insititution) Insert() error {
+func (i *Institution) Insert() error {
 	_, err := orm.NewOrm().Insert(i)
 	return err
 }
 
 // Insert ...
-func (i *Insititution) InsertOrUpdate() error {
+func (i *Institution) InsertOrUpdate() error {
 	_, err := orm.NewOrm().InsertOrUpdate(i)
 	return err
 }
 
 // Read ...
-func (i *Insititution) Read(fields ...string) error {
+func (i *Institution) Read(fields ...string) error {
 	return orm.NewOrm().Read(i, fields...)
 }
 
 // Update ...
-func (i *Insititution) Update(fields ...string) error {
+func (i *Institution) Update(fields ...string) error {
 	_, err := orm.NewOrm().Update(i, fields...)
 	return err
 }
 
 // Delete ...
-func (i *Insititution) Delete() error {
+func (i *Institution) Delete() error {
 	_, err := orm.NewOrm().Delete(i)
 	return err
 }
 
-func Insititutions() orm.QuerySeter {
-	return orm.NewOrm().QueryTable((*Insititution)(nil)).OrderBy("-CreateTime")
+func Institutions() orm.QuerySeter {
+	return orm.NewOrm().QueryTable((*Institution)(nil)).OrderBy("-CreateTime")
 }

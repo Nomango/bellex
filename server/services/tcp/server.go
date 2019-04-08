@@ -5,10 +5,10 @@ package tcp
 import (
 	"bufio"
 	"errors"
-	"fmt"
 	"log"
 	"net"
 
+	"github.com/nomango/bellex/server/models"
 	"github.com/nomango/bellex/server/modules/settings"
 )
 
@@ -106,7 +106,7 @@ func (ts *Server) Handle(conn net.Conn, handler func([]byte, net.Conn, chan<- []
 			case data := <-outputCh:
 				data = append(data, byte(0))
 				if _, err := conn.Write(data); err != nil {
-					fmt.Println("Bad response", conn.RemoteAddr(), err.Error())
+					log.Println("Bad response", conn.RemoteAddr(), err.Error())
 				}
 			case <-endCh:
 				// connection closed
@@ -121,7 +121,7 @@ func (ts *Server) Handle(conn net.Conn, handler func([]byte, net.Conn, chan<- []
 		recvByte, err := bufferReader.ReadByte()
 		if err != nil {
 			log.Println("Connection " + conn.RemoteAddr().String() + " is closed")
-			return
+			break
 		}
 
 		switch state {
@@ -165,5 +165,11 @@ func (ts *Server) Handle(conn net.Conn, handler func([]byte, net.Conn, chan<- []
 		}
 	}
 
+	// send end message
 	endCh <- struct{}{}
+
+	// remove connection
+	if err := models.DeleteConnectionWithConn(conn); err != nil {
+		log.Println("Remove connection failed", conn.RemoteAddr())
+	}
 }

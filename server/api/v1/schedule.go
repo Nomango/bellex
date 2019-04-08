@@ -38,9 +38,9 @@ func (c *ScheduleController) GetAll() {
 
 	switch {
 	case c.User.IsNormal():
-		qs = qs.Filter("Insititution", c.User.Insititution.Id)
+		qs = qs.Filter("Institution", c.User.Institution.Id)
 	case c.User.IsAdmin():
-		qs = qs.OrderBy("Insititution")
+		qs = qs.OrderBy("Institution")
 	}
 
 	if total, err = qs.Count(); err != nil {
@@ -73,7 +73,7 @@ func (c *ScheduleController) Post() {
 		c.WriteJson(Json{"message": "数据有误"}, 400)
 		return
 	}
-	schedule.Insititution = c.User.Insititution
+	schedule.Institution = c.User.Institution
 
 	if err := schedule.Insert(); err != nil {
 		beego.Error(err)
@@ -95,7 +95,7 @@ func (c *ScheduleController) Get() {
 		return
 	}
 
-	if c.User.IsNormal() && schedule.Insititution.Id != c.User.Insititution.Id {
+	if c.User.IsNormal() && schedule.Institution.Id != c.User.Institution.Id {
 		c.WriteJson(Json{"message": "无访问权限"}, 403)
 		return
 	}
@@ -113,7 +113,7 @@ func (c *ScheduleController) Update() {
 		return
 	}
 
-	if c.User.IsNormal() && schedule.Insititution.Id != c.User.Insititution.Id {
+	if c.User.IsNormal() && schedule.Institution.Id != c.User.Institution.Id {
 		c.WriteJson(Json{"message": "无访问权限"}, 403)
 		return
 	}
@@ -148,7 +148,7 @@ func (c *ScheduleController) Delete() {
 		return
 	}
 
-	if c.User.IsNormal() && schedule.Insititution.Id != c.User.Insititution.Id {
+	if c.User.IsNormal() && schedule.Institution.Id != c.User.Institution.Id {
 		c.WriteJson(Json{"message": "无访问权限"}, 403)
 		return
 	}

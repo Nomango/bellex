@@ -24,6 +24,11 @@ func init() {
 				&v1.ScheduleController{},
 			),
 		),
+		beego.NSNamespace("/institution",
+			beego.NSInclude(
+				&v1.InstitutionController{},
+			),
+		),
 		beego.NSNamespace("/user",
 			beego.NSInclude(
 				&v1.UserController{},

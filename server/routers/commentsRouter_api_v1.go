@@ -7,7 +7,7 @@ import (
 
 func init() {
 
-    beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:InsititutionController"] = append(beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:InsititutionController"],
+    beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:InstitutionController"] = append(beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:InstitutionController"],
         beego.ControllerComments{
             Method: "Get",
             Router: `/:id([0-9]+)`,
@@ -16,7 +16,7 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:InsititutionController"] = append(beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:InsititutionController"],
+    beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:InstitutionController"] = append(beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:InstitutionController"],
         beego.ControllerComments{
             Method: "Update",
             Router: `/:id([0-9]+)`,
@@ -25,7 +25,7 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:InsititutionController"] = append(beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:InsititutionController"],
+    beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:InstitutionController"] = append(beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:InstitutionController"],
         beego.ControllerComments{
             Method: "Delete",
             Router: `/:id([0-9]+)`,
@@ -34,7 +34,7 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:InsititutionController"] = append(beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:InsititutionController"],
+    beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:InstitutionController"] = append(beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:InstitutionController"],
         beego.ControllerComments{
             Method: "GetAll",
             Router: `/all`,
@@ -43,7 +43,7 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:InsititutionController"] = append(beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:InsititutionController"],
+    beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:InstitutionController"] = append(beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:InstitutionController"],
         beego.ControllerComments{
             Method: "Post",
             Router: `/new`,
@@ -75,6 +75,15 @@ func init() {
             Method: "Delete",
             Router: `/:id([0-9]+)`,
             AllowHTTPMethods: []string{"delete"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:MechineController"] = append(beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:MechineController"],
+        beego.ControllerComments{
+            Method: "Start",
+            Router: `/:id([0-9]+)/start`,
+            AllowHTTPMethods: []string{"post"},
             MethodParams: param.Make(),
             Filters: nil,
             Params: nil})

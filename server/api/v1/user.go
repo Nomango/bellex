@@ -44,9 +44,9 @@ func (c *UserController) GetAll() {
 
 	qs := models.Users().OrderBy("-CreateTime")
 	if !c.User.IsAdmin() {
-		qs = qs.Filter("Insititution", c.User.Insititution)
+		qs = qs.Filter("Institution", c.User.Institution)
 	}
-	_, err = qs.Exclude("Id", c.User.Id).Limit(limit, (page-1)*limit).All(&users)
+	_, err = qs.Exclude("Id", c.User.Id).Limit(limit, (page-1)*limit).RelatedSel().All(&users)
 }
 
 // @router /:id([0-9]+) [get]
@@ -60,7 +60,7 @@ func (c *UserController) Get() {
 	}
 
 	switch {
-	case c.User.IsNormal() && user.Insititution.Id == c.User.Insititution.Id:
+	case c.User.IsNormal() && user.Institution.Id == c.User.Institution.Id:
 		fallthrough
 	case c.User.IsAdmin():
 		c.WriteJson(Json{"data": user}, 200)

@@ -11,19 +11,19 @@ type UserRegisterForm struct {
 	UserName       string `json:"username"`
 	Password       string `json:"password"`
 	Email          string `json:"email"`
-	InsititutionID int    `json:"insititution_id"`
+	InstitutionID int    `json:"institution_id"`
 }
 
 func (u *UserRegisterForm) Assign(user *models.User) error {
-	insititution := &models.Insititution{Id: u.InsititutionID}
-	if err := insititution.Read(); err != nil {
+	institution := &models.Institution{Id: u.InstitutionID}
+	if err := institution.Read(); err != nil {
 		return err
 	}
 
 	user.UserName = u.UserName
 	user.SetNewPassword(u.Password)
 	user.Email = u.Email
-	user.Insititution = insititution
+	user.Institution = institution
 	return nil
 }
 

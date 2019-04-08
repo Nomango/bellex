@@ -5,9 +5,19 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/nomango/bellex/server/modules/settings"
 )
+
+var (
+	MechineCode   string
+	MechineSecret string
+)
+
+func makeRequest(request string) []byte {
+	return []byte("id:" + MechineCode + ";code:" + MechineSecret + ";req:" + request + ";")
+}
 
 func main() {
 
@@ -31,10 +41,17 @@ func main() {
 		receiver := client.Receiver()
 		for {
 			// handle response
-			if response, err := receiver.ReadString(byte(0)); err != nil {
+			response, err := receiver.ReadString(byte(0))
+			if err != nil {
 				log.Fatalln(err)
-			} else {
-				fmt.Println(response)
+				return
+			}
+			fmt.Println(response)
+
+			switch {
+			case strings.Contains(response, "unique_code:"):
+				MechineSecret = response[12:]
+				fmt.Println("secret", MechineSecret)
 			}
 		}
 	}()
@@ -62,7 +79,7 @@ func main() {
 		case 0:
 			return
 		case 1:
-			client.Send([]byte(`id:12345678;code:00000000;req:connect;`))
+			client.Send(makeRequest("connect"))
 		default:
 			fmt.Println("Unknown command")
 		}

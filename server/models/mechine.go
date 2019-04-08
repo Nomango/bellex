@@ -11,15 +11,17 @@ func init() {
 }
 
 type Mechine struct {
-	Id     int    `json:"id"`
-	Code   string `orm:"unique;size(30)" json:"code"`
-	Secret string `orm:"size(30)" json:"secret"`
+	Id      int                `json:"id"`
+	Code    string             `orm:"unique;size(30)" json:"code"`
+	Secret  string             `orm:"size(30)" json:"secret"`
+	Accept  bool               `orm:"-" json:"accept"`
+	Connect *MechineConnection `orm:"-" json:"-"`
 
-	Insititution *Insititution `orm:"rel(fk)" json:"insititution"`
+	Institution *Institution `orm:"rel(fk)" json:"institution"`
 	Schedule     *Schedule     `orm:"rel(fk)" json:"-"`
 
-	CreateTime time.Time `orm:"auto_now_add" json:"-"`
-	UpdateTime time.Time `orm:"auto_now" json:"-"`
+	CreateTime time.Time `orm:"auto_now_add" json:"create_time"`
+	UpdateTime time.Time `orm:"auto_now" json:"update_time"`
 }
 
 // NewMechine ...
@@ -59,6 +61,25 @@ func (m *Mechine) Delete() error {
 	return err
 }
 
+// UpdateStatus ...
+func (m *Mechine) UpdateStatus() {
+	if conn, err := GetConnection(m); err != nil {
+		m.Connect = conn
+		m.Accept = false
+	} else {
+		m.Connect = nil
+		m.Accept = true
+	}
+}
+
 func Mechines() orm.QuerySeter {
 	return orm.NewOrm().QueryTable((*Mechine)(nil)).OrderBy("-CreateTime")
+}
+
+func MechinesAccepted() orm.QuerySeter {
+	return Mechines().Filter("Accept", true)
+}
+
+func MechinesUnaccepted() orm.QuerySeter {
+	return Mechines().Filter("Accept", false)
 }

@@ -2,11 +2,11 @@ package forms
 
 import "github.com/nomango/bellex/server/models"
 
-type InsititutionForm struct {
+type InstitutionForm struct {
 	Name string `json:"name"`
 }
 
-func (i *InsititutionForm) Assign(ins *models.Insititution) error {
+func (i *InstitutionForm) Assign(ins *models.Institution) error {
 	ins.Name = i.Name
 	return nil
 }

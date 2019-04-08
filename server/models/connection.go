@@ -11,13 +11,18 @@ var (
 	mutex    sync.Mutex
 )
 
-type MechineConnection struct {
-	Id   int
-	Code string
-	Conn net.Conn
+func init() {
+	connects = make(map[int]*MechineConnection)
 }
 
-func AddConnection(mechine *Mechine, conn net.Conn) error {
+type MechineConnection struct {
+	Id     int
+	Code   string
+	Conn   net.Conn
+	Output chan<- []byte
+}
+
+func AddConnection(mechine *Mechine, conn net.Conn, output chan<- []byte) error {
 	mutex.Lock()
 	defer mutex.Unlock()
 
@@ -26,14 +31,15 @@ func AddConnection(mechine *Mechine, conn net.Conn) error {
 	}
 
 	connects[mechine.Id] = &MechineConnection{
-		Id:   mechine.Id,
-		Code: mechine.Code,
-		Conn: conn,
+		Id:     mechine.Id,
+		Code:   mechine.Code,
+		Conn:   conn,
+		Output: output,
 	}
 	return nil
 }
 
-func GetConnection(mechine *Mechine) (net.Conn, error) {
+func GetConnection(mechine *Mechine) (*MechineConnection, error) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
@@ -41,7 +47,7 @@ func GetConnection(mechine *Mechine) (net.Conn, error) {
 		return nil, errors.New("Connection not exists")
 	}
 
-	return connects[mechine.Id].Conn, nil
+	return connects[mechine.Id], nil
 }
 
 func DeleteConnection(mechine *Mechine) error {
@@ -56,11 +62,21 @@ func DeleteConnection(mechine *Mechine) error {
 	return nil
 }
 
+func DeleteConnectionWithConn(conn net.Conn) error {
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	for key, c := range connects {
+		if c.Conn == conn {
+			delete(connects, key)
+			return nil
+		}
+	}
+
+	return errors.New("Connection not exists")
+}
+
 func ExistsConnection(Id int) bool {
 	_, ok := connects[Id]
 	return ok
-}
-
-func init() {
-	connects = make(map[int]*MechineConnection)
 }

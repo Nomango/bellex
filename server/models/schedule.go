@@ -15,11 +15,11 @@ type Schedule struct {
 	Name    string `orm:"size(30)" json:"name"`
 	Content string `orm:"size(130)" json:"content"`
 
-	Insititution *Insititution `orm:"rel(fk)" json:"insititution"`
-	Mechines []*Mechine `orm:"reverse(many)" json:"-"`
+	Institution *Institution `orm:"rel(fk)" json:"institution"`
+	Mechines     []*Mechine    `orm:"reverse(many)" json:"-"`
 
-	CreateTime time.Time `orm:"auto_now_add" json:"-"`
-	UpdateTime time.Time `orm:"auto_now" json:"-"`
+	CreateTime time.Time `orm:"auto_now_add" json:"create_time"`
+	UpdateTime time.Time `orm:"auto_now" json:"update_time"`
 }
 
 // Insert ...

@@ -9,15 +9,15 @@ import (
 	"github.com/nomango/bellex/server/modules/forms"
 )
 
-// InsititutionController ...
-type InsititutionController struct {
+// InstitutionController ...
+type InstitutionController struct {
 	LoginValidateController
 }
 
 // @router /all [get]
-func (c *InsititutionController) GetAll() {
+func (c *InstitutionController) GetAll() {
 	var (
-		insititutions []*models.Insititution
+		institutions []*models.Institution
 		page          int
 		limit         int
 		err           error
@@ -32,7 +32,7 @@ func (c *InsititutionController) GetAll() {
 		if err != nil {
 			c.WriteJson(Json{"message": "输入有误"}, 400)
 		} else {
-			c.WriteJson(Json{"data": insititutions, "total": len(insititutions)}, 200)
+			c.WriteJson(Json{"data": institutions, "total": len(institutions)}, 200)
 		}
 	}()
 
@@ -44,15 +44,19 @@ func (c *InsititutionController) GetAll() {
 		return
 	}
 
-	_, err = models.Insititutions().Limit(limit, (page-1)*limit).All(&insititutions)
+	if page == 0 && limit == 0 {
+		_, err = models.Institutions().All(&institutions)
+	} else {
+		_, err = models.Institutions().Limit(limit, (page-1)*limit).All(&institutions)
+	}
 }
 
 // @router /new [post]
-func (c *InsititutionController) Post() {
+func (c *InstitutionController) Post() {
 
 	var (
-		insititution models.Insititution
-		form         forms.InsititutionForm
+		institution models.Institution
+		form         forms.InstitutionForm
 	)
 
 	if !c.User.IsAdmin() {
@@ -65,12 +69,12 @@ func (c *InsititutionController) Post() {
 		return
 	}
 
-	if err := form.Assign(&insititution); err != nil {
+	if err := form.Assign(&institution); err != nil {
 		c.WriteJson(Json{"message": "数据有误"}, 400)
 		return
 	}
 
-	if err := insititution.Insert(); err != nil {
+	if err := institution.Insert(); err != nil {
 		beego.Error(err)
 		c.WriteJson(Json{"message": "系统异常，请稍后再试"}, 400)
 		return
@@ -80,51 +84,51 @@ func (c *InsititutionController) Post() {
 }
 
 // @router /:id([0-9]+) [get]
-func (c *InsititutionController) Get() {
+func (c *InstitutionController) Get() {
 
-	insititutionID, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
-	insititution := models.Insititution{Id: insititutionID}
+	institutionID, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
+	institution := models.Institution{Id: institutionID}
 
 	if !c.User.IsAdmin() {
 		c.WriteJson(Json{"message": "无访问权限"}, 403)
 		return
 	}
 
-	if err := insititution.Read(); err != nil {
+	if err := institution.Read(); err != nil {
 		c.WriteJson(Json{"message": "不存在指定主控机"}, 404)
 		return
 	}
 
-	c.WriteJson(Json{"data": insititution}, 200)
+	c.WriteJson(Json{"data": institution}, 200)
 }
 
 // @router /:id([0-9]+) [put]
-func (c *InsititutionController) Update() {
-	insititutionID, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
-	insititution := models.Insititution{Id: insititutionID}
+func (c *InstitutionController) Update() {
+	institutionID, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
+	institution := models.Institution{Id: institutionID}
 
 	if !c.User.IsAdmin() {
 		c.WriteJson(Json{"message": "无访问权限"}, 403)
 		return
 	}
 
-	if err := insititution.Read(); err != nil {
+	if err := institution.Read(); err != nil {
 		c.WriteJson(Json{"message": "不存在指定主控机"}, 404)
 		return
 	}
 
-	var form forms.InsititutionForm
+	var form forms.InstitutionForm
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &form); err != nil {
 		c.WriteJson(Json{"message": "数据格式有误"}, 400)
 		return
 	}
 
-	if err := form.Assign(&insititution); err != nil {
+	if err := form.Assign(&institution); err != nil {
 		c.WriteJson(Json{"message": "数据有误"}, 400)
 		return
 	}
 
-	if err := insititution.Update(); err != nil {
+	if err := institution.Update(); err != nil {
 		beego.Error(err)
 		c.WriteJson(Json{"message": "系统异常，请稍后再试"}, 400)
 		return
@@ -134,21 +138,21 @@ func (c *InsititutionController) Update() {
 }
 
 // @router /:id([0-9]+) [delete]
-func (c *InsititutionController) Delete() {
-	insititutionID, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
-	insititution := models.Insititution{Id: insititutionID}
+func (c *InstitutionController) Delete() {
+	institutionID, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
+	institution := models.Institution{Id: institutionID}
 
 	if !c.User.IsAdmin() {
 		c.WriteJson(Json{"message": "无访问权限"}, 403)
 		return
 	}
 
-	if err := insititution.Read(); err != nil {
+	if err := institution.Read(); err != nil {
 		c.WriteJson(Json{"message": "不存在指定主控机"}, 404)
 		return
 	}
 
-	if err := insititution.Delete(); err != nil {
+	if err := institution.Delete(); err != nil {
 		beego.Error(err)
 		c.WriteJson(Json{"message": "系统异常，请稍后再试"}, 400)
 		return

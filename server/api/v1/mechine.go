@@ -41,9 +41,9 @@ func (c *MechineController) GetAll() {
 
 	switch {
 	case c.User.IsNormal():
-		_, err = models.Mechines().Filter("Insititution", c.User.Insititution.Id).Limit(limit, (page-1)*limit).All(&mechines)
+		_, err = models.Mechines().Filter("Institution", c.User.Institution.Id).Limit(limit, (page-1)*limit).All(&mechines)
 	case c.User.IsAdmin():
-		_, err = models.Mechines().OrderBy("Insititution").Limit(limit, (page-1)*limit).All(&mechines)
+		_, err = models.Mechines().OrderBy("Institution").Limit(limit, (page-1)*limit).All(&mechines)
 	}
 }
 
@@ -64,7 +64,7 @@ func (c *MechineController) Post() {
 		c.WriteJson(Json{"message": "数据有误"}, 400)
 		return
 	}
-	mechine.Insititution = c.User.Insititution
+	mechine.Institution = c.User.Institution
 
 	if err := mechine.Insert(); err != nil {
 		beego.Error(err)
@@ -86,7 +86,7 @@ func (c *MechineController) Get() {
 		return
 	}
 
-	if c.User.IsNormal() && mechine.Insititution.Id != c.User.Insititution.Id {
+	if c.User.IsNormal() && mechine.Institution.Id != c.User.Institution.Id {
 		c.WriteJson(Json{"message": "无访问权限"}, 403)
 		return
 	}
@@ -104,7 +104,7 @@ func (c *MechineController) Update() {
 		return
 	}
 
-	if c.User.IsNormal() && mechine.Insititution.Id != c.User.Insititution.Id {
+	if c.User.IsNormal() && mechine.Institution.Id != c.User.Institution.Id {
 		c.WriteJson(Json{"message": "无访问权限"}, 403)
 		return
 	}
@@ -139,7 +139,7 @@ func (c *MechineController) Delete() {
 		return
 	}
 
-	if c.User.IsNormal() && mechine.Insititution.Id != c.User.Insititution.Id {
+	if c.User.IsNormal() && mechine.Institution.Id != c.User.Institution.Id {
 		c.WriteJson(Json{"message": "无访问权限"}, 403)
 		return
 	}
@@ -151,4 +151,30 @@ func (c *MechineController) Delete() {
 	}
 
 	c.WriteJson(Json{"message": "删除成功"}, 200)
+}
+
+// @router /:id([0-9]+)/start [post]
+func (c *MechineController) Start() {
+	mechineID, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
+	mechine := models.Mechine{Id: mechineID}
+
+	if err := mechine.Read(); err != nil {
+		c.WriteJson(Json{"message": "不存在指定主控机"}, 404)
+		return
+	}
+
+	if c.User.IsNormal() && mechine.Institution.Id != c.User.Institution.Id {
+		c.WriteJson(Json{"message": "无访问权限"}, 403)
+		return
+	}
+
+	mechine.UpdateStatus()
+	if !mechine.Accept {
+		c.WriteJson(Json{"message": "主控机未连接"}, 403)
+		return
+	}
+
+	mechine.Connect.Output <- append([]byte(`bell:current`), byte(0))
+
+	c.WriteJson(Json{"message": "发送成功"}, 200)
 }

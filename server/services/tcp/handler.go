@@ -48,7 +48,7 @@ func PacketHandler(req []byte, conn net.Conn, outputCh chan<- []byte) {
 
 	switch packet.Type {
 	case types.PacketTypeConnect:
-		response, err = requestConnect(packet, conn)
+		response, err = requestConnect(packet, conn, outputCh)
 	case types.PacketTypeRequestTime:
 		response, err = requestTime()
 	case types.PacketTypeHeartBeat:
@@ -58,19 +58,24 @@ func PacketHandler(req []byte, conn net.Conn, outputCh chan<- []byte) {
 	}
 }
 
-func requestConnect(packet *types.Packet, conn net.Conn) (string, error) {
-	// if _, ok := bells[packet.Auth.Code]; ok {
-	// 	return tcpPacket.NewError("Code exists")
-	// }
-	code := utils.RandString(8)
-	mechine := models.NewMechine(packet.Auth.Code, code)
-	if err := mechine.Insert(); err != nil {
-		return "", err
+func requestConnect(packet *types.Packet, conn net.Conn, outputCh chan<- []byte) (string, error) {
+
+	var mechine models.Mechine
+	if err := models.Mechines().Filter("Code", packet.Auth.Code).One(&mechine); err == nil {
+		// Mechine already exists
+		if mechine.Accept {
+			mechine.Secret = utils.RandString(8)
+			mechine.Update("Secret")
+		}
+	} else {
+		return "", errors.New("Permission denied")
 	}
-	if err := models.AddConnection(mechine, conn); err != nil {
+
+	if err := models.AddConnection(&mechine, conn, outputCh); err != nil {
 		beego.Error("Add connection failed", err)
 	}
-	return "unique_code:" + code + ";", nil
+
+	return "unique_code:" + mechine.Secret + ";", nil
 }
 
 func requestTime() (string, error) {

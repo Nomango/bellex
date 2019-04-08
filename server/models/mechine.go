@@ -15,8 +15,8 @@ type Mechine struct {
 	Code   string `orm:"unique;size(30)" json:"code"`
 	Secret string `orm:"size(30)" json:"secret"`
 
-	User     *User     `orm:"rel(fk)" json:"-"`
-	Schedule *Schedule `orm:"rel(fk)" json:"-"`
+	Insititution *Insititution `orm:"rel(fk)" json:"insititution"`
+	Schedule     *Schedule     `orm:"rel(fk)" json:"-"`
 
 	CreateTime time.Time `orm:"auto_now_add" json:"-"`
 	UpdateTime time.Time `orm:"auto_now" json:"-"`
@@ -31,31 +31,31 @@ func NewMechine(Code string, Secret string) *Mechine {
 }
 
 // Insert ...
-func (b *Mechine) Insert() error {
-	_, err := orm.NewOrm().Insert(b)
+func (m *Mechine) Insert() error {
+	_, err := orm.NewOrm().Insert(m)
 	return err
 }
 
-// Insert ...
-func (b *Mechine) InsertOrUpdate() error {
-	_, err := orm.NewOrm().InsertOrUpdate(b)
+// InsertOrUpdate ...
+func (m *Mechine) InsertOrUpdate() error {
+	_, err := orm.NewOrm().InsertOrUpdate(m)
 	return err
 }
 
 // Read ...
-func (b *Mechine) Read(fields ...string) error {
-	return orm.NewOrm().Read(b, fields...)
+func (m *Mechine) Read(fields ...string) error {
+	return orm.NewOrm().Read(m, fields...)
 }
 
 // Update ...
-func (b *Mechine) Update(fields ...string) error {
-	_, err := orm.NewOrm().Update(b, fields...)
+func (m *Mechine) Update(fields ...string) error {
+	_, err := orm.NewOrm().Update(m, fields...)
 	return err
 }
 
 // Delete ...
-func (b *Mechine) Delete() error {
-	_, err := orm.NewOrm().Delete(b)
+func (m *Mechine) Delete() error {
+	_, err := orm.NewOrm().Delete(m)
 	return err
 }
 

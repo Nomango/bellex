@@ -16,20 +16,17 @@ func init() {
 const (
 	UserRoleNormal = iota
 	UserRoleAdmin
-	UserRoleSuperAdmin
 )
 
 type User struct {
 	Id       int    `json:"id"`
-	UserName string `orm:"size(30)" json:"username"`
+	UserName string `orm:"size(30);unique" json:"username"`
 	Password string `orm:"size(128)" json:"-"`
 	Email    string `orm:"size(80);unique" json:"email"`
 	Role     int    `orm:"index;default(0)" json:"role"`
 	IsForbid bool   `orm:"index" json:"is_forbid"`
-	Parent   int    `orm:"default(0)" json:"-"`
 
-	Mechines  []*Mechine  `orm:"reverse(many)" json:"-"`
-	Schedules []*Schedule `orm:"reverse(many)" json:"-"`
+	Insititution *Insititution `orm:"rel(fk)" json:"insititution"`
 
 	CreateTime time.Time `orm:"auto_now_add" json:"-"`
 	UpdateTime time.Time `orm:"auto_now" json:"-"`
@@ -41,10 +38,6 @@ func (u *User) IsNormal() bool {
 
 func (u *User) IsAdmin() bool {
 	return u.Role == UserRoleAdmin
-}
-
-func (u *User) IsSuperAdmin() bool {
-	return u.Role == UserRoleSuperAdmin
 }
 
 // Insert ...
@@ -89,17 +82,6 @@ func (u *User) SetNewPassword(password string) {
 func (u *User) SaveNewPassword(password string) error {
 	u.SetNewPassword(password)
 	return u.Update("Password", "UpdateTime")
-}
-
-// GetParent ...
-func (u *User) GetParentAdmin() *User {
-	if u.IsNormal() && u.Parent > 0 {
-		parent := &User{Id: u.Parent}
-		if err := parent.Read(); err == nil {
-			return parent
-		}
-	}
-	return nil
 }
 
 // Users returns all users query
@@ -153,7 +135,7 @@ func CreateAdminUser() error {
 	var err error
 	if !HasUser(user.UserName) {
 		if err = RegisterUser(user, user.UserName, "admin@localhost.com", "admin"); err == nil {
-			user.Role = UserRoleSuperAdmin
+			user.Role = UserRoleAdmin
 			user.IsForbid = false
 			err = user.Update("Role", "IsForbid")
 		}

@@ -8,8 +8,14 @@ type MechineForm struct {
 	ScheduleID int    `json:"schedule_id"`
 }
 
-func (m *MechineForm) Update(mechine *models.Mechine) {
+func (m *MechineForm) Assign(mechine *models.Mechine) error {
+	schedule := &models.Schedule{Id: m.ScheduleID}
+	if err := schedule.Read(); err != nil {
+		return err
+	}
+
 	mechine.Code = m.Code
 	mechine.Secret = m.Secret
-	mechine.Schedule = &models.Schedule{Id: m.ScheduleID}
+	mechine.Schedule = schedule
+	return nil
 }

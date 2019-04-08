@@ -7,7 +7,8 @@ type ScheduleForm struct {
 	Content string `json:"content"`
 }
 
-func (m *ScheduleForm) Update(schedule *models.Schedule) {
+func (m *ScheduleForm) Assign(schedule *models.Schedule) error {
 	schedule.Name = m.Name
 	schedule.Content = m.Content
+	return nil
 }

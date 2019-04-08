@@ -2,6 +2,7 @@ package v1
 
 import (
 	"encoding/json"
+	"errors"
 	"strconv"
 
 	"github.com/astaxie/beego"
@@ -18,25 +19,34 @@ func (c *UserController) GetAll() {
 
 	var (
 		users []*models.User
+		page  int
+		limit int
 		err   error
 	)
 
-	switch {
-	case c.User.IsAdmin():
-		_, err = models.Users().Filter("Parent", c.User.Id).All(&users)
-	case c.User.IsSuperAdmin():
-		_, err = models.Users().OrderBy("User").All(&users)
-	default:
-		c.WriteJson(Json{"message": "无访问权限"}, 403)
+	defer func() {
+		if err != nil {
+			c.WriteJson(Json{"message": err.Error()}, 400)
+		} else {
+			c.WriteJson(Json{"data": users, "total": len(users)}, 200)
+		}
+	}()
+
+	if page, err = c.GetInt("page"); err != nil {
+		err = errors.New("请求数据有误")
 		return
 	}
 
-	if err != nil {
-		beego.Error(err.Error())
-		c.WriteJson(Json{"message": "系统异常，请稍后再试"}, 400)
-	} else {
-		c.WriteJson(Json{"data": users}, 200)
+	if limit, err = c.GetInt("limit"); err != nil {
+		err = errors.New("请求数据有误")
+		return
 	}
+
+	qs := models.Users().OrderBy("-CreateTime")
+	if !c.User.IsAdmin() {
+		qs = qs.Filter("Insititution", c.User.Insititution)
+	}
+	_, err = qs.Exclude("Id", c.User.Id).Limit(limit, (page-1)*limit).All(&users)
 }
 
 // @router /:id([0-9]+) [get]
@@ -50,9 +60,9 @@ func (c *UserController) Get() {
 	}
 
 	switch {
-	case c.User.IsAdmin() && user.Parent == c.User.Id:
+	case c.User.IsNormal() && user.Insititution.Id == c.User.Insititution.Id:
 		fallthrough
-	case c.User.IsSuperAdmin():
+	case c.User.IsAdmin():
 		c.WriteJson(Json{"data": user}, 200)
 	default:
 		c.WriteJson(Json{"message": "无访问权限"}, 403)
@@ -61,14 +71,10 @@ func (c *UserController) Get() {
 
 // @router /new [post]
 func (c *UserController) Post() {
-	if c.User.IsNormal() {
-		c.WriteJson(Json{"message": "无访问权限"}, 403)
-		return
-	}
 
 	var (
 		user models.User
-		form forms.UserForm
+		form forms.UserRegisterForm
 	)
 
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &form); err != nil {
@@ -76,14 +82,11 @@ func (c *UserController) Post() {
 		return
 	}
 
-	form.Update(&user)
-	user.Parent = c.User.Id
-
-	if c.User.IsSuperAdmin() {
-		user.Role = models.UserRoleAdmin
-	} else {
-		user.Role = models.UserRoleNormal
+	if err := form.Assign(&user); err != nil {
+		c.WriteJson(Json{"message": "数据有误"}, 400)
+		return
 	}
+	user.Role = models.UserRoleNormal
 
 	if err := user.Insert(); err != nil {
 		beego.Error(err)
@@ -99,20 +102,13 @@ func (c *UserController) Update() {
 	userID, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	user := models.User{Id: userID}
 
-	if err := user.Read(); err != nil {
-		c.WriteJson(Json{"message": "不存在指定用户"}, 404)
+	if c.User.IsNormal() && c.User.Id != userID {
+		c.WriteJson(Json{"message": "无访问权限"}, 403)
 		return
 	}
 
-	switch {
-	case c.User.IsNormal() && c.User.Id == user.Id:
-		fallthrough
-	case c.User.IsAdmin() && c.User.Id == user.Parent:
-		fallthrough
-	case c.User.IsSuperAdmin():
-		break
-	default:
-		c.WriteJson(Json{"message": "无访问权限"}, 403)
+	if err := user.Read(); err != nil {
+		c.WriteJson(Json{"message": "不存在指定用户"}, 404)
 		return
 	}
 
@@ -122,7 +118,11 @@ func (c *UserController) Update() {
 		return
 	}
 
-	form.Update(&user)
+	if err := form.Assign(&user); err != nil {
+		c.WriteJson(Json{"message": "数据有误"}, 400)
+		return
+	}
+
 	if err := user.Update(); err != nil {
 		beego.Error(err)
 		c.WriteJson(Json{"message": "系统异常，请稍后再试"}, 400)
@@ -137,18 +137,13 @@ func (c *UserController) Delete() {
 	userID, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
 	user := models.User{Id: userID}
 
-	if err := user.Read(); err != nil {
-		c.WriteJson(Json{"message": "不存在指定用户"}, 404)
+	if c.User.IsNormal() {
+		c.WriteJson(Json{"message": "无访问权限"}, 403)
 		return
 	}
 
-	switch {
-	case c.User.IsAdmin() && user.Parent == c.User.Id:
-		fallthrough
-	case c.User.IsSuperAdmin():
-		break
-	default:
-		c.WriteJson(Json{"message": "无访问权限"}, 403)
+	if err := user.Read(); err != nil {
+		c.WriteJson(Json{"message": "不存在指定用户"}, 404)
 		return
 	}
 

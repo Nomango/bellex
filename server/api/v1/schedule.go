@@ -18,24 +18,42 @@ type ScheduleController struct {
 func (c *ScheduleController) GetAll() {
 	var (
 		schedules []*models.Schedule
+		page      int
+		limit     int
+		total     int64
 		err       error
 	)
 
-	switch {
-	case c.User.IsNormal():
-		_, err = models.Schedules().Filter("user_id", c.User.Parent).All(&schedules)
-	case c.User.IsAdmin():
-		_, err = models.Schedules().Filter("User", &c.User).All(&schedules)
-	case c.User.IsSuperAdmin():
-		_, err = models.Schedules().OrderBy("User").All(&schedules)
+	if page, err = c.GetInt("page"); err != nil {
+		c.WriteJson(Json{"message": "输入有误"}, 400)
+		return
 	}
 
-	if err != nil {
-		beego.Error(err.Error())
-		c.WriteJson(Json{"message": "系统异常，请稍后再试"}, 400)
-	} else {
-		c.WriteJson(Json{"data": schedules}, 200)
+	if limit, err = c.GetInt("limit"); err != nil {
+		c.WriteJson(Json{"message": "输入有误"}, 400)
+		return
 	}
+
+	qs := models.Schedules()
+
+	switch {
+	case c.User.IsNormal():
+		qs = qs.Filter("Insititution", c.User.Insititution.Id)
+	case c.User.IsAdmin():
+		qs = qs.OrderBy("Insititution")
+	}
+
+	if total, err = qs.Count(); err != nil {
+		c.WriteJson(Json{"message": "系统异常，请稍后再试"}, 400)
+		return
+	}
+
+	if _, err = qs.Limit(limit, (page-1)*limit).All(&schedules); err != nil {
+		c.WriteJson(Json{"message": "系统异常，请稍后再试"}, 400)
+		return
+	}
+
+	c.WriteJson(Json{"data": schedules, "total": total}, 200)
 }
 
 // @router /new [post]
@@ -51,8 +69,11 @@ func (c *ScheduleController) Post() {
 		return
 	}
 
-	form.Update(&schedule)
-	schedule.User = &c.User
+	if err := form.Assign(&schedule); err != nil {
+		c.WriteJson(Json{"message": "数据有误"}, 400)
+		return
+	}
+	schedule.Insititution = c.User.Insititution
 
 	if err := schedule.Insert(); err != nil {
 		beego.Error(err)
@@ -74,16 +95,12 @@ func (c *ScheduleController) Get() {
 		return
 	}
 
-	switch {
-	case c.User.IsNormal() && schedule.User.Id == c.User.Parent:
-		fallthrough
-	case c.User.IsAdmin() && schedule.User.Id == c.User.Id:
-		fallthrough
-	case c.User.IsSuperAdmin():
-		c.WriteJson(Json{"data": schedule}, 200)
-	default:
+	if c.User.IsNormal() && schedule.Insititution.Id != c.User.Insititution.Id {
 		c.WriteJson(Json{"message": "无访问权限"}, 403)
+		return
 	}
+
+	c.WriteJson(Json{"data": schedule}, 200)
 }
 
 // @router /:id([0-9]+) [put]
@@ -96,14 +113,7 @@ func (c *ScheduleController) Update() {
 		return
 	}
 
-	switch {
-	case c.User.IsNormal() && schedule.User.Id == c.User.Parent:
-		fallthrough
-	case c.User.IsAdmin() && schedule.User.Id == c.User.Id:
-		fallthrough
-	case c.User.IsSuperAdmin():
-		break
-	default:
+	if c.User.IsNormal() && schedule.Insititution.Id != c.User.Insititution.Id {
 		c.WriteJson(Json{"message": "无访问权限"}, 403)
 		return
 	}
@@ -114,7 +124,11 @@ func (c *ScheduleController) Update() {
 		return
 	}
 
-	form.Update(&schedule)
+	if err := form.Assign(&schedule); err != nil {
+		c.WriteJson(Json{"message": "数据有误"}, 400)
+		return
+	}
+
 	if err := schedule.Update(); err != nil {
 		beego.Error(err)
 		c.WriteJson(Json{"message": "系统异常，请稍后再试"}, 400)
@@ -134,14 +148,7 @@ func (c *ScheduleController) Delete() {
 		return
 	}
 
-	switch {
-	case c.User.IsNormal() && schedule.User.Id == c.User.Parent:
-		fallthrough
-	case c.User.IsAdmin() && schedule.User.Id == c.User.Id:
-		fallthrough
-	case c.User.IsSuperAdmin():
-		break
-	default:
+	if c.User.IsNormal() && schedule.Insititution.Id != c.User.Insititution.Id {
 		c.WriteJson(Json{"message": "无访问权限"}, 403)
 		return
 	}

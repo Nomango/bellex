@@ -18,23 +18,32 @@ type MechineController struct {
 func (c *MechineController) GetAll() {
 	var (
 		mechines []*models.Mechine
+		page     int
+		limit    int
 		err      error
 	)
 
-	switch {
-	case c.User.IsNormal():
-		_, err = models.Mechines().Filter("user_id", c.User.Parent).All(&mechines)
-	case c.User.IsAdmin():
-		_, err = models.Mechines().Filter("User", &c.User).All(&mechines)
-	case c.User.IsSuperAdmin():
-		_, err = models.Mechines().OrderBy("User").All(&mechines)
+	defer func() {
+		if err != nil {
+			c.WriteJson(Json{"message": "输入有误"}, 400)
+		} else {
+			c.WriteJson(Json{"data": mechines, "total": len(mechines)}, 200)
+		}
+	}()
+
+	if page, err = c.GetInt("page"); err != nil {
+		return
 	}
 
-	if err != nil {
-		beego.Error(err.Error())
-		c.WriteJson(Json{"message": "系统异常，请稍后再试"}, 400)
-	} else {
-		c.WriteJson(Json{"data": mechines}, 200)
+	if limit, err = c.GetInt("limit"); err != nil {
+		return
+	}
+
+	switch {
+	case c.User.IsNormal():
+		_, err = models.Mechines().Filter("Insititution", c.User.Insititution.Id).Limit(limit, (page-1)*limit).All(&mechines)
+	case c.User.IsAdmin():
+		_, err = models.Mechines().OrderBy("Insititution").Limit(limit, (page-1)*limit).All(&mechines)
 	}
 }
 
@@ -51,8 +60,11 @@ func (c *MechineController) Post() {
 		return
 	}
 
-	form.Update(&mechine)
-	mechine.User = &c.User
+	if err := form.Assign(&mechine); err != nil {
+		c.WriteJson(Json{"message": "数据有误"}, 400)
+		return
+	}
+	mechine.Insititution = c.User.Insititution
 
 	if err := mechine.Insert(); err != nil {
 		beego.Error(err)
@@ -74,16 +86,12 @@ func (c *MechineController) Get() {
 		return
 	}
 
-	switch {
-	case c.User.IsNormal() && mechine.User.Id == c.User.Parent:
-		fallthrough
-	case c.User.IsAdmin() && mechine.User.Id == c.User.Id:
-		fallthrough
-	case c.User.IsSuperAdmin():
-		c.WriteJson(Json{"data": mechine}, 200)
-	default:
+	if c.User.IsNormal() && mechine.Insititution.Id != c.User.Insititution.Id {
 		c.WriteJson(Json{"message": "无访问权限"}, 403)
+		return
 	}
+
+	c.WriteJson(Json{"data": mechine}, 200)
 }
 
 // @router /:id([0-9]+) [put]
@@ -96,14 +104,7 @@ func (c *MechineController) Update() {
 		return
 	}
 
-	switch {
-	case c.User.IsNormal() && mechine.User.Id == c.User.Parent:
-		fallthrough
-	case c.User.IsAdmin() && mechine.User.Id == c.User.Id:
-		fallthrough
-	case c.User.IsSuperAdmin():
-		break
-	default:
+	if c.User.IsNormal() && mechine.Insititution.Id != c.User.Insititution.Id {
 		c.WriteJson(Json{"message": "无访问权限"}, 403)
 		return
 	}
@@ -114,7 +115,11 @@ func (c *MechineController) Update() {
 		return
 	}
 
-	form.Update(&mechine)
+	if err := form.Assign(&mechine); err != nil {
+		c.WriteJson(Json{"message": "数据有误"}, 400)
+		return
+	}
+
 	if err := mechine.Update(); err != nil {
 		beego.Error(err)
 		c.WriteJson(Json{"message": "系统异常，请稍后再试"}, 400)
@@ -134,14 +139,7 @@ func (c *MechineController) Delete() {
 		return
 	}
 
-	switch {
-	case c.User.IsNormal() && mechine.User.Id == c.User.Parent:
-		fallthrough
-	case c.User.IsAdmin() && mechine.User.Id == c.User.Id:
-		fallthrough
-	case c.User.IsSuperAdmin():
-		break
-	default:
+	if c.User.IsNormal() && mechine.Insititution.Id != c.User.Insititution.Id {
 		c.WriteJson(Json{"message": "无访问权限"}, 403)
 		return
 	}

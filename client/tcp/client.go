@@ -43,15 +43,12 @@ func (c *Client) Receiver() *bufio.Reader {
 	return bufio.NewReader(c.conn)
 }
 
-// RequestTime send 'GetTime' request
-func (c *Client) RequestTime() {
+// Send send request
+func (c *Client) Send(data []byte) {
 
-	packetData := []byte(`id:123;code:123;req:schedule;`)
-	//packetData := []byte(`id:123;code:123;req:request_timing;`)
-	fmt.Println("Send packet:", string(packetData))
+	fmt.Println("Send packet:", string(data))
 
-	data := packSendData(packetData)
-	if _, err := c.conn.Write(data); err != nil {
+	if _, err := c.conn.Write(packSendData(data)); err != nil {
 		log.Fatalln("Send request failed,", err)
 		return
 	}

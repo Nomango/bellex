@@ -40,16 +40,10 @@ func (b *BaseController) Prepare() {
 
 func (b *BaseController) LoginUser(user *models.User) {
 	b.SetSession(sessionUserKey, user.Id)
-	// ctx.Input.CruSession.SessionRelease(ctx.ResponseWriter)
-	// ctx.Input.CruSession = beego.GlobalSessions.SessionRegenerateID(ctx.ResponseWriter, ctx.Request)
-	// ctx.Input.CruSession.Set(sessionUserKey, user.Id)
 }
 
 func (b *BaseController) LogoutUser() {
 	b.DelSession(sessionUserKey)
-	// ctx.Input.CruSession.Delete(sessionUserKey)
-	// ctx.Input.CruSession.Flush()
-	// beego.GlobalSessions.SessionDestroy(ctx.ResponseWriter, ctx.Request)
 }
 
 func (b *BaseController) GetUserFromSession(user *models.User) bool {
@@ -57,9 +51,7 @@ func (b *BaseController) GetUserFromSession(user *models.User) bool {
 	if !ok || id <= 0 {
 		return false
 	}
-	u := models.User{Id: id}
-	if u.Read() == nil {
-		*user = u
+	if models.Users().Filter("Id", id).RelatedSel().One(user) == nil {
 		return true
 	}
 	return false

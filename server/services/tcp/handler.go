@@ -18,7 +18,7 @@ import (
 )
 
 // PacketHandler handle request packets
-func PacketHandler(req []byte, conn net.Conn) {
+func PacketHandler(req []byte, conn net.Conn, outputCh chan<- []byte) {
 
 	var (
 		packet   *types.Packet
@@ -28,9 +28,9 @@ func PacketHandler(req []byte, conn net.Conn) {
 
 	defer func() {
 		if err != nil {
-			write("error:"+err.Error()+";", conn)
+			outputCh <- []byte("error:" + err.Error() + ";")
 		} else {
-			write(response, conn)
+			outputCh <- []byte(response)
 		}
 	}()
 
@@ -113,11 +113,4 @@ func requestNTP() (time.Time, error) {
 		return time.Time{}, errors.New("Request NTP failed")
 	}
 	return result, nil
-}
-
-func write(data string, conn net.Conn) error {
-	if _, err := conn.Write([]byte(data)); err != nil {
-		return err
-	}
-	return nil
 }

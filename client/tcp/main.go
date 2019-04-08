@@ -4,12 +4,22 @@ package main
 
 import (
 	"fmt"
-	"time"
+	"log"
+
+	"github.com/nomango/bellex/server/modules/settings"
 )
 
 func main() {
 
-	client, err := NewClient("132.232.126.221:7777")
+	var serverIP string
+
+	if settings.IsDevelopeMode() {
+		serverIP = "127.0.0.1:7777"
+	} else {
+		serverIP = "132.232.126.221:7777"
+	}
+
+	client, err := NewClient(serverIP)
 	if err != nil {
 		fmt.Println("Start client failed: ", err)
 		return
@@ -17,34 +27,44 @@ func main() {
 
 	defer client.Close()
 
-	responseChan := make(chan struct{}, 3)
-	heartBeatTick := time.Tick(time.Second)
-
-	fmt.Println("Start to request server time")
-
 	go func() {
 		receiver := client.Receiver()
 		for {
 			// handle response
 			if response, err := receiver.ReadString(byte(0)); err != nil {
-				fmt.Println(err)
+				log.Fatalln(err)
 			} else {
 				fmt.Println(response)
 			}
 		}
 	}()
 
-	// send request per second in goroutine
-	for i := 0; i < cap(responseChan); i++ {
-		select {
-		case <-heartBeatTick:
-			client.RequestTime()
-			responseChan <- struct{}{}
-		}
-	}
+	fmt.Println("===============================")
+	fmt.Println("Bellex Console v0.9")
+	fmt.Println()
 
-	// wait response
-	for i := 0; i < cap(responseChan); i++ {
-		<-responseChan
+	fmt.Println("Menus:")
+	fmt.Println("- 1: Send connect request")
+	fmt.Println("- 0: Exit")
+
+	fmt.Println()
+	fmt.Println("Copyright (c) 2019 Bellex")
+	fmt.Println("===============================")
+
+	for {
+		var cmd int
+		if _, err := fmt.Scanln(&cmd); err != nil {
+			fmt.Println("Unknown command")
+			continue
+		}
+
+		switch cmd {
+		case 0:
+			return
+		case 1:
+			client.Send([]byte(`id:12345678;code:00000000;req:connect;`))
+		default:
+			fmt.Println("Unknown command")
+		}
 	}
 }

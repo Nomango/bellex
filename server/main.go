@@ -16,10 +16,8 @@ func main() {
 	settings.Setup()
 	models.Setup()
 
-	if settings.Mode == settings.ModeProduct {
-		// start a tcp server
-		go startTCPServer()
-	}
+	// start a tcp server
+	go startTCPServer()
 
 	beego.Run()
 }
@@ -27,21 +25,21 @@ func main() {
 func startTCPServer() {
 	tcpServer, err := tcp.NewServer("7777")
 	if err != nil {
-		log.Fatalln("[Mechineex] Start TCP server failed: ", err)
+		log.Fatalln("[Bellex] Start TCP server failed:", err)
 	}
 
 	defer tcpServer.Close()
 
-	log.Println("[Mechineex] TCP server is running on", tcpServer.Addr())
+	log.Println("[Bellex] TCP server is running on", tcpServer.Addr())
 
 	// start to accept connections
 	for {
 		conn, err := tcpServer.Accept()
 		if err != nil {
-			log.Println("[Mechineex] Accept TCP connection failed:", err)
+			log.Println("[Bellex] Accept TCP connection failed:", err)
 			continue
 		}
-		log.Println("[Mechineex] Accept TCP connection from", conn.RemoteAddr().String())
+		log.Println("[Bellex] Accept TCP connection from", conn.RemoteAddr().String())
 
 		// handle conn in goroutine
 		go tcpServer.Handle(conn, tcp.PacketHandler)

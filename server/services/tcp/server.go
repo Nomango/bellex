@@ -5,8 +5,11 @@ package tcp
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"log"
 	"net"
+
+	"github.com/nomango/bellex/server/modules/settings"
 )
 
 // Server tcp server
@@ -35,16 +38,28 @@ func getLocalIP() (string, error) {
 
 // NewServer returns a new tcp server
 func NewServer(port string) (*Server, error) {
-	localIP, err := getLocalIP()
+	var (
+		addr *net.TCPAddr
+		err  error
+	)
+
+	if settings.Mode == settings.ModeDevelope {
+		addr, err = net.ResolveTCPAddr("tcp", "127.0.0.1:"+port)
+	} else {
+		var localIP string
+		localIP, err = getLocalIP()
+		if err != nil {
+			return nil, err
+		}
+		addr, err = net.ResolveTCPAddr("tcp", localIP+":"+port)
+	}
+
 	if err != nil {
 		return nil, err
 	}
-	addr, err := net.ResolveTCPAddr("tcp", localIP+":"+port)
-	if err != nil {
-		return nil, err
-	}
-	listener, err := net.ListenTCP("tcp", addr)
-	if err != nil {
+
+	var listener *net.TCPListener
+	if listener, err = net.ListenTCP("tcp", addr); err != nil {
 		return nil, err
 	}
 
@@ -71,7 +86,7 @@ func (ts *Server) Addr() string {
 
 // Handle recives data from client and send response
 // Data format: 0xFF|0xFF|len(high)|len(low)|Data|0xFF|0xFE. '0xFF' is preamble code
-func (ts *Server) Handle(conn net.Conn, handler func([]byte, net.Conn)) {
+func (ts *Server) Handle(conn net.Conn, handler func([]byte, net.Conn, chan<- []byte)) {
 	// close connection before exit
 	defer conn.Close()
 
@@ -81,6 +96,24 @@ func (ts *Server) Handle(conn net.Conn, handler func([]byte, net.Conn)) {
 		recvBuffer   []byte
 		bufferReader = bufio.NewReader(conn)
 	)
+
+	// Wait for response
+	outputCh := make(chan []byte)
+	endCh := make(chan struct{})
+	go func(conn net.Conn, outputCh <-chan []byte, endCh <-chan struct{}) {
+		for {
+			select {
+			case data := <-outputCh:
+				data = append(data, byte(0))
+				if _, err := conn.Write(data); err != nil {
+					fmt.Println("Bad response", conn.RemoteAddr(), err.Error())
+				}
+			case <-endCh:
+				// connection closed
+				return
+			}
+		}
+	}(conn, outputCh, endCh)
 
 	// state machine
 	state := 0
@@ -125,10 +158,12 @@ func (ts *Server) Handle(conn net.Conn, handler func([]byte, net.Conn)) {
 			}
 		case 5:
 			if recvByte == 0xFE {
-				handler(recvBuffer, conn)
+				handler(recvBuffer, conn, outputCh)
 			}
 			// state machine is ready. read next packet.
 			state = 0
 		}
 	}
+
+	endCh <- struct{}{}
 }

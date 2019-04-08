@@ -15,6 +15,10 @@ const (
 	ModeProduct
 )
 
+func IsDevelopeMode() bool {
+	return os.Getenv("BELLEX_MODE") == "develope"
+}
+
 func Setup() {
 	beego.SetViewsPath("views")
 	beego.SetStaticPath("/static", "static")
@@ -31,7 +35,7 @@ func Setup() {
 	beego.BConfig.WebConfig.FlashName = "BELLEX_FLASH"
 	beego.BConfig.WebConfig.FlashSeparator = "BELLEXLASH"
 
-	if os.Getenv("BELLEX_MODE") == "develope" {
+	if IsDevelopeMode() {
 		Mode = ModeDevelope
 	} else {
 		Mode = ModeProduct

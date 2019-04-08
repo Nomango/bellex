@@ -77,20 +77,20 @@ export default {
   },
   methods: {
     initController () {
-      homeAjax.getControllers({})
-        .then(res => {
-          console.log('res', res)
-          if (res.code === 0) {
-            res = res.data
-            this.controllerData = res.controllerList
-            this.totalPage = res.total
-          } else {
-            this.controllerData = []
-          }
-        })
-        .catch(err => {
-          console.log('err', err)
-        })
+      // homeAjax.getControllers({})
+      //   .then(res => {
+      //     console.log('res', res)
+      //     if (res.code === 0) {
+      //       res = res.data
+      //       this.controllerData = res.controllerList
+      //       this.totalPage = res.total
+      //     } else {
+      //       this.controllerData = []
+      //     }
+      //   })
+      //   .catch(err => {
+      //     console.log('err', err)
+      //   })
     },
     handleCheck (val) {
       console.log('val', val)

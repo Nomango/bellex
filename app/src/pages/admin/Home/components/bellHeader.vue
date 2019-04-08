@@ -16,7 +16,7 @@
             <router-link to="/home/set">修改密码</router-link>
           </el-dropdown-item>
           <el-dropdown-item icon="">
-            <router-link @click.native="handleLogOut">退出</router-link>
+            <span @click="handleLogOut">退出</span>
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
@@ -40,7 +40,7 @@ export default {
   },
   methods: {
     ...mapMutations(['changeCollapse']),
-    handleLogOut() {
+    handleLogOut () {
       loginAjax.logout()
         .then(res => {
           this.$message({

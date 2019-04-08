@@ -52,7 +52,7 @@ func (u *UserLoginController) Login() {
 // @router /logout [post]
 func (u *UserLoginController) Logout() {
 	if u.IsLogin {
-		u.Logout()
+		u.LogoutUser()
 	}
 
 	u.WriteJson(Json{"message": "退出成功"}, 200)

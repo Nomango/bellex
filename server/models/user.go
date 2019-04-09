@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -118,28 +119,29 @@ func FindUser(usernameOrEmail string) (*User, error) {
 }
 
 // RegisterUser ...
-func RegisterUser(user *User, username, email, password string) error {
-	user.UserName = strings.ToLower(username)
-	user.Email = strings.ToLower(email)
-	user.SetNewPassword(password)
+func RegisterUser(user *User) error {
+	if Users().Filter("UserName", user.UserName).Exist() {
+		return errors.New("UserName already exists")
+	}
 
-	user.IsForbid = false
-	user.Role = UserRoleNormal
-
+	user.UserName = strings.ToLower(user.UserName)
+	user.Email = strings.ToLower(user.Email)
+	user.SetNewPassword(user.Password)
 	return user.Insert()
 }
 
 // CreateAdminUser register an administrator
 func CreateAdminUser() error {
-	user := &User{UserName: "admin"}
-	var err error
-	if !HasUser(user.UserName) {
-		if err = RegisterUser(user, user.UserName, "admin@localhost.com", "admin"); err == nil {
-			user.Role = UserRoleAdmin
-			user.IsForbid = false
-			user.Institution = &Institution{Id: 1}
-			err = user.Update("Role", "IsForbid", "Institution")
+	if !HasUser("admin") {
+		user := &User{
+			UserName:    "admin",
+			Email:       "admin@localhost.com",
+			Password:    "admin",
+			Role:        UserRoleAdmin,
+			IsForbid:    false,
+			Institution: &Institution{Id: 1},
 		}
+		return RegisterUser(user)
 	}
-	return err
+	return nil
 }

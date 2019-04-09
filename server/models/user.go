@@ -165,6 +165,7 @@ func CreateAdminUser() error {
 	if !HasUser("admin") {
 		user := &User{
 			UserName:    "admin",
+			NickName:    "Administrator",
 			Email:       "admin@localhost.com",
 			Password:    "admin",
 			Role:        UserRoleAdmin,

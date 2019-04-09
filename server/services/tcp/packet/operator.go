@@ -19,7 +19,7 @@ var (
 
 	packetTypes = map[string]byte{
 		"connect":      types.PacketTypeConnect,
-		"request_time": types.PacketTypeRequestTime,
+		"proof_time":   types.PacketTypeRequestTime,
 		"heart_beat":   types.PacketTypeHeartBeat,
 		"get_schedule": types.PacketTypeGetSchedule,
 	}

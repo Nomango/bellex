@@ -54,3 +54,13 @@ func (i *Institution) Delete() error {
 func Institutions() orm.QuerySeter {
 	return orm.NewOrm().QueryTable((*Institution)(nil)).OrderBy("-CreateTime")
 }
+
+func CreateDefaultInstitution() error {
+	table := orm.NewOrm().QueryTable((*Institution)(nil))
+	if cnt, err := table.Count(); err != nil {
+		return err
+	} else if cnt == 0 {
+		return (&Institution{Name: "Default"}).Insert()
+	}
+	return nil
+}

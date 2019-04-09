@@ -137,7 +137,8 @@ func CreateAdminUser() error {
 		if err = RegisterUser(user, user.UserName, "admin@localhost.com", "admin"); err == nil {
 			user.Role = UserRoleAdmin
 			user.IsForbid = false
-			err = user.Update("Role", "IsForbid")
+			user.Institution = &Institution{Id: 1}
+			err = user.Update("Role", "IsForbid", "Institution")
 		}
 	}
 	return err

@@ -20,5 +20,6 @@ func Setup() {
 		beego.Error(err)
 	}
 
+	CreateDefaultInstitution()
 	CreateAdminUser()
 }

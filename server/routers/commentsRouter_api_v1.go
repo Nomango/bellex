@@ -189,15 +189,6 @@ func init() {
 
     beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:UserController"] = append(beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:UserController"],
         beego.ControllerComments{
-            Method: "ChangePassword",
-            Router: `/:id([0-9]+)/password`,
-            AllowHTTPMethods: []string{"post"},
-            MethodParams: param.Make(),
-            Filters: nil,
-            Params: nil})
-
-    beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:UserController"] = append(beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:UserController"],
-        beego.ControllerComments{
             Method: "GetAll",
             Router: `/all`,
             AllowHTTPMethods: []string{"get"},
@@ -209,6 +200,24 @@ func init() {
         beego.ControllerComments{
             Method: "Post",
             Router: `/new`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:UserController"] = append(beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:UserController"],
+        beego.ControllerComments{
+            Method: "ChangePassword",
+            Router: `/password`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:UserController"] = append(beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:UserController"],
+        beego.ControllerComments{
+            Method: "ChangeProfile",
+            Router: `/profile`,
             AllowHTTPMethods: []string{"post"},
             MethodParams: param.Make(),
             Filters: nil,

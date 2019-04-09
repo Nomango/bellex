@@ -97,6 +97,19 @@ func GetUserSalt() string {
 	return utils.RandString(10)
 }
 
+// VerifyPassword compare raw password and encoded password
+func VerifyPassword(rawPwd, encodedPwd string) bool {
+
+	// split
+	var salt, encoded string
+	if len(encodedPwd) > 11 {
+		salt = encodedPwd[:10]
+		encoded = encodedPwd[11:]
+	}
+
+	return utils.EncodePassword(rawPwd, salt) == encoded
+}
+
 // HasUser returns whether if user exists
 func HasUser(usernameOrEmail string) bool {
 	users := Users()

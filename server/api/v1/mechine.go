@@ -144,7 +144,7 @@ func (c *MechineController) Update() {
 
 	mechine.UpdateStatus()
 	if mechine.Schedule.Content != oldSchedule && mechine.Accept {
-		mechine.Connect.Output <- []byte(`schedule:` + timetable)
+		mechine.Connect.Output <- []byte(`schedule:` + timetable + ";")
 	}
 
 	c.WriteJson(Json{"message": "更新成功"}, 201)
@@ -153,7 +153,7 @@ func (c *MechineController) Update() {
 // @router /:id([0-9]+) [delete]
 func (c *MechineController) Delete() {
 	mechineID, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
-	mechine := models.Mechine{Id: mechineID}
+	mechine := &models.Mechine{Id: mechineID}
 
 	if err := mechine.Read(); err != nil {
 		c.WriteJson(Json{"message": "不存在指定主控机"}, 404)
@@ -163,6 +163,11 @@ func (c *MechineController) Delete() {
 	if c.User.IsNormal() && mechine.Institution.Id != c.User.Institution.Id {
 		c.WriteJson(Json{"message": "无访问权限"}, 403)
 		return
+	}
+
+	mechine.UpdateStatus()
+	if mechine.Accept {
+		models.DeleteConnection(mechine)
 	}
 
 	if err := mechine.Delete(); err != nil {
@@ -195,7 +200,7 @@ func (c *MechineController) StartCurrent() {
 		return
 	}
 
-	mechine.Connect.Output <- append([]byte(`bell:current`), byte(0))
+	mechine.Connect.Output <- []byte(`bell:current;`)
 
 	c.WriteJson(Json{"message": "发送成功"}, 200)
 }
@@ -228,7 +233,7 @@ func (c *MechineController) Start() {
 		return
 	}
 
-	mechine.Connect.Output <- []byte(`bell:` + time)
+	mechine.Connect.Output <- []byte(`bell:` + time + ";")
 
 	c.WriteJson(Json{"message": "发送成功"}, 200)
 }

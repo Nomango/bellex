@@ -83,7 +83,7 @@ func (c *UserController) Post() {
 	}
 
 	if err := form.Assign(&user); err != nil {
-		c.WriteJson(Json{"message": "数据格式有误"}, 400)
+		c.WriteJson(Json{"message": err.Error()}, 400)
 		return
 	}
 	user.Role = models.UserRoleNormal
@@ -124,7 +124,7 @@ func (c *UserController) Update() {
 	}
 
 	if err := form.Assign(&user); err != nil {
-		c.WriteJson(Json{"message": "数据有误"}, 400)
+		c.WriteJson(Json{"message": err.Error()}, 400)
 		return
 	}
 
@@ -161,30 +161,46 @@ func (c *UserController) Delete() {
 	c.WriteJson(Json{"message": "删除成功"}, 200)
 }
 
-// @router /:id([0-9]+)/password [post]
-func (c *UserController) ChangePassword() {
-	userID, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
+// @router /profile [post]
+func (c *UserController) ChangeProfile() {
 
-	if c.User.IsNormal() && c.User.Id != userID {
-		c.WriteJson(Json{"message": "无访问权限"}, 403)
+	var form forms.UserForm
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &form); err != nil {
+		c.WriteJson(Json{"message": "数据格式有误"}, 400)
 		return
 	}
 
-	user := models.User{Id: userID}
-	if err := user.Read(); err != nil {
-		c.WriteJson(Json{"message": "不存在指定用户"}, 404)
+	if err := form.Assign(&c.User); err != nil {
+		c.WriteJson(Json{"message": err.Error()}, 400)
+		return
+	}
+
+	if err := c.User.Update(); err != nil {
+		beego.Error(err)
+		c.WriteJson(Json{"message": "系统异常，请稍后再试"}, 400)
+		return
+	}
+
+	c.WriteJson(Json{"message": "个人资料更新成功"}, 201)
+}
+
+// @router /password [post]
+func (c *UserController) ChangePassword() {
+
+	oldPassword := c.GetString("old_password")
+	if !models.VerifyPassword(oldPassword, c.User.Password) {
+		c.WriteJson(Json{"message": "原密码输入错误"}, 400)
 		return
 	}
 
 	password := c.GetString("password")
-	user.Password = password
-
-	if err := models.CheckRegister(&user); err != nil {
-		c.WriteJson(Json{"message": "密码不合法"}, 400)
+	if len(password) < 4 {
+		c.WriteJson(Json{"message": "密码长度应大于4位字符"}, 400)
 		return
 	}
 
-	if err := user.SaveNewPassword(user.Password); err != nil {
+	c.User.Password = password
+	if err := c.User.SaveNewPassword(c.User.Password); err != nil {
 		beego.Error(err)
 		c.WriteJson(Json{"message": "系统异常，请稍后再试"}, 400)
 		return

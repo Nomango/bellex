@@ -59,10 +59,10 @@ func (m *Mechine) Delete() error {
 // UpdateStatus ...
 func (m *Mechine) UpdateStatus() {
 	if conn, err := GetConnection(m); err != nil {
-		m.Connect = conn
+		m.Connect = nil
 		m.Accept = false
 	} else {
-		m.Connect = nil
+		m.Connect = conn
 		m.Accept = true
 	}
 }

@@ -6,7 +6,6 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/nomango/bellex/server/models"
 	"github.com/nomango/bellex/server/modules/forms"
-	"github.com/nomango/bellex/server/modules/utils"
 )
 
 // UserLoginController ...
@@ -40,7 +39,7 @@ func (u *UserLoginController) Login() {
 		return
 	}
 
-	if !verifyPassword(form.Password, user.Password) {
+	if !models.VerifyPassword(form.Password, user.Password) {
 		u.WriteJson(Json{"message": "密码错误，请重新输入"}, 400)
 		return
 	}
@@ -65,17 +64,4 @@ func (u *UserLoginController) Status() {
 	} else {
 		u.WriteJson(Json{"message": "用户未登录"}, 400)
 	}
-}
-
-// VerifyPassword compare raw password and encoded password
-func verifyPassword(rawPwd, encodedPwd string) bool {
-
-	// split
-	var salt, encoded string
-	if len(encodedPwd) > 11 {
-		salt = encodedPwd[:10]
-		encoded = encodedPwd[11:]
-	}
-
-	return utils.EncodePassword(rawPwd, salt) == encoded
 }

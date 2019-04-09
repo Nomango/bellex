@@ -1,6 +1,10 @@
 package forms
 
-import "github.com/nomango/bellex/server/models"
+import (
+	"errors"
+
+	"github.com/nomango/bellex/server/models"
+)
 
 type UserLoginForm struct {
 	UserName string `json:"username"`
@@ -19,7 +23,15 @@ type UserRegisterForm struct {
 func (u *UserRegisterForm) Assign(user *models.User) error {
 	institution := &models.Institution{Id: u.InstitutionID}
 	if err := institution.Read(); err != nil {
-		return err
+		return errors.New("指定机构不存在")
+	}
+
+	if models.HasUser(user.UserName) {
+		return errors.New("用户已被占用")
+	}
+
+	if models.HasUser(user.Email) {
+		return errors.New("邮箱已被占用")
 	}
 
 	user.UserName = u.UserName
@@ -37,6 +49,14 @@ type UserForm struct {
 }
 
 func (u *UserForm) Assign(user *models.User) error {
+	if user.UserName != u.UserName && models.HasUser(u.UserName) {
+		return errors.New("用户已被占用")
+	}
+
+	if user.Email != u.Email && models.HasUser(u.Email) {
+		return errors.New("邮箱已被占用")
+	}
+
 	user.UserName = u.UserName
 	user.NickName = u.NickName
 	user.Email = u.Email

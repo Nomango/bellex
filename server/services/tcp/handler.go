@@ -6,12 +6,12 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"strings"
 	"time"
 
 	"github.com/astaxie/beego"
 
 	"github.com/nomango/bellex/server/models"
-	"github.com/nomango/bellex/server/modules/utils"
 	"github.com/nomango/bellex/server/services/ntp"
 	tcpPacket "github.com/nomango/bellex/server/services/tcp/packet"
 	"github.com/nomango/bellex/server/services/tcp/types"
@@ -48,38 +48,40 @@ func PacketHandler(req []byte, conn net.Conn, outputCh chan<- []byte) {
 
 	switch packet.Type {
 	case types.PacketTypeConnect:
-		response, err = requestConnect(packet, conn, outputCh)
+		response, err = handleRequestConnect(packet, conn, outputCh)
 	case types.PacketTypeRequestTime:
-		response, err = requestTime()
+		response, err = handleRequestTime()
 	case types.PacketTypeHeartBeat:
-		response = "status:1;"
+		response, err = handleRequestHeartBeat(packet)
 	default:
 		err = errors.New("Invalid request")
 	}
 }
 
-func requestConnect(packet *types.Packet, conn net.Conn, outputCh chan<- []byte) (string, error) {
+func handleRequestConnect(packet *types.Packet, conn net.Conn, outputCh chan<- []byte) (string, error) {
 
-	var mechine models.Mechine
-	if err := models.Mechines().Filter("Code", packet.Auth.Code).One(&mechine); err == nil {
-		// Mechine already exists
-		if mechine.Accept {
-			mechine.Secret = utils.RandString(8)
-			mechine.Update("Secret")
-		}
-	} else {
+	mechine, err := packet.GetMechine()
+	if err != nil {
 		return "", errors.New("Permission denied")
 	}
 
-	if err := models.AddConnection(&mechine, conn, outputCh); err != nil {
+	mechine.UpdateStatus()
+	if mechine.Accept {
+		return "", errors.New("Connection already exists")
+	}
+
+	// connection already exists
+	mechine.SaveNewSecret()
+
+	if err := models.AddConnection(mechine, conn, outputCh); err != nil {
 		beego.Error("Add connection failed", err)
 	}
 
 	return "unique_code:" + mechine.Secret + ";", nil
 }
 
-func requestTime() (string, error) {
-	now, err := requestNTP()
+func handleRequestTime() (string, error) {
+	now, err := sendNTPRequest()
 	if err != nil {
 		return "", err
 	}
@@ -92,7 +94,30 @@ func requestTime() (string, error) {
 	return response, nil
 }
 
-func requestNTP() (time.Time, error) {
+func handleRequestHeartBeat(packet *types.Packet) (string, error) {
+	mechine, err := packet.GetMechine()
+	if err != nil {
+		return "", errors.New("Permission denied")
+	}
+
+	mechine.UpdateStatus()
+	if !mechine.Accept {
+		return "", errors.New("Connection not found")
+	}
+
+	switch {
+	case strings.Contains(packet.Data, "status:idle"):
+		mechine.Idle = true
+		mechine.Update("Idle")
+	case strings.Contains(packet.Data, "status:ready"):
+		mechine.Idle = false
+		mechine.Update("Idle")
+	}
+
+	return "status:1;", nil
+}
+
+func sendNTPRequest() (time.Time, error) {
 	size := len(ntp.Servers)
 	signals := make(chan time.Time, size)
 

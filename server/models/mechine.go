@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/astaxie/beego/orm"
+	"github.com/nomango/bellex/server/modules/utils"
 )
 
 func init() {
@@ -14,22 +15,15 @@ type Mechine struct {
 	Id      int                `json:"id"`
 	Code    string             `orm:"unique;size(30)" json:"code"`
 	Secret  string             `orm:"size(30)" json:"secret"`
+	Idle    bool               `json:"idle"`
 	Accept  bool               `orm:"-" json:"accept"`
 	Connect *MechineConnection `orm:"-" json:"-"`
 
 	Institution *Institution `orm:"rel(fk)" json:"institution"`
-	Schedule     *Schedule     `orm:"rel(fk)" json:"-"`
+	Schedule    *Schedule    `orm:"rel(fk)" json:"-"`
 
 	CreateTime time.Time `orm:"auto_now_add" json:"create_time"`
 	UpdateTime time.Time `orm:"auto_now" json:"update_time"`
-}
-
-// NewMechine ...
-func NewMechine(Code string, Secret string) *Mechine {
-	return &Mechine{
-		Code:   Code,
-		Secret: Secret,
-	}
 }
 
 // Insert ...
@@ -70,6 +64,17 @@ func (m *Mechine) UpdateStatus() {
 		m.Connect = nil
 		m.Accept = true
 	}
+}
+
+// SetNewSecret ...
+func (m *Mechine) SetNewSecret() {
+	m.Secret = utils.RandString(8)
+}
+
+// SaveNewSecret ...
+func (m *Mechine) SaveNewSecret() error {
+	m.SetNewSecret()
+	return m.Update("Secret")
 }
 
 func Mechines() orm.QuerySeter {

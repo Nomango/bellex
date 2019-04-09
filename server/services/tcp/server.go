@@ -104,9 +104,10 @@ func (ts *Server) Handle(conn net.Conn, handler func([]byte, net.Conn, chan<- []
 		for {
 			select {
 			case data := <-outputCh:
-				data = append(data, byte(0))
-				if _, err := conn.Write(data); err != nil {
-					log.Println("Bad response", conn.RemoteAddr(), err.Error())
+				if len(data) != 0 {
+					if _, err := conn.Write(append(data, byte(0))); err != nil {
+						log.Println("Bad response", conn.RemoteAddr(), err.Error())
+					}
 				}
 			case <-endCh:
 				// connection closed

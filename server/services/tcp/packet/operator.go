@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	baseRegStr = `id:([\w]+);code:([\w]+);req:([\w]+);(.*)`
+	baseRegStr = `id:([\w]+);code:([\w]+);req:([\w]+);data:(.*);`
 )
 
 var (
@@ -48,6 +48,7 @@ func LoadPacket(req string) (*types.Packet, error) {
 			Secret: params[2],
 		},
 		Type: packetType,
+		Data: params[4],
 	}
 	return packet, nil
 }

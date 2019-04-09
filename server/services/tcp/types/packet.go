@@ -2,6 +2,8 @@
 
 package types
 
+import "github.com/nomango/bellex/server/models"
+
 // Packet types
 const (
 	PacketTypeConnect byte = iota
@@ -19,17 +21,26 @@ type AuthPacket struct {
 type Packet struct {
 	Auth AuthPacket `json:"auth"`
 	Type byte       `json:"type"`
-	Data []byte     `json:"data"`
+	Data string     `json:"data"`
 }
 
 // DefaultPacket returns a default packet
 func DefaultPacket() *Packet {
 	return &Packet{
 		Auth: AuthPacket{
-			Code:   "BW123",
-			Secret: "Xwa8pj7",
+			Code:   "BW123456",
+			Secret: "Xwa8pj7z",
 		},
 		Type: 0,
-		Data: make([]byte, 0),
+		Data: "",
 	}
+}
+
+// GetMechine returns related mechine
+func (p *Packet) GetMechine() (*models.Mechine, error) {
+	var mechine models.Mechine
+	if err := models.Mechines().Filter("Code", p.Auth.Code).One(&mechine); err != nil {
+		return nil, err
+	}
+	return &mechine, nil
 }

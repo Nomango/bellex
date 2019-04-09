@@ -11,12 +11,12 @@ import (
 )
 
 var (
-	MechineCode   string
-	MechineSecret string
+	MechineCode   = "12345678"
+	MechineSecret = "00000000"
 )
 
-func makeRequest(request string) []byte {
-	return []byte("id:" + MechineCode + ";code:" + MechineSecret + ";req:" + request + ";")
+func makeRequest(request string, data string) []byte {
+	return []byte("id:" + MechineCode + ";code:" + MechineSecret + ";req:" + request + ";data:" + data + ";")
 }
 
 func main() {
@@ -46,12 +46,12 @@ func main() {
 				log.Fatalln(err)
 				return
 			}
-			fmt.Println(response)
+			fmt.Printf("Receive (size: %d) %s\n", len(response), response)
 
 			switch {
-			case strings.Contains(response, "unique_code:"):
-				MechineSecret = response[12:]
-				fmt.Println("secret", MechineSecret)
+			case strings.Contains(response, "unique_code:") && len(response) == 22:
+				MechineSecret = response[12:20]
+				fmt.Println("Update secret", MechineSecret)
 			}
 		}
 	}()
@@ -62,6 +62,9 @@ func main() {
 
 	fmt.Println("Menus:")
 	fmt.Println("- 1: Send connect request")
+	fmt.Println("- 2: Send proof-time request")
+	fmt.Println("- 3: Send heart-beat request")
+	fmt.Println("- 4: Send heart-beat request with idle")
 	fmt.Println("- 0: Exit")
 
 	fmt.Println()
@@ -79,7 +82,13 @@ func main() {
 		case 0:
 			return
 		case 1:
-			client.Send(makeRequest("connect"))
+			client.Send(makeRequest("connect", ""))
+		case 2:
+			client.Send(makeRequest("request_time", ""))
+		case 3:
+			client.Send(makeRequest("heart_beat", "status:ready"))
+		case 4:
+			client.Send(makeRequest("heart_beat", "status:idle"))
 		default:
 			fmt.Println("Unknown command")
 		}

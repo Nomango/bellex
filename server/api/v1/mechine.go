@@ -2,7 +2,9 @@ package v1
 
 import (
 	"encoding/json"
+	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/astaxie/beego"
 	"github.com/nomango/bellex/server/models"
@@ -65,6 +67,7 @@ func (c *MechineController) Post() {
 		return
 	}
 	mechine.Institution = c.User.Institution
+	mechine.SetNewSecret()
 
 	if err := mechine.Insert(); err != nil {
 		beego.Error(err)
@@ -126,6 +129,14 @@ func (c *MechineController) Update() {
 		return
 	}
 
+	var timetable string
+	for _, time := range strings.Split(mechine.Schedule.Content, " ") {
+		for _, num := range strings.Split(time, ":") {
+			timetable += num
+		}
+	}
+	mechine.Connect.Output <- []byte(`schedule:` + timetable)
+
 	c.WriteJson(Json{"message": "更新成功"}, 201)
 }
 
@@ -153,6 +164,32 @@ func (c *MechineController) Delete() {
 	c.WriteJson(Json{"message": "删除成功"}, 200)
 }
 
+// @router /:id([0-9]+)/start/current [post]
+func (c *MechineController) StartCurrent() {
+	mechineID, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
+	mechine := models.Mechine{Id: mechineID}
+
+	if err := mechine.Read(); err != nil {
+		c.WriteJson(Json{"message": "不存在指定主控机"}, 404)
+		return
+	}
+
+	if c.User.IsNormal() && mechine.Institution.Id != c.User.Institution.Id {
+		c.WriteJson(Json{"message": "无访问权限"}, 403)
+		return
+	}
+
+	mechine.UpdateStatus()
+	if !mechine.Accept {
+		c.WriteJson(Json{"message": "主控机未连接"}, 403)
+		return
+	}
+
+	mechine.Connect.Output <- append([]byte(`bell:current`), byte(0))
+
+	c.WriteJson(Json{"message": "发送成功"}, 200)
+}
+
 // @router /:id([0-9]+)/start [post]
 func (c *MechineController) Start() {
 	mechineID, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
@@ -174,7 +211,14 @@ func (c *MechineController) Start() {
 		return
 	}
 
-	mechine.Connect.Output <- append([]byte(`bell:current`), byte(0))
+	time := c.GetString("time")
+	matched, _ := regexp.MatchString(`\d{2}:\d{2}`, time)
+	if !matched {
+		c.WriteJson(Json{"message": "数据格式有误"}, 403)
+		return
+	}
+
+	mechine.Connect.Output <- []byte(`bell:` + time)
 
 	c.WriteJson(Json{"message": "发送成功"}, 200)
 }

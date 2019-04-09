@@ -6,7 +6,9 @@ const state = {
   isShowLoading: false,
   isCollapse: false,
   ajaxLoading: false,
-  roles: 0
+  roles: 0,
+  nickName: '',
+  userInfo: null
 }
 const mutations = {
   changLoading: (state, isShow) => {
@@ -17,6 +19,12 @@ const mutations = {
   },
   SET_ROLE: (state, role) => {
     state.roles = role
+  },
+  SET_NICKNAME: (state, name) => {
+    state.nickName = name
+  },
+  SET_USERINFO: (state, name) => {
+    state.userInfo = name
   }
 }
 const actions = {
@@ -30,6 +38,8 @@ const actions = {
             data
           } = response
           commit('SET_ROLE', data.user.role)
+          commit('SET_NICKNAME', data.user.nickname)
+          commit('SET_USERINFO', data.user)
           resolve(data.user.role)
         }).catch(error => {
           reject(error)

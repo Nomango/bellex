@@ -12,7 +12,12 @@
             style="width: 100%">
           <el-table-column
             prop="username"
-            label="名称"
+            label="账号"
+            align="center"
+            width="" />
+          <el-table-column
+            prop="nickname"
+            label="昵称"
             align="center"
             width="" />
           <el-table-column
@@ -33,7 +38,7 @@
             align="center"
             width="">
             <template slot-scope="{row}">
-              <span>{{row.insititution.name}}</span>
+              <span>{{row.institution.name}}</span>
             </template>
           </el-table-column>
           <el-table-column
@@ -61,14 +66,20 @@
             @confirm="handleAddConfirm">
             <div class="content" slot="content">
               <el-form ref="subUserForm" :model="subUserForm" :rules="rules" label-width="60px">
-                <el-form-item label="名称: " prop="username">
-                  <el-input v-model="subUserForm.username" placeholder="请输入名称" />
+                <el-form-item label="账号: " prop="username">
+                  <el-input v-model="subUserForm.username" placeholder="请输入账号" />
+                </el-form-item>
+                <el-form-item label="昵称: " prop="nickname">
+                  <el-input v-model="subUserForm.nickname" placeholder="请输入昵称" />
+                </el-form-item>
+                <el-form-item v-show="clickType === 'create'" label="密码: " prop="password">
+                  <el-input v-model="subUserForm.password" type="password" placeholder="请输入密码" />
                 </el-form-item>
                 <el-form-item label="邮箱: " prop="email">
-                  <el-input v-model="subUserForm.email" placeholder="请输入账号" />
+                  <el-input v-model="subUserForm.email" placeholder="请输入邮箱" />
                 </el-form-item>
                 <el-form-item label="机构: " prop="institution">
-                  <el-select v-model="subUserForm.institution" placeholder="请选择活动区域">
+                  <el-select v-model="subUserForm.institution" placeholder="请选择机构">
                     <el-option
                       v-for="item of institutionOption"
                       :key="item.value"
@@ -122,24 +133,31 @@ export default {
       addDialog: false,
       subUserForm: {
         username: '',
+        nickname: '',
         email: '',
         institution: ''
       },
       subUserData: [],
       clickType: null,
+      rowId: null,
       institutionOption: [],
       rules: {
         username: [{ required: true, message: '请输入名称', trigger: 'blur' }],
+        password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+        nickname: [{ required: true, message: '请输入昵称', trigger: 'blur' }],
         email: [{ required: true, message: '请输入账号', trigger: 'blur' }],
         institution: [{ required: true, message: '请选择机构', trigger: 'change' }]
       }
     }
   },
   created () {
-    this.getUserList()
-    this.getInstitution()
+    this.initData()
   },
   methods: {
+    initData () {
+      this.getUserList()
+      this.getInstitution()
+    },
     getInstitution () {
       userAjax.getInstitution({
         page: 0,
@@ -187,7 +205,7 @@ export default {
     },
     handleEdit (data) {
       this.subUserForm = Object.assign({}, data)
-      this.subUserForm.institution = data.insititution.name
+      this.subUserForm.institution = data.institution.id
       this.clickType = 'update'
       this.addDialog = true
       this.resetForm()
@@ -202,9 +220,8 @@ export default {
           id: data.id
         })
           .then(res => {
-            if (res.code === 0) {
-              this.showMsg('success', '删除成功!')
-            }
+            this.showMsg('success', '删除成功!')
+            this.initData()
           })
           .catch(err => {
             console.log(err)
@@ -232,37 +249,43 @@ export default {
           console.log('error submit!!')
           return false
         }
-      });
+      })
     },
     createData (val) {
       let subUserForm = this.subUserForm
       userAjax.addUser({
         username: subUserForm.username,
+        nickname: subUserForm.nickname,
+        password: subUserForm.password,
         email: subUserForm.email,
         institution_id: subUserForm.institution
       })
         .then(res => {
           this.showMsg('success', '添加成功!')
+          this.initData()
+          this.addDialog = val
         })
         .catch(err => {
           console.log(err)
         })
-      this.addDialog = val
     },
     updateData (val) {
       let subUserForm = this.subUserForm
       userAjax.putUser({
+        id: subUserForm.id,
         username: subUserForm.username,
+        nickname: subUserForm.nickname,
         email: subUserForm.email,
         institution_id: subUserForm.institution
       })
         .then(res => {
           this.showMsg('success', '编辑成功!')
+          this.initData()
+          this.addDialog = val
         })
         .catch(err => {
           console.log(err)
         })
-      this.addDialog = val
     },
     handleAddCancel (val) {
       this.addDialog = val

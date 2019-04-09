@@ -8,10 +8,12 @@
     <div class="bell-nav bell-layout-right">
       <el-dropdown @visible-change="handleVisible">
         <span class="el-dropdown-link">
-          我的<i class="el-icon--right" :class="dropIcon" />
+          {{nickName}}<i class="el-icon--right" :class="dropIcon" />
         </span>
         <el-dropdown-menu slot="dropdown">
-          <!-- <el-dropdown-item icon="">基本资料</el-dropdown-item> -->
+          <el-dropdown-item icon="">
+            <router-link to="/home/profile">基本资料</router-link>
+          </el-dropdown-item>
           <el-dropdown-item icon="">
             <router-link to="/home/set">修改密码</router-link>
           </el-dropdown-item>
@@ -34,6 +36,7 @@ export default {
   },
   computed: {
     ...mapState(['isCollapse']),
+    ...mapState(['nickName']),
     isShousuo () {
       return this.isCollapse ? 'icon-zhankai' : 'icon-shousuo'
     }

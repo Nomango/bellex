@@ -2,7 +2,7 @@
   <div class="login-wrapper">
     <div class="bell-login-main">
       <div class="bell-login-header">
-        <h2>智慧打铃系统</h2>
+        <h2>智铃校园后台管理</h2>
         <el-form ref="form" :model="form">
           <el-form-item label="">
             <el-input
@@ -16,7 +16,8 @@
             <el-input
               v-model="form.psd"
               type="password"
-              placeholder="密码">
+              placeholder="密码"
+              @keyup.enter.native="onSubmit">
               <i slot="prefix" class="iconfont icon-password"></i>
             </el-input>
           </el-form-item>
@@ -27,24 +28,13 @@
           <el-form-item>
             <el-button type="primary"
               :loading="buttonLoading"
-              @click="onSubmit"
-              @keyup.enter="onSubmit">登入</el-button>
-          </el-form-item>
-          <el-form-item class="contact-item">
-            <span>社交账号登入</span>
-            <a href="javascript:;"><i class="iconfont icon-qq"></i></a>
-            <a href="javascript:;"><i class="iconfont icon-weixin"></i></a>
-            <a href="javascript:;"><i class="iconfont icon-weibo"></i></a>
+              @click="onSubmit">登入</el-button>
           </el-form-item>
         </el-form>
       </div>
     </div>
     <div class="bell-login-footer">
-      <p>© 2019 <a href="http://www.baidu.com/" target="_blank">leoGOGO.com</a></p>
-      <p>
-        <span><a href="http://www.layui.com/admin/#get" target="_blank">获取授权</a></span>
-        <span><a href="http://www.layui.com/admin/" target="_blank">前往官网</a></span>
-      </p>
+      <p>© 2019 <a href="http://bellex.easy2d.cn:8080" target="_blank">bellex.com</a></p>
     </div>
   </div>
 </template>

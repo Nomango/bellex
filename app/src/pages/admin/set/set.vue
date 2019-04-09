@@ -6,18 +6,20 @@
       </div>
       <div slot="card-content">
         <el-form ref="setForm" :model="form" :rules="rules" label-width="100px">
-          <el-form-item label="当前密码" prop="psd">
-            <el-input v-model="form.psd" />
+          <el-form-item label="当前密码" prop="old_password">
+            <el-input v-model="form.old_password" type="password" />
           </el-form-item>
-          <el-form-item label="新密码" prop="newPsd">
-            <el-input v-model="form.newPsd" />
+          <el-form-item label="新密码" prop="password">
+            <el-input v-model="form.password" type="password" />
             <span class="form-word-aux">6到16个字符</span>
           </el-form-item>
           <el-form-item label="确认新密码" prop="confirmPsd">
-            <el-input v-model="form.confirmPsd" />
+            <el-input v-model="form.confirmPsd" type="password" @keyup.enter.native="onSubmit"/>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="onSubmit">立即创建</el-button>
+            <el-button
+              type="primary"
+              @click="onSubmit">确定</el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -26,24 +28,34 @@
 </template>
 <script>
 import bellCard from 'common/card/card'
+import loginAjax from '@/api/login.js'
 export default {
   components: {
     bellCard
   },
   data () {
+    var validateOncePass = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请再次输入密码'));
+      } else if (value !== this.form.password) {
+        callback(new Error('两次输入密码不一致!'));
+      } else {
+        callback();
+      }
+    }
     return {
       form: {
-        psd: '',
-        newPsd: '',
+        old_password: '',
+        password: '',
         confirmPsd: ''
       },
       rules: {
-        psd: [
-          { required: true, message: '请输入活动名称', trigger: 'blur' },
+        old_password: [
+          { required: true, message: '请输入当前密码', trigger: 'blur' },
           { min: 6, max: 16, message: '长度在 6 到 16 个字符', trigger: 'blur' }
         ],
-        newPsd: [{ required: true, message: '请输入新密码', trigger: 'blur' }],
-        confirmPsd: [{ required: true, message: '请确认密码', trigger: 'blur' }]
+        password: [{ required: true, message: '请输入新密码', trigger: 'blur' }],
+        confirmPsd: [{ required: true, validator: validateOncePass, trigger: 'blur' }]
       }
     }
   },
@@ -51,13 +63,28 @@ export default {
     onSubmit () {
       this.$refs['setForm'].validate((valid) => {
         if (valid) {
-          console.log('submit!')
+          loginAjax.resetPsd(this.form)
+            .then(res => {
+              this.resetForm()
+              this.showMsg('success', '修改成功 ^_^')
+            })
+            .catch(err => {
+              console.log('err', err)
+            })
         } else {
           console.log('error submit!!')
           return false
         }
-      });
-      console.log('aaa')
+      })
+    },
+    resetForm () {
+      this.$refs['setForm'].resetFields();
+    },
+    showMsg (type, msg) {
+      this.$message({
+        type: type,
+        message: msg
+      })
     }
   }
 }

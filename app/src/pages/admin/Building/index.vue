@@ -106,7 +106,6 @@ export default {
   },
   data () {
     return {
-      timeVal: new Date(2019, 4, 2, 18, 40),
       timeVisible: false,
       timeValue: '',
       buildingDialog: false,

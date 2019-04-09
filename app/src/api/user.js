@@ -10,19 +10,12 @@ export default {
     return API.POST('user/new', params)
   },
   putUser: params => {
-    return API.PUT(`user/${params.institution_id}`, params)
+    return API.PUT(`user/${params.id}`, params)
   },
   getInstitution: params => {
     return API.GET('institution/all', params)
   },
   delUser: params => {
-    return new Promise(function (resolve, reject) {
-      if (params !== undefined) {
-        resolve({
-          code: 0
-        })
-      }
-    })
-    // return API.GET('static/mock/controllers.json', params)
+    return API.DELETE(`user/${params.id}`)
   }
 }

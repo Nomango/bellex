@@ -62,6 +62,18 @@ export const POST = (url, params) => {
   console.info('POST请求路径' + `${base}${url}`);
   return axios.post(`${base}${url}`, params)
 }
+export const REPOST = (url, params) => {
+  console.info('POST请求路径' + `${base}${url}`);
+  const formData = new FormData()
+  for (let i in params) {
+    formData.append(i, params[i])
+  }
+  return axios.post(`${base}${url}`, formData, {
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+}
 export const GET = (url, params) => {
   console.info('GET请求路径' + `${base}${url}`)
   return axios.get(`${base}${url}`, {

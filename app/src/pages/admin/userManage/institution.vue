@@ -110,12 +110,21 @@ export default {
         .then(res => {
           console.log('getInstitutionList', res)
           res = res.data
-          this.institutionLists = res.data
           this.totalPage = res.total
+          this.handleResData(res.data)
         })
         .catch(err => {
           console.log(err)
         })
+    },
+    handleResData (res) {
+      this.institutionLists = res.map(item => {
+        return {
+          create_time: translateTime(item.create_time).all,
+          id: item.id,
+          name: item.name
+        }
+      })
     },
     handleEdit (row) {
       console.log('handleCheck', row)

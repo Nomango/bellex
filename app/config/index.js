@@ -13,7 +13,7 @@ module.exports = {
     proxyTable: {
       '/api/v1': {
         // target: 'http://localhost:8081',
-        target: 'http://192.168.137.66:8080',
+        target: 'http://192.168.137.28:8080',
         // target: 'http://192.168.43.136:8080',
         pathRewrite: {
           // '^/api': '/static/mock'

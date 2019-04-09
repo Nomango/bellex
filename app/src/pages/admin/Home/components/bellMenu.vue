@@ -1,7 +1,7 @@
 <template>
   <div class="bell-side bell-side-menu" :class="{'isHideMenu': isCollapse}">
     <div class="bell-logo">
-      <span>打铃系统</span>
+      <span>{{userInfo.institution.name}}</span>
     </div>
     <el-menu
       :default-active="defaultActive"
@@ -27,17 +27,6 @@
           :index="subItem.index">
           {{subItem.name}}
         </el-menu-item>
-        <template v-if="item.isSubMenu">
-          <el-submenu
-            v-for="(subMenu,subMenuIndex) of item.subMenu"
-            :key="subMenuIndex"
-            :index="subMenu.index">
-            <template slot="title">{{subMenu.title}}</template>
-            <el-menu-item :index="subMenu.index">
-              {{subMenu.itemName}}
-            </el-menu-item>
-          </el-submenu>
-        </template>
       </el-submenu>
     </el-menu>
   </div>
@@ -47,7 +36,8 @@ import { mapState } from 'vuex'
 export default {
   computed: {
     ...mapState(['isCollapse']),
-    ...mapState(['roles'])
+    ...mapState(['roles']),
+    ...mapState(['userInfo'])
   },
   data () {
     return {
@@ -79,11 +69,12 @@ export default {
         id: '3',
         icon: 'icon-shezhi',
         name: '设置',
-        isSubMenu: true,
-        subMenu: [{
+        children: [{
+          index: '/home/profile',
+          name: '修改资料'
+        }, {
           index: '/home/set',
-          title: '我的设置',
-          itemName: '修改密码'
+          name: '修改密码'
         }]
       }]
     }
@@ -95,7 +86,8 @@ export default {
     handleRoleMenu () {
       if (this.roles === 0) {
         let newMenuArr = Object.assign([], this.menuList)
-        this.roleMenu = newMenuArr.splice(1, 1)
+        newMenuArr.splice(1, 1)
+        this.roleMenu = newMenuArr
       } else {
         this.roleMenu = this.menuList
       }

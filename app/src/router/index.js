@@ -25,6 +25,9 @@ let routerArr = [{
     path: '/home/set',
     component: () => import('@/pages/admin/set/set.vue')
   }, {
+    path: '/home/profile',
+    component: () => import('@/pages/admin/set/profile.vue')
+  }, {
     path: '/home/tableDetail',
     name: 'tableDetail',
     component: () => import('@/pages/admin/tableDetail/index.vue')

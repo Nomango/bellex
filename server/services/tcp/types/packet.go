@@ -9,6 +9,7 @@ const (
 	PacketTypeConnect byte = iota
 	PacketTypeRequestTime
 	PacketTypeHeartBeat
+	PacketTypeGetSchedule
 )
 
 // AuthPacket contains authority verification infofmation
@@ -39,7 +40,7 @@ func DefaultPacket() *Packet {
 // GetMechine returns related mechine
 func (p *Packet) GetMechine() (*models.Mechine, error) {
 	var mechine models.Mechine
-	if err := models.Mechines().Filter("Code", p.Auth.Code).One(&mechine); err != nil {
+	if err := models.Mechines().Filter("Code", p.Auth.Code).RelatedSel().One(&mechine); err != nil {
 		return nil, err
 	}
 	return &mechine, nil

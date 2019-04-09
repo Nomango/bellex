@@ -13,7 +13,7 @@ type ScheduleForm struct {
 }
 
 func (m *ScheduleForm) Assign(schedule *models.Schedule) error {
-	matched, _ := regexp.MatchString(`\d{2}:\d{2}( \d{2}:\d{2})*`, m.Content)
+	matched, _ := regexp.MatchString(`^\d{2}:\d{2}( \d{2}:\d{2})*$`, m.Content)
 	if !matched {
 		return errors.New("数据格式有误")
 	}

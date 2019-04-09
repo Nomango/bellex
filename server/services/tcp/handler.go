@@ -53,6 +53,8 @@ func PacketHandler(req []byte, conn net.Conn, outputCh chan<- []byte) {
 		response, err = handleRequestTime()
 	case types.PacketTypeHeartBeat:
 		response, err = handleRequestHeartBeat(packet)
+	case types.PacketTypeGetSchedule:
+		response, err = handleRequestGetSchedule(packet)
 	default:
 		err = errors.New("Invalid request")
 	}
@@ -115,6 +117,20 @@ func handleRequestHeartBeat(packet *types.Packet) (string, error) {
 	}
 
 	return "status:1;", nil
+}
+
+func handleRequestGetSchedule(packet *types.Packet) (string, error) {
+	mechine, err := packet.GetMechine()
+	if err != nil {
+		return "", errors.New("Permission denied")
+	}
+
+	mechine.UpdateStatus()
+	if !mechine.Accept {
+		return "", errors.New("Connection not found")
+	}
+
+	return "schedule:" + mechine.Schedule.Content + ";", nil
 }
 
 func sendNTPRequest() (time.Time, error) {

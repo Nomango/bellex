@@ -29,6 +29,9 @@ func (c *MechineController) GetAll() {
 		if err != nil {
 			c.WriteJson(Json{"message": "输入有误"}, 400)
 		} else {
+			for _, m := range mechines {
+				m.UpdateStatus()
+			}
 			c.WriteJson(Json{"data": mechines, "total": len(mechines)}, 200)
 		}
 	}()
@@ -43,9 +46,9 @@ func (c *MechineController) GetAll() {
 
 	switch {
 	case c.User.IsNormal():
-		_, err = models.Mechines().Filter("Institution", c.User.Institution.Id).Limit(limit, (page-1)*limit).All(&mechines)
+		_, err = models.Mechines().Filter("Institution", c.User.Institution.Id).Limit(limit, (page-1)*limit).RelatedSel().All(&mechines)
 	case c.User.IsAdmin():
-		_, err = models.Mechines().OrderBy("Institution").Limit(limit, (page-1)*limit).All(&mechines)
+		_, err = models.Mechines().OrderBy("Institution").Limit(limit, (page-1)*limit).RelatedSel().All(&mechines)
 	}
 }
 
@@ -94,6 +97,7 @@ func (c *MechineController) Get() {
 		return
 	}
 
+	mechine.UpdateStatus()
 	c.WriteJson(Json{"data": mechine}, 200)
 }
 
@@ -118,6 +122,8 @@ func (c *MechineController) Update() {
 		return
 	}
 
+	oldSchedule := mechine.Schedule.Content
+
 	if err := form.Assign(&mechine); err != nil {
 		c.WriteJson(Json{"message": "数据有误"}, 400)
 		return
@@ -135,7 +141,11 @@ func (c *MechineController) Update() {
 			timetable += num
 		}
 	}
-	mechine.Connect.Output <- []byte(`schedule:` + timetable)
+
+	mechine.UpdateStatus()
+	if mechine.Schedule.Content != oldSchedule && mechine.Accept {
+		mechine.Connect.Output <- []byte(`schedule:` + timetable)
+	}
 
 	c.WriteJson(Json{"message": "更新成功"}, 201)
 }
@@ -212,7 +222,7 @@ func (c *MechineController) Start() {
 	}
 
 	time := c.GetString("time")
-	matched, _ := regexp.MatchString(`\d{2}:\d{2}`, time)
+	matched, _ := regexp.MatchString(`^\d{2}:\d{2}$`, time)
 	if !matched {
 		c.WriteJson(Json{"message": "数据格式有误"}, 403)
 		return

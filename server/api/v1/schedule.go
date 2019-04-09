@@ -48,7 +48,13 @@ func (c *ScheduleController) GetAll() {
 		return
 	}
 
-	if _, err = qs.Limit(limit, (page-1)*limit).All(&schedules); err != nil {
+	if page == 0 && limit == 0 {
+		_, err = qs.All(&schedules)
+	} else {
+		_, err = qs.Limit(limit, (page-1)*limit).All(&schedules)
+	}
+
+	if err != nil {
 		c.WriteJson(Json{"message": "系统异常，请稍后再试"}, 400)
 		return
 	}

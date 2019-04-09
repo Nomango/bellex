@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	baseRegStr = `id:([\w]+);code:([\w]+);req:([\w]+);data:(.*);`
+	baseRegStr = `^id:([\w]+);code:([\w]+);req:([\w]+);data:(.*);$`
 )
 
 var (
@@ -21,6 +21,7 @@ var (
 		"connect":      types.PacketTypeConnect,
 		"request_time": types.PacketTypeRequestTime,
 		"heart_beat":   types.PacketTypeHeartBeat,
+		"get_schedule": types.PacketTypeGetSchedule,
 	}
 )
 

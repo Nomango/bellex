@@ -3,6 +3,7 @@ package models
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -22,6 +23,7 @@ const (
 type User struct {
 	Id       int    `json:"id"`
 	UserName string `orm:"size(30);unique" json:"username"`
+	NickName string `orm:"size(30)" json:"nickname"`
 	Password string `orm:"size(128)" json:"-"`
 	Email    string `orm:"size(80);unique" json:"email"`
 	Role     int    `orm:"index;default(0)" json:"role"`
@@ -101,7 +103,7 @@ func HasUser(usernameOrEmail string) bool {
 	if strings.IndexRune(usernameOrEmail, '@') == -1 {
 		return users.Filter("UserName", usernameOrEmail).Exist()
 	}
-	return users.Filter("Email", usernameOrEmail).Exist()
+	return users.Filter("Email", strings.ToLower(usernameOrEmail)).Exist()
 }
 
 // FindUser ...
@@ -114,18 +116,33 @@ func FindUser(usernameOrEmail string) (*User, error) {
 		return &user, err
 	}
 
-	err := users.Filter("Email", usernameOrEmail).One(&user)
+	err := users.Filter("Email", strings.ToLower(usernameOrEmail)).One(&user)
 	return &user, err
+}
+
+func CheckRegister(user *User) error {
+	if Users().Filter("UserName", user.UserName).Exist() {
+		return errors.New("账号已存在")
+	}
+
+	user.Email = strings.ToLower(user.Email)
+	emailReg := `^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$`
+	if matched, _ := regexp.MatchString(emailReg, user.Email); !matched {
+		return errors.New("邮箱格式不合法")
+	}
+
+	if len(user.UserName) < 3 || len(user.Password) < 4 {
+		return errors.New("用户名或密码不合法")
+	}
+	return nil
 }
 
 // RegisterUser ...
 func RegisterUser(user *User) error {
-	if Users().Filter("UserName", user.UserName).Exist() {
-		return errors.New("UserName already exists")
+	if err := CheckRegister(user); err != nil {
+		return nil
 	}
 
-	user.UserName = strings.ToLower(user.UserName)
-	user.Email = strings.ToLower(user.Email)
 	user.SetNewPassword(user.Password)
 	return user.Insert()
 }

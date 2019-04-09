@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"log"
 	"strings"
-
-	"github.com/nomango/bellex/server/modules/settings"
 )
 
 var (
@@ -16,22 +14,32 @@ var (
 )
 
 func makeRequest(request string, data string) []byte {
-	return []byte("id:" + MechineCode + ";code:" + MechineSecret + ";req:" + request + ";data:" + data + ";")
+	requestStr := "id:" + MechineCode + ";code:" + MechineSecret + ";req:" + request + ";data:" + data + ";"
+	fmt.Println("发送数据包", requestStr)
+	return []byte(requestStr)
 }
 
 func main() {
 
 	var serverIP string
 
-	if settings.IsDevelopeMode() {
-		serverIP = "127.0.0.1:7777"
-	} else {
-		serverIP = "132.232.126.221:7777"
+	fmt.Println("连接到本地还是远程TCP服务器? (0 or 1)")
+	for {
+		var cmd int
+		if _, err := fmt.Scanln(&cmd); err != nil {
+			continue
+		}
+		if cmd == 0 {
+			serverIP = "127.0.0.1:7777"
+		} else {
+			serverIP = "132.232.126.221:7777"
+		}
+		break
 	}
 
 	client, err := NewClient(serverIP)
 	if err != nil {
-		fmt.Println("Start client failed: ", err)
+		fmt.Println("连接TCP服务器失败: ", err)
 		return
 	}
 
@@ -46,12 +54,12 @@ func main() {
 				log.Fatalln(err)
 				return
 			}
-			fmt.Printf("Receive (size: %d) %s\n", len(response), response)
+			fmt.Printf("接收到数据包 (字节: %d) %s\n", len(response)-1, response)
 
 			switch {
 			case strings.Contains(response, "unique_code:") && len(response) == 22:
 				MechineSecret = response[12:20]
-				fmt.Println("Update secret", MechineSecret)
+				fmt.Println("更新主控机密码", MechineSecret)
 			}
 		}
 	}()
@@ -61,11 +69,12 @@ func main() {
 	fmt.Println()
 
 	fmt.Println("Menus:")
-	fmt.Println("- 1: Send connect request")
-	fmt.Println("- 2: Send proof-time request")
-	fmt.Println("- 3: Send heart-beat request")
-	fmt.Println("- 4: Send heart-beat request with idle")
-	fmt.Println("- 0: Exit")
+	fmt.Println("- 1: 发送连接请求")
+	fmt.Println("- 2: 发送校时请求")
+	fmt.Println("- 3: 发送心跳包（工作状态）")
+	fmt.Println("- 4: 发送心跳包（待机状态）")
+	fmt.Println("- 5: 发送获取时间表请求")
+	fmt.Println("- 0: 退出")
 
 	fmt.Println()
 	fmt.Println("Copyright (c) 2019 Bellex")
@@ -74,7 +83,7 @@ func main() {
 	for {
 		var cmd int
 		if _, err := fmt.Scanln(&cmd); err != nil {
-			fmt.Println("Unknown command")
+			fmt.Println("未知命令，请重新输入")
 			continue
 		}
 
@@ -84,13 +93,15 @@ func main() {
 		case 1:
 			client.Send(makeRequest("connect", ""))
 		case 2:
-			client.Send(makeRequest("request_time", ""))
+			client.Send(makeRequest("proof_time", ""))
 		case 3:
 			client.Send(makeRequest("heart_beat", "status:ready"))
 		case 4:
 			client.Send(makeRequest("heart_beat", "status:idle"))
+		case 5:
+			client.Send(makeRequest("get_schedule", ""))
 		default:
-			fmt.Println("Unknown command")
+			fmt.Println("未知命令，请重新输入")
 		}
 	}
 }

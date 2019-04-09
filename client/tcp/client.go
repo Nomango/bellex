@@ -4,7 +4,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"net"
 )
@@ -45,9 +44,6 @@ func (c *Client) Receiver() *bufio.Reader {
 
 // Send send request
 func (c *Client) Send(data []byte) {
-
-	fmt.Println("Send packet:", string(data))
-
 	if _, err := c.conn.Write(packSendData(data)); err != nil {
 		log.Fatalln("Send request failed,", err)
 		return

@@ -83,12 +83,17 @@ func (c *UserController) Post() {
 	}
 
 	if err := form.Assign(&user); err != nil {
-		c.WriteJson(Json{"message": "数据有误"}, 400)
+		c.WriteJson(Json{"message": "数据格式有误"}, 400)
 		return
 	}
 	user.Role = models.UserRoleNormal
 
-	if err := user.Insert(); err != nil {
+	if err := models.CheckRegister(&user); err != nil {
+		c.WriteJson(Json{"message": err.Error()}, 400)
+		return
+	}
+
+	if err := models.RegisterUser(&user); err != nil {
 		beego.Error(err)
 		c.WriteJson(Json{"message": "系统异常，请稍后再试"}, 400)
 		return
@@ -154,4 +159,36 @@ func (c *UserController) Delete() {
 	}
 
 	c.WriteJson(Json{"message": "删除成功"}, 200)
+}
+
+// @router /:id([0-9]+)/password [post]
+func (c *UserController) ChangePassword() {
+	userID, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
+
+	if c.User.IsNormal() && c.User.Id != userID {
+		c.WriteJson(Json{"message": "无访问权限"}, 403)
+		return
+	}
+
+	user := models.User{Id: userID}
+	if err := user.Read(); err != nil {
+		c.WriteJson(Json{"message": "不存在指定用户"}, 404)
+		return
+	}
+
+	password := c.GetString("password")
+	user.Password = password
+
+	if err := models.CheckRegister(&user); err != nil {
+		c.WriteJson(Json{"message": "密码不合法"}, 400)
+		return
+	}
+
+	if err := user.SaveNewPassword(user.Password); err != nil {
+		beego.Error(err)
+		c.WriteJson(Json{"message": "系统异常，请稍后再试"}, 400)
+		return
+	}
+
+	c.WriteJson(Json{"message": "密码更新成功"}, 200)
 }

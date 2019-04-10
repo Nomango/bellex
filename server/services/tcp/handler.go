@@ -114,6 +114,8 @@ func handleRequestHeartBeat(packet *types.Packet) (string, error) {
 	case strings.Contains(packet.Data, "status:working"):
 		mechine.Idle = false
 		mechine.Update("Idle")
+	default:
+		return "status:0;", nil
 	}
 
 	return "status:1;", nil

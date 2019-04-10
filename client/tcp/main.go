@@ -51,7 +51,7 @@ func main() {
 			// handle response
 			response, err := receiver.ReadString(byte(0))
 			if err != nil {
-				log.Fatalln(err)
+				log.Fatalln("TCP连接已断开", err)
 				return
 			}
 			fmt.Printf("接收到数据包 (字节: %d) %s\n", len(response)-1, response)
@@ -95,7 +95,7 @@ func main() {
 		case 2:
 			client.Send(makeRequest("proof_time", ""))
 		case 3:
-			client.Send(makeRequest("heart_beat", "status:ready"))
+			client.Send(makeRequest("heart_beat", "status:working"))
 		case 4:
 			client.Send(makeRequest("heart_beat", "status:idle"))
 		case 5:

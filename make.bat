@@ -8,8 +8,8 @@ if {%1}=={run} (
 )
 if {%1}=={build} (
     if {%2}=={server}       goto build_server
-    if {%2}=={ntp}          goto build_ntp
-    if {%2}=={tcp}          goto build_tcp_server
+    if {%2}=={ntp}          goto build_ntp_client
+    if {%2}=={tcp}          goto build_tcp_client
 )
 if {%1}=={test} (
     if {%2}=={ntp}          goto test_ntp
@@ -41,6 +41,14 @@ goto help
 
 :build_server
     go build -o server.exe .\services\main.go
+    exit
+
+:build_ntp_client
+    go build -o tcp_client.exe .\client\ntp\
+    exit
+
+:build_tcp_client
+    go build -o tcp_client.exe .\client\tcp\
     exit
 
 :test_tcp

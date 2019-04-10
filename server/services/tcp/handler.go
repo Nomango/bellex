@@ -111,7 +111,7 @@ func handleRequestHeartBeat(packet *types.Packet) (string, error) {
 	case strings.Contains(packet.Data, "status:idle"):
 		mechine.Idle = true
 		mechine.Update("Idle")
-	case strings.Contains(packet.Data, "status:ready"):
+	case strings.Contains(packet.Data, "status:working"):
 		mechine.Idle = false
 		mechine.Update("Idle")
 	}

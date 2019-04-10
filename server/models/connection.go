@@ -67,7 +67,7 @@ func DeleteConnectionWithConn(conn net.Conn) error {
 	defer mutex.Unlock()
 
 	for key, c := range connects {
-		if c.Conn.RemoteAddr() == conn.RemoteAddr() {
+		if c.Conn.RemoteAddr().String() == conn.RemoteAddr().String() {
 			delete(connects, key)
 			return nil
 		}

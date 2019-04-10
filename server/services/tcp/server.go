@@ -106,7 +106,7 @@ func (ts *Server) Handle(conn net.Conn, handler func([]byte, net.Conn, chan<- []
 			case data := <-outputCh:
 				if len(data) != 0 {
 					if _, err := conn.Write(append(data, byte(0))); err != nil {
-						log.Println("Bad response", conn.RemoteAddr(), err.Error())
+						log.Println("[Bellex] Bad response", conn.RemoteAddr(), err.Error())
 					}
 				}
 			case <-endCh:
@@ -121,7 +121,7 @@ func (ts *Server) Handle(conn net.Conn, handler func([]byte, net.Conn, chan<- []
 	for {
 		recvByte, err := bufferReader.ReadByte()
 		if err != nil {
-			log.Println("Connection " + conn.RemoteAddr().String() + " is closed")
+			log.Println("[Bellex] Connection " + conn.RemoteAddr().String() + " is closed")
 			break
 		}
 
@@ -171,6 +171,6 @@ func (ts *Server) Handle(conn net.Conn, handler func([]byte, net.Conn, chan<- []
 
 	// remove connection
 	if err := models.DeleteConnectionWithConn(conn); err != nil {
-		log.Println("Remove connection failed", conn.RemoteAddr())
+		log.Println("[Bellex] Remove connection failed", conn.RemoteAddr())
 	}
 }

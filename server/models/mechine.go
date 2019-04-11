@@ -78,6 +78,14 @@ func (m *Mechine) SaveNewSecret() error {
 	return m.Update("Secret")
 }
 
+func (m *Mechine) SetNewSchedule(s *Schedule) {
+	m.UpdateStatus()
+	if m.Accept && m.Schedule.Content != s.Content {
+		m.Schedule = s
+		m.Connect.Output <- []byte(`schedule:` + s.FormatContent() + ";")
+	}
+}
+
 func Mechines() orm.QuerySeter {
 	return orm.NewOrm().QueryTable((*Mechine)(nil)).OrderBy("-CreateTime")
 }

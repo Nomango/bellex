@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"regexp"
 	"strconv"
-	"strings"
 
 	"github.com/astaxie/beego"
 	"github.com/nomango/bellex/server/models"
@@ -122,8 +121,6 @@ func (c *MechineController) Update() {
 		return
 	}
 
-	oldSchedule := mechine.Schedule.Content
-
 	if err := form.Assign(&mechine); err != nil {
 		c.WriteJson(Json{"message": "数据有误"}, 400)
 		return
@@ -133,18 +130,6 @@ func (c *MechineController) Update() {
 		beego.Error(err)
 		c.WriteJson(Json{"message": "系统异常，请稍后再试"}, 400)
 		return
-	}
-
-	var timetable string
-	for _, time := range strings.Split(mechine.Schedule.Content, " ") {
-		for _, num := range strings.Split(time, ":") {
-			timetable += num
-		}
-	}
-
-	mechine.UpdateStatus()
-	if mechine.Schedule.Content != oldSchedule && mechine.Accept {
-		mechine.Connect.Output <- []byte(`schedule:` + timetable + ";")
 	}
 
 	c.WriteJson(Json{"message": "更新成功"}, 201)
@@ -233,7 +218,7 @@ func (c *MechineController) Start() {
 		return
 	}
 
-	mechine.Connect.Output <- []byte(`bell:` + time + ";")
+	mechine.Connect.Output <- []byte(`bell:` + time[:2] + time[3:] + ";")
 
 	c.WriteJson(Json{"message": "发送成功"}, 200)
 }

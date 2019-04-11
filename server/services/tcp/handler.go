@@ -132,7 +132,7 @@ func handleRequestGetSchedule(packet *types.Packet) (string, error) {
 		return "", errors.New("Connection not found")
 	}
 
-	return "schedule:" + mechine.Schedule.Content + ";", nil
+	return "schedule:" + mechine.Schedule.FormatContent() + ";", nil
 }
 
 func sendNTPRequest() (time.Time, error) {

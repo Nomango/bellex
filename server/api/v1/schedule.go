@@ -141,6 +141,15 @@ func (c *ScheduleController) Update() {
 		return
 	}
 
+	var mechines []models.Mechine
+	if _, err := models.Mechines().Filter("Schedule", schedule).All(&mechines); err != nil {
+		beego.Error(err)
+	} else {
+		for _, m := range mechines {
+			m.SetNewSchedule(&schedule)
+		}
+	}
+
 	c.WriteJson(Json{"message": "更新成功"}, 201)
 }
 

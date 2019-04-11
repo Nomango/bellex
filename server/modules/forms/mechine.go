@@ -9,12 +9,13 @@ type MechineForm struct {
 }
 
 func (m *MechineForm) Assign(mechine *models.Mechine) error {
-	mechine.Schedule = &models.Schedule{Id: m.ScheduleID}
-	if err := mechine.Schedule.Read(); err != nil {
+	schedule := &models.Schedule{Id: m.ScheduleID}
+	if err := schedule.Read(); err != nil {
 		return err
 	}
 
 	mechine.Name = m.Name
 	mechine.Code = m.Code
+	mechine.SetNewSchedule(schedule)
 	return nil
 }

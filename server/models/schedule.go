@@ -1,6 +1,7 @@
 package models
 
 import (
+	"strings"
 	"time"
 
 	"github.com/astaxie/beego/orm"
@@ -16,7 +17,7 @@ type Schedule struct {
 	Content string `orm:"size(130)" json:"content"`
 
 	Institution *Institution `orm:"rel(fk)" json:"institution"`
-	Mechines     []*Mechine    `orm:"reverse(many)" json:"-"`
+	Mechines    []*Mechine   `orm:"reverse(many)" json:"-"`
 
 	CreateTime time.Time `orm:"auto_now_add" json:"create_time"`
 	UpdateTime time.Time `orm:"auto_now" json:"update_time"`
@@ -49,6 +50,17 @@ func (s *Schedule) Update(fields ...string) error {
 func (s *Schedule) Delete() error {
 	_, err := orm.NewOrm().Delete(s)
 	return err
+}
+
+// FormatContent ...
+func (s *Schedule) FormatContent() string {
+	var timetable string
+	for _, time := range strings.Split(s.Content, " ") {
+		for _, num := range strings.Split(time, ":") {
+			timetable += num
+		}
+	}
+	return timetable
 }
 
 func Schedules() orm.QuerySeter {

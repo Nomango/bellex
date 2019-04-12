@@ -80,9 +80,11 @@ func (m *Mechine) SaveNewSecret() error {
 
 func (m *Mechine) SetNewSchedule(s *Schedule) {
 	m.UpdateStatus()
-	if m.Accept && m.Schedule.Content != s.Content {
-		m.Schedule = s
-		m.Connect.Output <- []byte(`schedule:` + s.FormatContent() + ";")
+	if m.Accept && m.Schedule != nil {
+		if m.Schedule.Content != s.Content {
+			m.Schedule = s
+			m.Connect.Output <- []byte(`schedule:` + s.FormatContent() + ";")
+		}
 	}
 }
 

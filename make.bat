@@ -36,11 +36,11 @@ goto help
 
 
 :run_server
-    go run .\services\main.go
+    go run .\server\main.go
     exit
 
 :build_server
-    go build -o server.exe .\services\main.go
+    go build -o server.exe .\server\main.go
     exit
 
 :build_ntp_client

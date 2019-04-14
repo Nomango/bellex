@@ -81,6 +81,15 @@ func init() {
 
     beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:MechineController"] = append(beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:MechineController"],
         beego.ControllerComments{
+            Method: "Close",
+            Router: `/:id([0-9]+)/close`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:MechineController"] = append(beego.GlobalControllerRouter["github.com/nomango/bellex/server/api/v1:MechineController"],
+        beego.ControllerComments{
             Method: "Start",
             Router: `/:id([0-9]+)/start`,
             AllowHTTPMethods: []string{"post"},

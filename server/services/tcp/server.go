@@ -7,6 +7,7 @@ import (
 	"errors"
 	"log"
 	"net"
+	"time"
 
 	"github.com/nomango/bellex/server/models"
 	"github.com/nomango/bellex/server/modules/settings"
@@ -90,39 +91,39 @@ func (ts *Server) Handle(conn net.Conn, handler func([]byte, net.Conn, chan<- []
 	// close connection before exit
 	defer conn.Close()
 
-	var (
-		dataSize     uint8
-		dataCursor   uint8
-		recvBuffer   []byte
-		bufferReader = bufio.NewReader(conn)
-	)
-
 	// Wait for response
 	outputCh := make(chan []byte)
 	endCh := make(chan struct{})
-	go func(conn net.Conn, outputCh <-chan []byte, endCh <-chan struct{}) {
-		for {
-			select {
-			case data := <-outputCh:
-				if len(data) != 0 {
-					if _, err := conn.Write(append(data, byte(0))); err != nil {
-						log.Println("[Bellex] Bad response", conn.RemoteAddr(), err.Error())
-					}
-				}
-			case <-endCh:
-				// connection closed
-				return
-			}
-		}
-	}(conn, outputCh, endCh)
+	go syncWriter(conn, outputCh, endCh)
 
 	// state machine
-	state := 0
+	var (
+		state        int
+		dataSize     uint8
+		dataCursor   uint8
+		recvByte     byte
+		recvBuffer   []byte
+		bufferReader = bufio.NewReader(conn)
+
+		inputCh = make(chan byte)
+		errCh   = make(chan error)
+	)
+
+tcpLoop:
 	for {
-		recvByte, err := bufferReader.ReadByte()
-		if err != nil {
-			log.Println("[Bellex] Connection " + conn.RemoteAddr().String() + " is closed")
+		go syncReadByte(bufferReader, inputCh, errCh)
+
+		select {
+		case recvByte = <-inputCh:
 			break
+		case <-errCh:
+			// connection closed
+			log.Println("[Bellex] Connection " + conn.RemoteAddr().String() + " is closed")
+			break tcpLoop
+		case <-time.After(45 * time.Second):
+			// connection timeout
+			log.Println("[Bellex] Connection " + conn.RemoteAddr().String() + " timeout")
+			break tcpLoop
 		}
 
 		switch state {
@@ -173,4 +174,29 @@ func (ts *Server) Handle(conn net.Conn, handler func([]byte, net.Conn, chan<- []
 	if err := models.DeleteConnectionWithConn(conn); err != nil {
 		log.Println("[Bellex] Remove connection failed", conn.RemoteAddr())
 	}
+}
+
+func syncWriter(conn net.Conn, outputCh <-chan []byte, endCh <-chan struct{}) {
+	for {
+		select {
+		case data := <-outputCh:
+			if len(data) != 0 {
+				if _, err := conn.Write(append(data, byte(0))); err != nil {
+					log.Println("[Bellex] Bad response", conn.RemoteAddr(), err.Error())
+				}
+			}
+		case <-endCh:
+			// connection closed
+			return
+		}
+	}
+}
+
+func syncReadByte(reader *bufio.Reader, recvCh chan<- byte, errCh chan<- error) {
+	recvByte, err := reader.ReadByte()
+	if err != nil {
+		errCh <- err
+		return
+	}
+	recvCh <- recvByte
 }

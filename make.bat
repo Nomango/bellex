@@ -36,11 +36,11 @@ goto help
 
 
 :run_server
-    go run .\server\main.go
+    cd server && go run .\main.go
     exit
 
 :build_server
-    go build -o server.exe .\server\main.go
+    cd server && bee.exe run
     exit
 
 :build_ntp_client

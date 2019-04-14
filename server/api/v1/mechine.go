@@ -216,3 +216,22 @@ func (c *MechineController) Start() {
 
 	c.WriteJson(Json{"message": "发送成功"}, 200)
 }
+
+// @router /:id([0-9]+)/close [post]
+func (c *MechineController) Close() {
+	mechineID, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
+	mechine := models.Mechine{Id: mechineID}
+
+	if err := mechine.Read(); err != nil {
+		c.WriteJson(Json{"message": "不存在指定主控机"}, 404)
+		return
+	}
+
+	if c.User.IsNormal() && mechine.Institution.Id != c.User.Institution.Id {
+		c.WriteJson(Json{"message": "无访问权限"}, 403)
+		return
+	}
+
+	models.DeleteConnection(&mechine)
+	c.WriteJson(Json{"message": "断开成功"}, 200)
+}

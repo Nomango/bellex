@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"time"
 
 	"github.com/astaxie/beego/orm"
@@ -82,14 +83,19 @@ func (m *Mechine) SetNewSchedule(s *Schedule) {
 	oldSchedule := m.Schedule
 	m.Schedule = s
 
+	if oldSchedule == nil || (oldSchedule.Content != s.Content) {
+		m.SendData(`schedule:` + s.FormatContent() + ";")
+	}
+}
+
+func (m *Mechine) SendData(data string) error {
 	m.UpdateStatus()
-	if !m.Accept {
-		return
+	if !m.Accept || m.Connect.Output == nil {
+		return errors.New("no connection")
 	}
 
-	if oldSchedule == nil || (oldSchedule.Content != s.Content) {
-		m.Connect.Output <- []byte(`schedule:` + s.FormatContent() + ";")
-	}
+	m.Connect.Output <- []byte(data)
+	return nil
 }
 
 func Mechines() orm.QuerySeter {

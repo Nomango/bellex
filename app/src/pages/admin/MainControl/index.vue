@@ -76,13 +76,13 @@
             <div class="content" slot="content">
               <el-form ref="controlForm" :model="controlForm" :rules="rules" label-width="70px">
                 <el-form-item label="名称: " prop="name">
-                  <el-input v-model="controlForm.name" placeholder="请输入名称" />
+                  <el-input v-model="controlForm.name" placeholder="请输入主控机名称" />
                 </el-form-item>
-                <el-form-item label="主控机: " prop="code">
+                <el-form-item label="序列号: " prop="code">
                   <el-input :disabled="clickStatus === 'update'" v-model="controlForm.code" placeholder="请输入主控机序列号" />
                 </el-form-item>
-                <el-form-item label="时间: " prop="schedule_id">
-                  <el-select v-model="controlForm.schedule_id" placeholder="请选择时间">
+                <el-form-item label="时间表: " prop="schedule_id">
+                  <el-select v-model="controlForm.schedule_id" placeholder="请选择应用到主控机的时间表">
                     <el-option
                       v-for="(item,index) of timeOption"
                       :key="index"
@@ -95,7 +95,7 @@
           </add-dialog>
         </div>
         <el-dialog
-          title="设置时间"
+          title="设置打铃时间"
           :modal-append-to-body="false"
           :visible.sync="timingFormVisible"
           width="40%">
@@ -113,7 +113,7 @@
                 :picker-options="{
                   selectableRange: '00:00:00 - 23:59:59'
                 }"
-                placeholder="选择时间" />
+                placeholder="设置打铃时间" />
             </el-form-item>
           </el-form>
           <div slot="footer" class="dialog-footer">

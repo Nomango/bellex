@@ -179,13 +179,10 @@ func (c *MechineController) StartCurrent() {
 		return
 	}
 
-	mechine.UpdateStatus()
-	if !mechine.Accept {
+	if err := mechine.SendData(`bell:current;`); err != nil {
 		c.WriteJson(Json{"message": "主控机未连接"}, 403)
 		return
 	}
-
-	mechine.Connect.Output <- []byte(`bell:current;`)
 
 	c.WriteJson(Json{"message": "发送成功"}, 200)
 }
@@ -205,12 +202,6 @@ func (c *MechineController) Start() {
 		return
 	}
 
-	mechine.UpdateStatus()
-	if !mechine.Accept {
-		c.WriteJson(Json{"message": "主控机未连接"}, 403)
-		return
-	}
-
 	time := c.GetString("time")
 	matched, _ := regexp.MatchString(`^\d{2}:\d{2}$`, time)
 	if !matched {
@@ -218,7 +209,10 @@ func (c *MechineController) Start() {
 		return
 	}
 
-	mechine.Connect.Output <- []byte(`bell:` + time[:2] + time[3:] + ";")
+	if err := mechine.SendData(`bell:` + time[:2] + time[3:] + ";"); err != nil {
+		c.WriteJson(Json{"message": "主控机未连接"}, 403)
+		return
+	}
 
 	c.WriteJson(Json{"message": "发送成功"}, 200)
 }

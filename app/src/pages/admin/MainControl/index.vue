@@ -29,7 +29,15 @@
             align="center"
             label="网络状态">
             <template slot-scope="{row}">
-              <el-tag :type="row.accept | tagsFilter">{{row.accept | acceptFilter}}</el-tag>
+              <el-tag v-if="!row.accept" :type="row.accept | tagsFilter">{{row.accept | acceptFilter}}</el-tag>
+              <template v-else>
+                <el-tooltip  content="点我断开" placement="top">
+                  <el-button
+                    type="success"
+                    size="mini"
+                    @click="handleAccept(row)">{{row.accept | acceptFilter}}</el-button>
+                </el-tooltip>
+              </template>
             </template>
           </el-table-column>
           <el-table-column
@@ -45,7 +53,6 @@
             width="300">
             <template slot-scope="scope">
               <el-button @click="handleEdit(scope.row)" icon="el-icon-edit" size="mini">编辑</el-button>
-              <!-- <el-button @click="handleRing(scope.row)" icon="el-icon-edit" type="success" size="mini">打铃</el-button> -->
               <el-dropdown @command="handleCommand(scope.row, $event)">
                 <el-button icon="el-icon-phone-outline" type="success" size="mini">打铃</el-button>
                 <el-dropdown-menu slot="dropdown">
@@ -98,14 +105,14 @@
           title="设置打铃时间"
           :modal-append-to-body="false"
           :visible.sync="timingFormVisible"
-          width="40%">
+          width="30%">
           <el-form
             ref="timingForm"
             :rules="rules"
             :model="timingTemp"
             label-position="right"
             label-width="70px"
-            style="width: 80%; margin-left:50px;">
+            style="width: 80%; margin-left: 5%;">
             <el-form-item label="时间: " prop="time">
               <el-time-picker
                 v-model="timingTemp.time"
@@ -349,6 +356,10 @@ export default {
       }
     },
     confirmClick () {
+      if (!this.timingTemp.time) {
+        this.showMsg('warning', '请设置时间！')
+        return false
+      }
       homeAjax.timingControllers({
         id: this.timingId,
         time: translateTime(this.timingTemp.time).hm
@@ -370,6 +381,18 @@ export default {
         this.$refs['controlForm'].clearValidate();
       })
     },
+    handleAccept (data) {
+      homeAjax.closeControllers({
+        id: data.id
+      })
+        .then(res => {
+          this.showMsg('success', '断开成功 ^_^')
+          this.iniData()
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    },
     resetFormData () {
       this.controlForm = {
         code: '',
@@ -388,6 +411,8 @@ export default {
 </script>
 <style lang="stylus">
 .mainControl-wrapper
+  .el-date-editor.el-input
+    width 95%
   .el-button--success
     background-color: #009688;
     border-color #009688

@@ -23,8 +23,8 @@ const mutations = {
   SET_NICKNAME: (state, name) => {
     state.nickName = name
   },
-  SET_USERINFO: (state, name) => {
-    state.userInfo = name
+  SET_USERINFO: (state, user) => {
+    state.userInfo = user
   }
 }
 const actions = {

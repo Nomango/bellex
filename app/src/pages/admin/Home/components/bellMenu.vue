@@ -1,7 +1,7 @@
 <template>
   <div class="bell-side bell-side-menu" :class="{'isHideMenu': isCollapse}">
     <div class="bell-logo">
-      <span>{{userInfo.institution.name}}</span>
+      <span v-if="userInfo && userInfo.institution">{{userInfo.institution.name}}</span>
     </div>
     <el-menu
       :default-active="defaultActive"
@@ -35,9 +35,7 @@
 import { mapState } from 'vuex'
 export default {
   computed: {
-    ...mapState(['isCollapse']),
-    ...mapState(['roles']),
-    ...mapState(['userInfo'])
+    ...mapState(['isCollapse', 'userInfo', 'roles'])
   },
   data () {
     return {
@@ -81,6 +79,8 @@ export default {
   },
   created () {
     this.handleRoleMenu()
+  },
+  mounted () {
   },
   methods: {
     handleRoleMenu () {
@@ -149,7 +149,8 @@ export default {
     width 64px
     .bell-logo
       width: 60px;
-      background: #fff;
+      background: url('../../../../assets/imgs/logo1.png') no-repeat;
+      background-position: center;
       span
         display none
   &.bell-side-menu

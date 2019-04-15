@@ -20,5 +20,8 @@ export default {
   },
   timingControllers: params => {
     return API.REPOST(`mechine/${params.id}/start`, params)
+  },
+  closeControllers: params => {
+    return API.POST(`mechine/${params.id}/close`)
   }
 }

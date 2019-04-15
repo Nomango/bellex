@@ -42,7 +42,11 @@ func (m *Mechine) InsertOrUpdate() error {
 
 // Read ...
 func (m *Mechine) Read(fields ...string) error {
-	return orm.NewOrm().Read(m, fields...)
+	if err := orm.NewOrm().Read(m, fields...); err != nil {
+		return err
+	}
+	m.UpdateStatus()
+	return nil
 }
 
 // Update ...
@@ -89,12 +93,20 @@ func (m *Mechine) SetNewSchedule(s *Schedule) {
 }
 
 func (m *Mechine) SendData(data string) error {
-	m.UpdateStatus()
-	if !m.Accept || m.Connect.Output == nil {
+	if !m.Accept || m.Connect.OutputCh == nil {
 		return errors.New("no connection")
 	}
 
-	m.Connect.Output <- []byte(data)
+	m.Connect.OutputCh <- []byte(data)
+	return nil
+}
+
+func (m *Mechine) CloseConnection() error {
+	if !m.Accept || m.Connect.CloseCh == nil {
+		return errors.New("no connection")
+	}
+
+	m.Connect.CloseCh <- struct{}{}
 	return nil
 }
 

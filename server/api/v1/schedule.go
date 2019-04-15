@@ -146,6 +146,7 @@ func (c *ScheduleController) Update() {
 		beego.Error(err)
 	} else {
 		for _, m := range mechines {
+			m.UpdateStatus()
 			m.SetNewSchedule(&schedule)
 		}
 	}

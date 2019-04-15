@@ -16,13 +16,14 @@ func init() {
 }
 
 type MechineConnection struct {
-	Id     int
-	Code   string
-	Conn   net.Conn
-	Output chan<- []byte
+	Id       int
+	Code     string
+	Conn     net.Conn
+	OutputCh chan<- []byte
+	CloseCh  chan<- struct{}
 }
 
-func AddConnection(mechine *Mechine, conn net.Conn, output chan<- []byte) error {
+func AddConnection(mechine *Mechine, conn net.Conn, output chan<- []byte, close chan<- struct{}) error {
 	mutex.Lock()
 	defer mutex.Unlock()
 
@@ -31,10 +32,11 @@ func AddConnection(mechine *Mechine, conn net.Conn, output chan<- []byte) error 
 	}
 
 	connects[mechine.Id] = &MechineConnection{
-		Id:     mechine.Id,
-		Code:   mechine.Code,
-		Conn:   conn,
-		Output: output,
+		Id:       mechine.Id,
+		Code:     mechine.Code,
+		Conn:     conn,
+		OutputCh: output,
+		CloseCh:  close,
 	}
 	return nil
 }
@@ -57,6 +59,8 @@ func DeleteConnection(mechine *Mechine) error {
 	if !ExistsConnection(mechine.Id) {
 		return errors.New("Connection not exists")
 	}
+
+	mechine.CloseConnection()
 
 	delete(connects, mechine.Id)
 	return nil

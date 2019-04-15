@@ -87,7 +87,7 @@ func (ts *Server) Addr() string {
 
 // Handle recives data from client and send response
 // Data format: 0xFF|0xFF|len(high)|len(low)|Data|0xFF|0xFE. '0xFF' is preamble code
-func (ts *Server) Handle(conn net.Conn, handler func([]byte, net.Conn, chan<- []byte)) {
+func (ts *Server) Handle(conn net.Conn, handler func([]byte, net.Conn, chan<- []byte, chan<- struct{})) {
 	// close connection before exit
 	defer conn.Close()
 
@@ -107,6 +107,7 @@ func (ts *Server) Handle(conn net.Conn, handler func([]byte, net.Conn, chan<- []
 
 		inputCh = make(chan byte)
 		errCh   = make(chan error)
+		closeCh = make(chan struct{})
 	)
 
 tcpLoop:
@@ -119,6 +120,10 @@ tcpLoop:
 		case <-errCh:
 			// connection closed
 			log.Println("[Bellex] Connection " + conn.RemoteAddr().String() + " is closed")
+			break tcpLoop
+		case <-closeCh:
+			// force to close connection
+			log.Println("[Bellex] Connection is forced to be closed", conn.RemoteAddr().String())
 			break tcpLoop
 		case <-time.After(45 * time.Second):
 			// connection timeout
@@ -160,7 +165,7 @@ tcpLoop:
 			}
 		case 5:
 			if recvByte == 0xFE {
-				handler(recvBuffer, conn, outputCh)
+				handler(recvBuffer, conn, outputCh, closeCh)
 			}
 			// state machine is ready. read next packet.
 			state = 0

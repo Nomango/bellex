@@ -18,7 +18,7 @@ import (
 )
 
 // PacketHandler handle request packets
-func PacketHandler(req []byte, conn net.Conn, outputCh chan<- []byte) {
+func PacketHandler(req []byte, conn net.Conn, outputCh chan<- []byte, closeCh chan<- struct{}) {
 
 	var (
 		packet   *types.Packet
@@ -48,7 +48,7 @@ func PacketHandler(req []byte, conn net.Conn, outputCh chan<- []byte) {
 
 	switch packet.Type {
 	case types.PacketTypeConnect:
-		response, err = handleRequestConnect(packet, conn, outputCh)
+		response, err = handleRequestConnect(packet, conn, outputCh, closeCh)
 	case types.PacketTypeRequestTime:
 		response, err = handleRequestTime()
 	case types.PacketTypeHeartBeat:
@@ -60,7 +60,7 @@ func PacketHandler(req []byte, conn net.Conn, outputCh chan<- []byte) {
 	}
 }
 
-func handleRequestConnect(packet *types.Packet, conn net.Conn, outputCh chan<- []byte) (string, error) {
+func handleRequestConnect(packet *types.Packet, conn net.Conn, outputCh chan<- []byte, closeCh chan<- struct{}) (string, error) {
 
 	mechine, err := packet.GetMechine()
 	if err != nil {
@@ -75,7 +75,7 @@ func handleRequestConnect(packet *types.Packet, conn net.Conn, outputCh chan<- [
 	// connection already exists
 	mechine.SaveNewSecret()
 
-	if err := models.AddConnection(mechine, conn, outputCh); err != nil {
+	if err := models.AddConnection(mechine, conn, outputCh, closeCh); err != nil {
 		beego.Error("Add connection failed", err)
 	}
 

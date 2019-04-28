@@ -148,9 +148,13 @@ tcpLoop:
 			}
 		case 2:
 			dataSize = uint8(recvByte)
-			recvBuffer = make([]byte, dataSize)
-			dataCursor = 0
-			state = 3
+			if dataSize == 0 {
+				state = 0
+			} else {
+				recvBuffer = make([]byte, dataSize)
+				dataCursor = 0
+				state = 3
+			}
 		case 3:
 			recvBuffer[dataCursor] = recvByte
 			dataCursor++

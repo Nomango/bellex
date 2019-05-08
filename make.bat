@@ -36,7 +36,7 @@ goto help
 
 
 :run_server
-    cd server && go run .\main.go
+    cd server && bee.exe run
     exit
 
 :build_server

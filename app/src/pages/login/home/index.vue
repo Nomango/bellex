@@ -34,7 +34,8 @@
       </div>
     </div>
     <div class="bell-login-footer">
-      <p>© 2019 <a href="http://bellex.easy2d.cn:8080" target="_blank">bellex.com</a></p>
+      <p>© 2019 <a href="http://www.bellex.cn" target="_blank">bellex.cn</a></p>
+      <p><a href="http://www.beian.miit.gov.cn" target="_blank">蜀ICP备16028738号-7</a></p>
     </div>
   </div>
 </template>

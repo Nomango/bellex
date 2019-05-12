@@ -21,7 +21,7 @@
 /**********************************************
 //IIC Start
 **********************************************/
-void IIC_Start()
+void IIC_Start(void)
 {
 
 	OLED_SCLK_Set() ;
@@ -33,7 +33,7 @@ void IIC_Start()
 /**********************************************
 //IIC Stop
 **********************************************/
-void IIC_Stop()
+void IIC_Stop(void)
 {
 OLED_SCLK_Set() ;
 //	OLED_SCLK_Clr();
@@ -42,7 +42,7 @@ OLED_SCLK_Set() ;
 	
 }
 
-void IIC_Wait_Ack()
+void IIC_Wait_Ack(void)
 {
 
 	//GPIOB->CRH &= 0XFFF0FFFF;	//设置PB12为上拉输入模式

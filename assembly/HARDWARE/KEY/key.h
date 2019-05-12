@@ -9,8 +9,10 @@
 #define KEY2_PRES	  2	//KEY2按下
 #define KEY3_PRES   3	//KEY3按下
 #define KEY4_PRES   4	//KEY3按下
+#define LED PCout(13)
 
 void KEY_Init(void);//IO初始化
 u8 KEY_Scan(u8);  	//按键扫描函数
+void LED_Init(void);
 
 #endif

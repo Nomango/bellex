@@ -16,7 +16,8 @@
 #include "bell.h"
 #include "timer.h"
 #include "time.h" 
-
+#include "ntp.h"
+#include "ds1302.h"
 #include "string.h"
 
 void HandleNtpResponse(unsigned char* recv, unsigned char size);

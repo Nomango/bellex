@@ -11,9 +11,9 @@
 
 //extern u8 control_0;
 //extern u16 A,B;
-
+u8 HMI;
 unsigned char g_RecvBuffer[261];
-unsigned char g_RecvBufferSize;
+unsigned char g_RecvBufferSize=0;
 int g_StreamEndFlag = 0;
 //u8 rec_buf[];
 
@@ -36,8 +36,8 @@ _sys_exit(int x)
 //重定义fputc函数 
 int fputc(int ch, FILE *f)
 {      
-	while((USART2->SR&0X40)==0);//循环发送,直到发送完毕   
-    USART2->DR = (u8) ch;      
+	while((USART1->SR&0X40)==0);//循环发送,直到发送完毕   
+    USART1->DR = (u8) ch;      
 	return ch;
 }
 #endif
@@ -113,8 +113,8 @@ void uart_init(u32 bound)
 
 	//Usart1 NVIC 配置
 	NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 3; //抢占优先级3
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;				//子优先级3
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2; //抢占优先级3
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;				//子优先级3
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;						//IRQ通道使能
 	NVIC_Init(&NVIC_InitStructure);														//根据指定的参数初始化VIC寄存器
 
@@ -151,6 +151,18 @@ void USART2_IRQHandler(void) //串口1中断服务程序
 	}
 }
 
+void USART1_IRQHandler(void) //串口1中断服务程序
+{
+	if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) //接受到一个字节
+	{
+		USART_ClearITPendingBit(USART1, USART_IT_RXNE); //清空标志位
+		HMI = USART_ReceiveData(USART1);
+		g_StreamEndFlag = 1;
+	}
+
+
+}
+
 void HMISends_0(char *buf1)
 {
 	u8 i = 0;
@@ -171,6 +183,39 @@ void HMISends_0(char *buf1)
 		}
 	}
 }
+
+void HMISends_HMI(unsigned char *buf1)		  //字符串发送函数
+{
+		u8 i=0;
+	while(1)
+	{
+	 if(buf1[i]!=0)
+	 	{
+			USART_SendData(USART1,buf1[i]);  //发送一个字节
+			while(USART_GetFlagStatus(USART1,USART_FLAG_TXE)==RESET){};//等待发送结束
+		 	i++;
+		}
+	 else 
+	 return ;
+
+		}
+}
+
+void HMISendb(u8 k)		         //字节发送函数
+{		 
+	u8 i;
+	 for(i=0;i<3;i++)
+	 {
+	 if(k!=0)
+	 	{
+			USART_SendData(USART1,k);  //发送一个字节
+			while(USART_GetFlagStatus(USART1,USART_FLAG_TXE)==RESET){};//等待发送结束
+		}
+	 else 
+	 return ;
+
+	 } 
+} 
 
 void UART2_Send_Array(unsigned char send_array[], unsigned char num)
 {

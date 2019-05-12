@@ -7,5 +7,7 @@
 #include "usart.h"
 
 void wifi_connect(void);
-
+void HMI_REC(void);
+void early_time(void);
+void HMI_DISPALY(void);
 #endif

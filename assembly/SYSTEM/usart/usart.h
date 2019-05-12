@@ -16,12 +16,14 @@ void uart_init(u32 bound);
 void usart1_send(u8 data);
 void uart2_init(u32 bound);
 void HMISends();
+void HMISendb(u8 k);
 void HMISends_0();
 void HMISenb();
 void OK_FLAG(void);
 void HMISendstart(void);
 void UART1_Send_Array(unsigned char send_array[],unsigned char num);
 void UART2_Send_Array(unsigned char send_array[],unsigned char num);
+void HMISends_HMI(unsigned char *buf1);
 #endif
 
 

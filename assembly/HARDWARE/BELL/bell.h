@@ -21,12 +21,17 @@
 
 #define BELL_ID_LENGTH 8
 #define BELL_CODE_LENGTH 8
-
-const char* GetBellID();
-const char* GetBellCode();
-
+extern unsigned char sch[100];
+extern unsigned char SCH[100];
+const char* GetBellID(void);
+const char* GetBellCode(void);
+char* GetBellStatus(void);
 void SetBellCode(const char* code, int size);
 void HandleConncetResponse(unsigned char* recv, unsigned char size);
 void HandleTimeResponse(unsigned char* recv, unsigned char size);
-
+void HandleHeartResponse(unsigned char* recv, unsigned char size);
+void Handle_Schudeule_Rec(unsigned char* recv, unsigned char size);
+void Handle_Regular_Belling(unsigned char* recv, unsigned char size);
+int bell_on(unsigned char* recv, unsigned char size);
+void restart(void);
 #endif

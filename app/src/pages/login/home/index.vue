@@ -29,6 +29,7 @@
             <el-button type="primary"
               :loading="buttonLoading"
               @click="onSubmit">登入</el-button>
+            <a :href="downloadUrl" target="_blank"><el-button style="margin-top:10px;">下载 PC 客户端</el-button></a>
           </el-form-item>
         </el-form>
       </div>
@@ -49,7 +50,8 @@ export default {
       form: {
         username: '',
         psd: ''
-      }
+      },
+      downloadUrl: 'https://bellex.oss-cn-beijing.aliyuncs.com/bellex_setup_1.0.0.exe'
     }
   },
   methods: {

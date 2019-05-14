@@ -1,6 +1,7 @@
 <template>
   <div class="bell-side bell-side-menu" :class="{'isHideMenu': isCollapse}">
     <div class="bell-logo">
+      <img v-show="sidebar" :src="logoUrl" alt="logo">
       <span v-if="userInfo && userInfo.institution">{{userInfo.institution.name}}</span>
     </div>
     <el-menu
@@ -40,6 +41,7 @@ export default {
   data () {
     return {
       defaultActive: this.$route.path || '/home/mainControl',
+      logoUrl: require('@/assets/imgs/logo.png'),
       roleMenu: null,
       menuList: [{
         id: '1',
@@ -149,8 +151,10 @@ export default {
     width 64px
     .bell-logo
       width: 60px;
-      background: url('../../../../assets/imgs/logo1.png') no-repeat;
-      background-position: center;
+      margin 0 auto
+      img
+        width: 30px
+        vertical-align: middle;
       span
         display none
   &.bell-side-menu

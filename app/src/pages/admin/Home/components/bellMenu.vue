@@ -23,7 +23,7 @@
         </template>
         <template v-if="item.children && item.children.length">
           <el-menu-item
-            v-if="item.children && item.children.length"
+            v-for="(subItem,index) of item.children"
             :key="index"
             :index="subItem.index">
             {{subItem.name}}

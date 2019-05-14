@@ -1,7 +1,7 @@
 <template>
   <div class="bell-side bell-side-menu" :class="{'isHideMenu': isCollapse}">
     <div class="bell-logo">
-      <img v-show="sidebar" :src="logoUrl" alt="logo">
+      <img v-show="isCollapse" :src="logoUrl" alt="logo">
       <span v-if="userInfo && userInfo.institution">{{userInfo.institution.name}}</span>
     </div>
     <el-menu
@@ -21,13 +21,14 @@
           <i class="iconfont" :class="item.icon" />
           <span>{{item.name}}</span>
         </template>
-        <el-menu-item
-          v-if="item.children && item.children.length"
-          v-for="(subItem,index) of item.children"
-          :key="index"
-          :index="subItem.index">
-          {{subItem.name}}
-        </el-menu-item>
+        <template v-if="item.children && item.children.length">
+          <el-menu-item
+            v-if="item.children && item.children.length"
+            :key="index"
+            :index="subItem.index">
+            {{subItem.name}}
+          </el-menu-item>
+        </template>
       </el-submenu>
     </el-menu>
   </div>

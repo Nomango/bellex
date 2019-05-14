@@ -34,6 +34,7 @@ export default {
   box-sizing border-box
   &.isCollapse
     left 64px
+    width calc(100vw - 64px)
   .bell-content
     position: absolute;
     top: 0;

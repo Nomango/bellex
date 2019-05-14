@@ -32,7 +32,7 @@ func main() {
 		if cmd == 0 {
 			serverIP = "127.0.0.1:7777"
 		} else {
-			serverIP = "132.232.126.221:7777"
+			serverIP = "47.102.102.16:7777"
 		}
 		break
 	}

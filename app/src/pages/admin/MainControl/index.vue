@@ -89,7 +89,10 @@
                   <el-input :disabled="clickStatus === 'update'" v-model="controlForm.code" placeholder="请输入主控机序列号" />
                 </el-form-item>
                 <el-form-item label="时间表: " prop="schedule_id">
-                  <el-select v-model="controlForm.schedule_id" placeholder="请选择应用到主控机的时间表">
+                  <el-select
+                    v-model="controlForm.schedule_id"
+                    placeholder="请选择应用到主控机的时间表"
+                    @change="$set(controlForm, controlForm.schedule_id, $event)">
                     <el-option
                       v-for="(item,index) of timeOption"
                       :key="index"

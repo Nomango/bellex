@@ -30,8 +30,8 @@ func (c *HomeController) Login() {
 
 func (c *HomeController) DownloadLatest() {
 	if ver, err := models.GetLatestVersion(); err != nil {
-		c.Redirect(ver.URL, 302)
-	} else {
 		c.Abort("400")
+	} else {
+		c.Redirect(ver.URL, 302)
 	}
 }

@@ -11,6 +11,7 @@ func init() {
 }
 
 type Version struct {
+	Id   int    `json:"id"`
 	Code int    `json:"code"`
 	URL  string `orm:"column(url)" json:"url"`
 

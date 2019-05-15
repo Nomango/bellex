@@ -22,6 +22,7 @@ func IsDevelopeMode() bool {
 func Setup() {
 	beego.SetViewsPath("views")
 	beego.SetStaticPath("/static", "static")
+	beego.SetStaticPath("/download/desktop", "download")
 
 	beego.BConfig.WebConfig.Session.SessionOn = true
 	beego.BConfig.WebConfig.Session.SessionName = "bellex_session"

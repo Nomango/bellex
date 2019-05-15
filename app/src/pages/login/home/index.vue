@@ -51,7 +51,7 @@ export default {
         username: '',
         psd: ''
       },
-      downloadUrl: 'https://bellex.oss-cn-beijing.aliyuncs.com/bellex_setup_1.0.0.exe'
+      downloadUrl: 'http://www.bellex.cn/download/latest'
     }
   },
   methods: {

@@ -1,5 +1,11 @@
 package controllers
 
+import (
+	"github.com/nomango/bellex/server/models"
+)
+
+const downloadBucketURL = ""
+
 type HomeController struct {
 	BaseController
 }
@@ -20,4 +26,12 @@ func (c *HomeController) Login() {
 	}
 
 	c.TplName = "login.html"
+}
+
+func (c *HomeController) DownloadLatest() {
+	if ver, err := models.GetLatestVersion(); err != nil {
+		c.Redirect(ver.URL, 302)
+	} else {
+		c.Abort("400")
+	}
 }

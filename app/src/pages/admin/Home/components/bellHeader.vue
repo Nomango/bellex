@@ -6,7 +6,7 @@
       </span>
     </div>
     <div class="bell-nav bell-layout-right">
-      <a href="https://bellex.oss-cn-beijing.aliyuncs.com/bellex_setup_1.0.0.exe" target="_blank"><el-button>下载 PC 客户端</el-button></a>
+      <a href="http://www.bellex.cn/download/latest" target="_blank" style="margin-right:10px;"><el-button>下载 PC 客户端</el-button></a>
       <el-dropdown @visible-change="handleVisible">
         <span class="el-dropdown-link">
           {{nickName}}<i class="el-icon--right" :class="dropIcon" />

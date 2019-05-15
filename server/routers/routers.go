@@ -11,6 +11,7 @@ import (
 
 func init() {
 	beego.Router("/", &controllers.HomeController{}, "GET:Index")
+	beego.Router("/download/latest", &controllers.HomeController{}, "GET:DownloadLatest")
 	beego.Router("/login", &controllers.HomeController{}, "GET:Login")
 
 	ns := beego.NewNamespace("/api/v1",

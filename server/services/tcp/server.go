@@ -119,15 +119,15 @@ tcpLoop:
 			break
 		case <-errCh:
 			// connection closed
-			log.Println("[Bellex] Connection " + conn.RemoteAddr().String() + " is closed")
+			log.Println("Connection " + conn.RemoteAddr().String() + " is closed")
 			break tcpLoop
 		case <-closeCh:
 			// force to close connection
-			log.Println("[Bellex] Connection is forced to be closed", conn.RemoteAddr().String())
+			log.Println("Connection is forced to be closed", conn.RemoteAddr().String())
 			break tcpLoop
 		case <-time.After(45 * time.Second):
 			// connection timeout
-			log.Println("[Bellex] Connection " + conn.RemoteAddr().String() + " timeout")
+			log.Println("Connection " + conn.RemoteAddr().String() + " timeout")
 			break tcpLoop
 		}
 
@@ -181,7 +181,7 @@ tcpLoop:
 
 	// remove connection
 	if err := models.DeleteConnectionWithConn(conn); err != nil {
-		log.Println("[Bellex] Remove connection failed", conn.RemoteAddr())
+		log.Println("Remove connection failed", conn.RemoteAddr())
 	}
 }
 
@@ -191,7 +191,7 @@ func syncWriter(conn net.Conn, outputCh <-chan []byte, endCh <-chan struct{}) {
 		case data := <-outputCh:
 			if len(data) != 0 {
 				if _, err := conn.Write(append(data, byte(0))); err != nil {
-					log.Println("[Bellex] Bad response", conn.RemoteAddr(), err.Error())
+					log.Println("Bad response", conn.RemoteAddr(), err.Error())
 				}
 			}
 		case <-endCh:

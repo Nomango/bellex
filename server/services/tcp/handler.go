@@ -5,11 +5,10 @@ package tcp
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net"
 	"strings"
 	"time"
-
-	"github.com/astaxie/beego"
 
 	"github.com/nomango/bellex/server/models"
 	"github.com/nomango/bellex/server/services/ntp"
@@ -41,9 +40,11 @@ func PacketHandler(req []byte, conn net.Conn, outputCh chan<- []byte, closeCh ch
 
 	err = tcpPacket.Verify(packet)
 	if err != nil {
-		beego.Error("Permission denied", string(req))
+		log.Println("Permission denied:", string(req))
 		err = errors.New("Permission denied")
 		return
+	} else {
+		log.Println("Receive request:", string(req))
 	}
 
 	switch packet.Type {
@@ -76,7 +77,7 @@ func handleRequestConnect(packet *types.Packet, conn net.Conn, outputCh chan<- [
 	mechine.SaveNewSecret()
 
 	if err := models.AddConnection(mechine, conn, outputCh, closeCh); err != nil {
-		beego.Error("Add connection failed", err)
+		log.Println("Add connection failed", err)
 	}
 
 	return "unique_code:" + mechine.Secret + ";", nil

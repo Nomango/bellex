@@ -6,7 +6,7 @@ app:
   name: Bellex
   address: localhost
   port: 8080
-  debug: false
+  debug: true
   session:
     name: bellex_session
     provider: memory

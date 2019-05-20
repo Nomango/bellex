@@ -3,6 +3,7 @@ package settings
 import (
 	"log"
 	"os"
+	"strconv"
 	"sync"
 
 	"github.com/astaxie/beego"
@@ -10,8 +11,11 @@ import (
 )
 
 var (
-	Debug                 bool
-	AppPort               string
+	Debug   bool
+	AppName string
+	AppAddr string
+	AppPort string
+
 	SessionName           string
 	SessionProvider       string
 	SessionProviderConfig string
@@ -47,6 +51,10 @@ func Setup() {
 		beego.BConfig.RunMode = "prod"
 	}
 
+	beego.BConfig.AppName = AppName
+	beego.BConfig.Listen.HTTPPort, _ = strconv.Atoi(AppPort)
+	beego.BConfig.Listen.HTTPAddr = AppAddr
+
 	beego.BConfig.WebConfig.Session.SessionOn = true
 	beego.BConfig.WebConfig.Session.SessionName = SessionName
 	beego.BConfig.WebConfig.Session.SessionProvider = SessionProvider
@@ -76,6 +84,8 @@ func ReadSettings() {
 	}
 
 	Debug = v.GetBool("app.debug")
+	AppName = v.GetString("app.name")
+	AppAddr = v.GetString("app.address")
 	AppPort = v.GetString("app.port")
 
 	SessionName = v.GetString("app.session.name")

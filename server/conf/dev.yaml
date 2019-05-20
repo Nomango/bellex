@@ -4,6 +4,7 @@
 
 app:
   name: Bellex
+  address: localhost
   port: 8081
   debug: false
   session:

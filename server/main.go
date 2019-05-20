@@ -13,5 +13,5 @@ func main() {
 	settings.Setup()
 	models.Setup()
 
-	beego.Run(":" + settings.AppPort)
+	beego.Run()
 }

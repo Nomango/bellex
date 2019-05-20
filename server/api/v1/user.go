@@ -21,6 +21,7 @@ func (c *UserController) GetAll() {
 		users []*models.User
 		page  int
 		limit int
+		total int64
 		err   error
 	)
 
@@ -28,25 +29,29 @@ func (c *UserController) GetAll() {
 		if err != nil {
 			c.WriteJson(Json{"message": err.Error()}, 400)
 		} else {
-			c.WriteJson(Json{"data": users, "total": len(users)}, 200)
+			c.WriteJson(Json{"data": users, "total": total}, 200)
 		}
 	}()
 
 	if page, err = c.GetInt("page"); err != nil {
-		err = errors.New("请求数据有误")
 		return
 	}
 
 	if limit, err = c.GetInt("limit"); err != nil {
-		err = errors.New("请求数据有误")
 		return
 	}
 
-	qs := models.Users().OrderBy("-CreateTime")
 	if !c.User.IsAdmin() {
-		qs = qs.Filter("Institution", c.User.Institution)
+		err = errors.New("Permission denied")
 	}
-	_, err = qs.Exclude("Id", c.User.Id).Limit(limit, (page-1)*limit).RelatedSel().All(&users)
+
+	qs := models.Users().OrderBy("-CreateTime").Exclude("Id", c.User.Id)
+
+	if total, err = qs.Count(); err != nil {
+		return
+	}
+
+	_, err = qs.Limit(limit, (page-1)*limit).RelatedSel().All(&users)
 }
 
 // @router /:id([0-9]+) [get]

@@ -18,9 +18,10 @@ type InstitutionController struct {
 func (c *InstitutionController) GetAll() {
 	var (
 		institutions []*models.Institution
-		page          int
-		limit         int
-		err           error
+		page         int
+		limit        int
+		total        int64
+		err          error
 	)
 
 	if !c.User.IsAdmin() {
@@ -30,9 +31,9 @@ func (c *InstitutionController) GetAll() {
 
 	defer func() {
 		if err != nil {
-			c.WriteJson(Json{"message": "输入有误"}, 400)
+			c.WriteJson(Json{"message": err.Error()}, 400)
 		} else {
-			c.WriteJson(Json{"data": institutions, "total": len(institutions)}, 200)
+			c.WriteJson(Json{"data": institutions, "total": total}, 200)
 		}
 	}()
 
@@ -44,10 +45,16 @@ func (c *InstitutionController) GetAll() {
 		return
 	}
 
+	qs := models.Institutions()
+
+	if total, err = qs.Count(); err != nil {
+		return
+	}
+
 	if page == 0 && limit == 0 {
-		_, err = models.Institutions().All(&institutions)
+		_, err = qs.All(&institutions)
 	} else {
-		_, err = models.Institutions().Limit(limit, (page-1)*limit).All(&institutions)
+		_, err = qs.Limit(limit, (page-1)*limit).All(&institutions)
 	}
 }
 
@@ -56,7 +63,7 @@ func (c *InstitutionController) Post() {
 
 	var (
 		institution models.Institution
-		form         forms.InstitutionForm
+		form        forms.InstitutionForm
 	)
 
 	if !c.User.IsAdmin() {

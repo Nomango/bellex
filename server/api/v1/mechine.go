@@ -21,17 +21,18 @@ func (c *MechineController) GetAll() {
 		mechines []*models.Mechine
 		page     int
 		limit    int
+		total    int64
 		err      error
 	)
 
 	defer func() {
 		if err != nil {
-			c.WriteJson(Json{"message": "输入有误"}, 400)
+			c.WriteJson(Json{"message": err.Error()}, 400)
 		} else {
 			for _, m := range mechines {
 				m.UpdateStatus()
 			}
-			c.WriteJson(Json{"data": mechines, "total": len(mechines)}, 200)
+			c.WriteJson(Json{"data": mechines, "total": total}, 200)
 		}
 	}()
 
@@ -43,12 +44,20 @@ func (c *MechineController) GetAll() {
 		return
 	}
 
+	qs := models.Mechines()
+
 	switch {
 	case c.User.IsNormal():
-		_, err = models.Mechines().Filter("Institution", c.User.Institution.Id).Limit(limit, (page-1)*limit).RelatedSel().All(&mechines)
+		qs = qs.Filter("Institution", c.User.Institution.Id)
 	case c.User.IsAdmin():
-		_, err = models.Mechines().OrderBy("Institution").Limit(limit, (page-1)*limit).RelatedSel().All(&mechines)
+		qs = qs.OrderBy("Institution")
 	}
+
+	if total, err = qs.Count(); err != nil {
+		return
+	}
+
+	_, err = qs.Limit(limit, (page-1)*limit).RelatedSel().All(&mechines)
 }
 
 // @router /new [post]

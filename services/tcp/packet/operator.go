@@ -7,7 +7,7 @@ import (
 	"log"
 	"regexp"
 
-	"github.com/nomango/bellex/server/services/tcp/types"
+	"github.com/nomango/bellex/services/tcp/types"
 )
 
 const (

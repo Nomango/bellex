@@ -42,8 +42,8 @@ goto help
     exit
 
 :run_tcp_server
-    cd server && go build -o tcp_server.exe .\tcp\
-    .\tcp_server.exe
+    cd services && go build -o server.exe .\
+    .\server.exe
     exit
 
 :build_server

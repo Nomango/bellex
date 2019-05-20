@@ -30,7 +30,7 @@ var (
 const (
 	configDevName  = "dev"
 	configProdName = "prod"
-	configPath     = "./conf/"
+	configPath     = "../conf/"
 	configFormat   = "yaml"
 )
 

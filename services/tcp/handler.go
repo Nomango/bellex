@@ -11,9 +11,9 @@ import (
 	"time"
 
 	"github.com/nomango/bellex/server/models"
-	"github.com/nomango/bellex/server/services/ntp"
-	tcpPacket "github.com/nomango/bellex/server/services/tcp/packet"
-	"github.com/nomango/bellex/server/services/tcp/types"
+	"github.com/nomango/bellex/services/ntp"
+	tcpPacket "github.com/nomango/bellex/services/tcp/packet"
+	"github.com/nomango/bellex/services/tcp/types"
 )
 
 // PacketHandler handle request packets

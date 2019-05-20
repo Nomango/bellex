@@ -6,7 +6,7 @@ import (
 	"errors"
 
 	"github.com/nomango/bellex/server/models"
-	"github.com/nomango/bellex/server/services/tcp/types"
+	"github.com/nomango/bellex/services/tcp/types"
 )
 
 // Verify check if the client has permissions

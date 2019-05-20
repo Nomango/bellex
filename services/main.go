@@ -5,7 +5,7 @@ import (
 
 	"github.com/nomango/bellex/server/models"
 	"github.com/nomango/bellex/server/modules/settings"
-	"github.com/nomango/bellex/server/services/tcp"
+	"github.com/nomango/bellex/services/tcp"
 )
 
 func main() {

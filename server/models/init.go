@@ -1,18 +1,22 @@
 package models
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/nomango/bellex/server/modules/settings"
 )
 
 func Setup() {
 	if err := orm.RegisterDriver("mysql", orm.DRMySQL); err != nil {
 		log.Fatalln("Register driver failed", err)
 	}
-	if err := orm.RegisterDataBase("default", "mysql", "bellex:Bellex2019@tcp(127.0.0.1:3306)/bellex?charset=utf8&loc=Local"); err != nil {
+
+	dataSource := fmt.Sprintf("%s:%s@%s", settings.DatabaseUser, settings.DatabasePassword, settings.DatabaseUri)
+	if err := orm.RegisterDataBase("default", "mysql", dataSource); err != nil {
 		log.Fatalln("Register database failed", err)
 	}
 

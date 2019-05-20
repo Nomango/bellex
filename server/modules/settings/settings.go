@@ -1,18 +1,33 @@
 package settings
 
 import (
+	"log"
 	"os"
+	"sync"
 
 	"github.com/astaxie/beego"
+	"github.com/spf13/viper"
 )
 
 var (
-	Mode int
+	Debug                 bool
+	AppPort               string
+	SessionName           string
+	SessionProvider       string
+	SessionProviderConfig string
+
+	DatabaseUser     string
+	DatabasePassword string
+	DatabaseUri      string
+
+	TcpPort string
 )
 
 const (
-	ModeDevelope = iota
-	ModeProduct
+	configDevName  = "dev"
+	configProdName = "prod"
+	configPath     = "./conf/"
+	configFormat   = "yaml"
 )
 
 func IsDevelopeMode() bool {
@@ -20,14 +35,22 @@ func IsDevelopeMode() bool {
 }
 
 func Setup() {
+	ReadSettings()
+
 	beego.SetViewsPath("views")
 	beego.SetStaticPath("/static", "static")
 	beego.SetStaticPath("/download/desktop", "download")
 
+	if Debug {
+		beego.BConfig.RunMode = "dev"
+	} else {
+		beego.BConfig.RunMode = "prod"
+	}
+
 	beego.BConfig.WebConfig.Session.SessionOn = true
-	beego.BConfig.WebConfig.Session.SessionName = "bellex_session"
-	beego.BConfig.WebConfig.Session.SessionProvider = "file"
-	beego.BConfig.WebConfig.Session.SessionProviderConfig = "./session"
+	beego.BConfig.WebConfig.Session.SessionName = SessionName
+	beego.BConfig.WebConfig.Session.SessionProvider = SessionProvider
+	beego.BConfig.WebConfig.Session.SessionProviderConfig = SessionProviderConfig
 
 	beego.BConfig.CopyRequestBody = true
 	beego.BConfig.WebConfig.EnableXSRF = false
@@ -35,10 +58,45 @@ func Setup() {
 	// flash name
 	beego.BConfig.WebConfig.FlashName = "BELLEX_FLASH"
 	beego.BConfig.WebConfig.FlashSeparator = "BELLEXLASH"
+}
+
+func ReadSettings() {
+	v := getViper()
+	v.SetConfigType(configFormat)
+	v.AddConfigPath(configPath)
 
 	if IsDevelopeMode() {
-		Mode = ModeDevelope
+		v.SetConfigName(configDevName)
 	} else {
-		Mode = ModeProduct
+		v.SetConfigName(configProdName)
 	}
+
+	if err := v.ReadInConfig(); err != nil {
+		log.Panicln("load config file failed", err)
+	}
+
+	Debug = v.GetBool("app.debug")
+	AppPort = v.GetString("app.port")
+
+	SessionName = v.GetString("app.session.name")
+	SessionProvider = v.GetString("app.session.provider")
+	SessionProviderConfig = v.GetString("app.session.providerConfig")
+
+	DatabaseUser = v.GetString("database.user")
+	DatabasePassword = v.GetString("database.password")
+	DatabaseUri = v.GetString("database.uri")
+
+	TcpPort = v.GetString("tcp.port")
+}
+
+var (
+	once      sync.Once
+	vInstance *viper.Viper
+)
+
+func getViper() *viper.Viper {
+	once.Do(func() {
+		vInstance = viper.New()
+	})
+	return vInstance
 }

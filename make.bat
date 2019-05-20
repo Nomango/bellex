@@ -5,6 +5,7 @@ if {%1}=={}                 goto all
 if {%1}=={help}             goto help
 if {%1}=={run} (
     if {%2}=={server}       goto run_server
+    if {%2}=={tcp}          goto run_tcp_server
 )
 if {%1}=={build} (
     if {%2}=={server}       goto build_server
@@ -26,6 +27,7 @@ goto help
     echo Options:
     echo run
     echo     server     - Run server app
+    echo     tcp        - Run tcp server app
     echo build
     echo     server     - Compile server app
     echo test
@@ -37,6 +39,11 @@ goto help
 
 :run_server
     cd server && bee.exe run
+    exit
+
+:run_tcp_server
+    go build -o tcp_server.exe .\server\tcp\
+    .\tcp_server.exe
     exit
 
 :build_server

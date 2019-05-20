@@ -1,0 +1,20 @@
+# Copyright (C) 2019 Nomango
+
+---
+
+app:
+  name: Bellex
+  port: 8081
+  debug: false
+  session:
+    name: bellex_session
+    provider: memory
+    providerConfig: 
+
+database:
+  user: root
+  password: 
+  uri: tcp(127.0.0.1:3306)/bellex?charset=utf8&loc=Local
+
+tcp:
+  port: 7777

@@ -44,7 +44,7 @@ func NewServer(port string) (*Server, error) {
 		err  error
 	)
 
-	if settings.Mode == settings.ModeDevelope {
+	if settings.Debug {
 		addr, err = net.ResolveTCPAddr("tcp", "127.0.0.1:"+port)
 	} else {
 		var localIP string

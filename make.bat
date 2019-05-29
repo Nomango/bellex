@@ -51,17 +51,17 @@ goto help
     exit
 
 :build_ntp_client
-    go build -o tcp_client.exe .\client\ntp\
+    go build -o tcp_client.exe .\services\client\ntp\
     exit
 
 :build_tcp_client
-    go build -o tcp_client.exe .\client\tcp\
+    go build -o tcp_client.exe .\services\client\tcp\
     exit
 
 :test_tcp
-    go run .\client\tcp\
+    go run .\services\client\tcp\
     exit
 
 :test_ntp
-    go run .\client\ntp\
+    go run .\services\client\ntp\
     exit

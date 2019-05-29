@@ -4,7 +4,6 @@ package tcp
 
 import (
 	"bufio"
-	"errors"
 	"log"
 	"net"
 	"time"
@@ -19,41 +18,10 @@ type Server struct {
 	addr     *net.TCPAddr
 }
 
-// getLocalIP get local ip address
-func getLocalIP() (string, error) {
-	addrs, err := net.InterfaceAddrs()
-	if err != nil {
-		return "", err
-	}
-
-	for _, address := range addrs {
-		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-			if ipnet.IP.To4() != nil {
-				return ipnet.IP.String(), nil
-			}
-		}
-	}
-
-	return "", errors.New("Local IP not found")
-}
-
 // NewServer returns a new tcp server
 func NewServer(port string) (*Server, error) {
-	var (
-		addr *net.TCPAddr
-		err  error
-	)
 
-	if settings.Debug {
-		addr, err = net.ResolveTCPAddr("tcp", "127.0.0.1:"+port)
-	} else {
-		var localIP string
-		localIP, err = getLocalIP()
-		if err != nil {
-			return nil, err
-		}
-		addr, err = net.ResolveTCPAddr("tcp", localIP+":"+port)
-	}
+	addr, err := net.ResolveTCPAddr("tcp", settings.LocalAddr+":"+port)
 
 	if err != nil {
 		return nil, err

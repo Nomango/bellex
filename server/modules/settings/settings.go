@@ -1,7 +1,9 @@
 package settings
 
 import (
+	"errors"
 	"log"
+	"net"
 	"os"
 	"strconv"
 	"sync"
@@ -23,6 +25,8 @@ var (
 	DatabaseUser     string
 	DatabasePassword string
 	DatabaseUri      string
+
+	LocalAddr string
 
 	TcpPort string
 	RpcPort string
@@ -99,6 +103,34 @@ func ReadSettings() {
 
 	TcpPort = v.GetString("tcp.port")
 	RpcPort = v.GetString("rpc.port")
+
+	if Debug {
+		LocalAddr = "127.0.0.1"
+	} else {
+		localIP, err := getLocalIP()
+		if err != nil {
+			log.Panicln(err)
+		}
+		LocalAddr = localIP
+	}
+}
+
+// getLocalIP get local ip address
+func getLocalIP() (string, error) {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return "", err
+	}
+
+	for _, address := range addrs {
+		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String(), nil
+			}
+		}
+	}
+
+	return "", errors.New("Local IP not found")
 }
 
 var (

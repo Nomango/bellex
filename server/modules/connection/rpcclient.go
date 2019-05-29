@@ -24,7 +24,7 @@ type ConnectionSendDataReq struct {
 
 // NewClient returns a new rpc client
 func NewClient() (*rpc.Client, error) {
-	if cli, err := rpc.DialHTTP("tcp", "127.0.0.1:"+settings.RpcPort); err != nil {
+	if cli, err := rpc.DialHTTP("tcp", settings.LocalAddr+":"+settings.RpcPort); err != nil {
 		return nil, err
 	} else {
 		return cli, nil

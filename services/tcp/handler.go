@@ -101,8 +101,7 @@ func handleRequestHeartBeat(packet *types.Packet) (string, error) {
 		return "", errors.New("Permission denied")
 	}
 
-	mechine.UpdateStatus()
-	if !mechine.Accept {
+	if !types.ExistsConnection(mechine.Code) {
 		return "", errors.New("Connection not found")
 	}
 
@@ -126,8 +125,7 @@ func handleRequestGetSchedule(packet *types.Packet) (string, error) {
 		return "", errors.New("Permission denied")
 	}
 
-	mechine.UpdateStatus()
-	if !mechine.Accept {
+	if !types.ExistsConnection(mechine.Code) {
 		return "", errors.New("Connection not found")
 	}
 

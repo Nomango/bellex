@@ -19,3 +19,4 @@ database:
 
 tcp:
   port: 7777
+  rpcAddr: 127.0.0.1:7778

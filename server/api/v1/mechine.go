@@ -161,7 +161,7 @@ func (c *MechineController) Delete() {
 
 	mechine.UpdateStatus()
 	if mechine.Accept {
-		models.DeleteConnection(mechine)
+		mechine.CloseConnection()
 	}
 
 	if err := mechine.Delete(); err != nil {
@@ -241,6 +241,6 @@ func (c *MechineController) Close() {
 		return
 	}
 
-	models.DeleteConnection(&mechine)
+	mechine.CloseConnection()
 	c.WriteJson(Json{"message": "断开成功"}, 200)
 }

@@ -2,10 +2,12 @@ package main
 
 import (
 	"log"
+	"net/http"
 
 	"github.com/nomango/bellex/server/models"
 	"github.com/nomango/bellex/server/modules/settings"
 	"github.com/nomango/bellex/services/tcp"
+	"github.com/nomango/bellex/services/tcp/tcprpc"
 )
 
 func main() {
@@ -14,6 +16,21 @@ func main() {
 	settings.Setup()
 	models.Setup()
 
+	listenRPC()
+	listenTCP()
+}
+
+func listenRPC() {
+	rpcServer, err := tcprpc.NewServer()
+	if err != nil {
+		log.Fatalln("Start RPC server failed:", err)
+	}
+	log.Println("RPC server is running on", rpcServer.Addr())
+
+	go http.Serve(rpcServer, nil)
+}
+
+func listenTCP() {
 	tcpServer, err := tcp.NewServer(settings.TcpPort)
 	if err != nil {
 		log.Fatalln("Start TCP server failed:", err)

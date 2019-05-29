@@ -9,8 +9,8 @@ import (
 	"net"
 	"time"
 
-	"github.com/nomango/bellex/server/models"
 	"github.com/nomango/bellex/server/modules/settings"
+	"github.com/nomango/bellex/services/tcp/types"
 )
 
 // Server tcp server
@@ -180,7 +180,7 @@ tcpLoop:
 	endCh <- struct{}{}
 
 	// remove connection
-	if err := models.DeleteConnectionWithConn(conn); err != nil {
+	if err := types.DeleteConnectionWithConn(conn); err != nil {
 		log.Println("Remove connection failed", conn.RemoteAddr())
 	}
 }

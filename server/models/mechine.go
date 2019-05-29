@@ -1,10 +1,10 @@
 package models
 
 import (
-	"errors"
 	"time"
 
 	"github.com/astaxie/beego/orm"
+	"github.com/nomango/bellex/server/modules/connection"
 	"github.com/nomango/bellex/server/modules/utils"
 )
 
@@ -13,13 +13,12 @@ func init() {
 }
 
 type Mechine struct {
-	Id      int                `json:"id"`
-	Name    string             `orm:"size(30)" json:"name"`
-	Code    string             `orm:"unique;size(8)" json:"code"`
-	Secret  string             `orm:"size(8)" json:"secret"`
-	Idle    bool               `json:"idle"`
-	Accept  bool               `orm:"-" json:"accept"`
-	Connect *MechineConnection `orm:"-" json:"-"`
+	Id     int    `json:"id"`
+	Name   string `orm:"size(30)" json:"name"`
+	Code   string `orm:"unique;size(8)" json:"code"`
+	Secret string `orm:"size(8)" json:"secret"`
+	Idle   bool   `json:"idle"`
+	Accept bool   `orm:"-" json:"accept"`
 
 	Institution *Institution `orm:"rel(fk)" json:"institution"`
 	Schedule    *Schedule    `orm:"rel(fk)" json:"schedule"`
@@ -63,12 +62,10 @@ func (m *Mechine) Delete() error {
 
 // UpdateStatus ...
 func (m *Mechine) UpdateStatus() {
-	if conn, err := GetConnection(m); err != nil {
-		m.Connect = nil
+	if exists, err := connection.Exists(m.Code); err != nil {
 		m.Accept = false
 	} else {
-		m.Connect = conn
-		m.Accept = true
+		m.Accept = exists
 	}
 }
 
@@ -88,26 +85,16 @@ func (m *Mechine) SetNewSchedule(s *Schedule) {
 	m.Schedule = s
 
 	if oldSchedule == nil || (oldSchedule.Content != s.Content) {
-		m.SendData(`schedule:` + s.FormatContent() + ";")
+		connection.SendData(m.Code, `schedule:`+s.FormatContent()+";")
 	}
 }
 
 func (m *Mechine) SendData(data string) error {
-	if !m.Accept || m.Connect.OutputCh == nil {
-		return errors.New("no connection")
-	}
-
-	m.Connect.OutputCh <- []byte(data)
-	return nil
+	return connection.SendData(m.Code, data)
 }
 
 func (m *Mechine) CloseConnection() error {
-	if !m.Accept || m.Connect.CloseCh == nil {
-		return errors.New("no connection")
-	}
-
-	m.Connect.CloseCh <- struct{}{}
-	return nil
+	return connection.Close(m.Code)
 }
 
 func Mechines() orm.QuerySeter {

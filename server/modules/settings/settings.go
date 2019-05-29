@@ -25,6 +25,7 @@ var (
 	DatabaseUri      string
 
 	TcpPort string
+	RpcAddr string
 )
 
 const (
@@ -97,6 +98,7 @@ func ReadSettings() {
 	DatabaseUri = v.GetString("database.uri")
 
 	TcpPort = v.GetString("tcp.port")
+	RpcAddr = v.GetString("tcp.rpcAddr")
 }
 
 var (

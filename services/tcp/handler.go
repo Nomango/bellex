@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nomango/bellex/server/models"
 	"github.com/nomango/bellex/services/ntp"
 	tcpPacket "github.com/nomango/bellex/services/tcp/packet"
 	"github.com/nomango/bellex/services/tcp/types"
@@ -68,15 +67,14 @@ func handleRequestConnect(packet *types.Packet, conn net.Conn, outputCh chan<- [
 		return "", errors.New("Permission denied")
 	}
 
-	mechine.UpdateStatus()
-	if mechine.Accept {
+	if types.ExistsConnection(mechine.Code) {
 		return "", errors.New("Connection already exists")
 	}
 
 	// connection already exists
 	mechine.SaveNewSecret()
 
-	if err := models.AddConnection(mechine, conn, outputCh, closeCh); err != nil {
+	if err := types.AddConnection(mechine.Code, conn, outputCh, closeCh); err != nil {
 		log.Println("Add connection failed", err)
 	}
 
